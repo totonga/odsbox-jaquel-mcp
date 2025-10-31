@@ -1,0 +1,22 @@
+############################################################
+# ASAM ODS Jaquel MCP Server - Python Requirements
+#
+# To install: pip install -r requirements.txt
+# For dev/test: see pyproject.toml [project.optional-dependencies]
+############################################################
+
+# Core dependencies
+odsbox
+mcp>=0.1.0
+requests
+
+# Optional: Jupyter and plotting for examples
+jupyter
+matplotlib
+
+# Testing
+pytest
+pytest-asyncio
+
+# build package
+build

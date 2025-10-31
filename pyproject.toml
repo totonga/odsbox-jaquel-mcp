@@ -1,0 +1,64 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "odsbox-jaquel-mcp"
+dynamic = ["version"]
+description = "ASAM ODS Jaquel MCP Server - A Model Context Protocol server for creating and validating Jaquel queries"
+readme = "README.md"
+requires-python = ">=3.12.15"
+authors = [
+    {name = "Assistant", email = "assistant@example.com"}
+]
+keywords = ["mcp", "jaquel", "odsbox", "asam", "ods"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = [
+    "mcp>=0.1.0",
+    "odsbox>1.0.14",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=1.2.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+]
+
+[project.scripts]
+odsbox-jaquel-mcp = "odsbox_jaquel_mcp.server:main"
+
+[tool.black]
+line-length = 119
+target-version = ["py310"]
+
+[tool.isort]
+profile = "black"
+line_length = 119
+
+[tool.flake8]
+max-line-length = 119
+extend-ignore = ["E203", "W503", "W293"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short"
