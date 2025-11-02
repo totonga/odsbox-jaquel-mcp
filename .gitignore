@@ -30,7 +30,7 @@ ENV/
 
 # IDE/project files
 .idea/
-.vscode/
+#.vscode/
 *.swp
 *.swo
 *~

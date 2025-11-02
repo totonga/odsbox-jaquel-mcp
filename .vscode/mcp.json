@@ -1,0 +1,14 @@
+{
+	"servers": {
+		"odsbox-jaquel": {
+			"type": "stdio",
+			"command": "C:\\dev\\github\\odsbox_jaquel_mcp\\.venv\\Scripts\\python.exe",
+			"args": [
+				"-m",
+				"odsbox_jaquel_mcp.server"
+			],
+			"cwd": "C:\\dev\\github\\odsbox_jaquel_mcp"
+		}
+	},
+	"inputs": []
+}
