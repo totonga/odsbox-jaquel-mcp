@@ -1,0 +1,38 @@
+{
+    "chat.mcp.serverSampling": {
+        "odsbox_playground/.vscode/mcp.json: odsbox-jaquel": {
+            "allowedModels": [
+                "copilot/gpt-5-mini",
+                "copilot/auto",
+                "copilot/claude-haiku-4.5",
+                "copilot/claude-sonnet-4",
+                "copilot/claude-sonnet-4.5",
+                "copilot/gpt-4.1",
+                "copilot/gpt-4o",
+                "copilot/gpt-5",
+                "copilot/o3-mini",
+                "copilot/o4-mini"
+            ]
+        }
+    },
+    "cSpell.words": [
+        "dcount",
+        "Jaquel",
+        "nullable",
+        "odsbox",
+        "rowlimit",
+        "rowskip",
+        "seqlimit",
+        "seqskip"
+    ],
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.rulers": [119]
+    },
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

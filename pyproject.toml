@@ -23,7 +23,8 @@ classifiers = [
 
 dependencies = [
     "mcp>=0.1.0",
-    "odsbox>1.0.14",
+    "odsbox>=1.0.14",
+    "matplotlib",
 ]
 
 [project.optional-dependencies]
@@ -33,10 +34,11 @@ dev = [
     "black>=23.0",
     "flake8>=6.0",
     "mypy>=1.0",
+    "build>=0.8.0",
 ]
 
 [project.scripts]
-odsbox-jaquel-mcp = "odsbox_jaquel_mcp.server:main"
+odsbox-jaquel-mcp = "odsbox_jaquel_mcp.__main__:main"
 
 [tool.black]
 line-length = 119

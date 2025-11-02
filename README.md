@@ -32,16 +32,14 @@ cd odsbox-jaquel-mcp
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate
-# Install dependencies
-pip install -r requirements.txt
-# Or: pip install .
+.venv/bin/activate
+pip install .
 ```
 
 ### Running the Server
 
 ```bash
-python -m odsbox_jaquel_mcp.server
+python -m odsbox_jaquel_mcp
 ```
 
 The server will start on stdio and await MCP protocol messages.
