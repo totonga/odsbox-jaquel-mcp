@@ -187,7 +187,7 @@ with ConI(url="{ods_url}", auth=("{ods_username}", "{ods_password}")) as con_i:
     local_column_ids = local_columns["id"].tolist()
     
     # Fetch bulk data for local columns
-    local_columns_signals = con_i.bulk.query({{"id":{{"$in": local_column_ids}}}}))'''
+    local_columns_signals = con_i.bulk.query({{"id":{{"$in": local_column_ids}}}})'''
 
         cells.append(NotebookGenerator.create_code_cell(retrieval_code))
 

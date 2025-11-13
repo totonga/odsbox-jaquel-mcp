@@ -35,8 +35,8 @@ class SubmatrixDataReader:
                     "sequence_representation": 1,
                     "independent": 1,
                     "measurement_quantity.name": 1,
-                    "measurement_quantity.data_type": 1,
-                    "unit.name": 1,
+                    "measurement_quantity.datatype": 1,
+                    "measurement_quantity.unit:OUTER.name": 1,
                 },
             }
 
@@ -51,9 +51,9 @@ class SubmatrixDataReader:
                             "id": int(row.get("id", 0)) if hasattr(row, "get") else int(row["id"]),
                             "name": row.get("name", "Unknown") if hasattr(row, "get") else row["name"],
                             "data_type": (
-                                row.get("measurement_quantity.data_type", 0)
+                                row.get("measurement_quantity.datatype", 0)
                                 if hasattr(row, "get")
-                                else row["measurement_quantity.data_type"]
+                                else row["measurement_quantity.datatype"]
                             ),
                             "measurement_quantity": (
                                 row.get("measurement_quantity.name", "Unknown")
@@ -61,9 +61,9 @@ class SubmatrixDataReader:
                                 else row["measurement_quantity.name"]
                             ),
                             "unit": (
-                                row.get("unit.name", "")
+                                row.get("measurement_quantity.unit:OUTER.name", "")
                                 if hasattr(row, "get")
-                                else row["unit.name"]
+                                else row["measurement_quantity.unit:OUTER.name"]
                             ),
                             "sequence_representation": (
                                 int(row.get("sequence_representation", 0))

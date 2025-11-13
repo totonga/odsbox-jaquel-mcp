@@ -438,7 +438,7 @@ class TestMCPServer:
                     "id": 1,
                     "name": "Time",
                     "measurement_quantity.name": "Time",
-                    "measurement_quantity.data_type": 2,  # DT_DOUBLE
+                    "measurement_quantity.datatype": 2,  # DT_DOUBLE
                     "unit.name": "s",
                     "sequence_representation": 1,
                     "independent": True,
