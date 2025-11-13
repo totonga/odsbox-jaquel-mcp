@@ -13,10 +13,12 @@
 
 - 🚀 Validate, build, and optimize Jaquel queries for ASAM ODS
 - 🔌 Built-in ODS connection management (no manual model injection)
-- 🧰 25+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
+- 🧰 27+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
 - 📦 Bulk timeseries/submatrix data access and script generation
 - 📊 **NEW**: Automatic Jupyter notebook generation for measurement comparison
 - 📈 **NEW**: Matplotlib visualization code generation
+- 📉 **NEW**: Statistical measurement comparison and correlation analysis
+- 🔎 **NEW**: Measurement hierarchy exploration and discovery
 - 📝 Comprehensive examples and test suite
 
 ---
@@ -177,6 +179,65 @@ Solution: Use one of the suggested fields
 }
 ```
 Solution: Check URL, server availability, firewall
+
+## Measurement Analysis & Query Discovery (NEW)
+
+### Compare Measurements Statistically
+
+Compare measurements across quantities with correlation and statistics:
+
+```python
+from odsbox_jaquel_mcp import MeasurementAnalyzer
+
+result = MeasurementAnalyzer.compare_multiple_measurements(
+    quantity_name="Motor_speed",
+    measurement_data={
+        1: [50, 55, 52, 51, 54],
+        2: [52, 56, 53, 52, 55],
+        3: [48, 50, 49, 51, 47]
+    }
+)
+
+# Returns:
+# - Individual statistics per measurement (mean, median, stdev)
+# - Pairwise comparisons between measurements
+# - Correlation coefficients
+# - Significance indicators
+```
+
+### Query Measurement Hierarchy
+
+Explore and discover measurements in the ODS:
+
+```python
+from odsbox_jaquel_mcp import MeasurementHierarchyExplorer
+
+# Extract measurements from ODS query result
+measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
+    query_result
+)
+
+# Get unique tests and quantities
+tests = MeasurementHierarchyExplorer.get_unique_tests(measurements)
+quantities = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
+
+# Build hierarchy structure
+hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
+    measurements
+)
+
+# Create index for fast lookup
+index = MeasurementHierarchyExplorer.build_measurement_index(
+    measurements
+)
+```
+
+**Use Cases**:
+- Discover available measurements and quantities
+- Find measurements by test type
+- Compare performance across test runs
+- Analyze consistency and correlations
+- Generate analysis notebooks automatically
 
 ## Notebook Generation & Visualization (NEW)
 

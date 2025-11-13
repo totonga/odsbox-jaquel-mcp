@@ -32,6 +32,8 @@ from .submatrix.scripts import (
 )
 from .notebook_generator import NotebookGenerator
 from .visualization_templates import VisualizationTemplateGenerator
+from .measurement_analysis import MeasurementAnalyzer
+from .measurement_queries import MeasurementHierarchyExplorer
 
 # ============================================================================
 # MCP SERVER SETUP
@@ -488,6 +490,62 @@ async def list_tools() -> list[Tool]:
                 ],
             },
         ),
+        Tool(
+            name="compare_measurements",
+            description="Compare measurements across quantities with statistical analysis",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "quantity_name": {
+                        "type": "string",
+                        "description": "Name of quantity to compare",
+                    },
+                    "measurement_data": {
+                        "type": "object",
+                        "description": "Dict mapping measurement_id (as string) to list of values",
+                    },
+                    "measurement_names": {
+                        "type": "object",
+                        "description": "Optional dict mapping measurement_id to display names",
+                    },
+                },
+                "required": ["quantity_name", "measurement_data"],
+            },
+        ),
+        Tool(
+            name="query_measurement_hierarchy",
+            description="Query and explore ODS measurement hierarchy and structure",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query_result": {
+                        "type": "object",
+                        "description": "ODS query result to explore",
+                    },
+                    "operation": {
+                        "type": "string",
+                        "description": "Operation to perform on query result",
+                        "enum": [
+                            "extract_measurements",
+                            "build_hierarchy",
+                            "get_unique_tests",
+                            "get_unique_quantities",
+                            "build_index",
+                        ],
+                    },
+                    "test_name": {
+                        "type": "string",
+                        "description": "Optional test name for filtering",
+                    },
+                    "quantity_names": {
+                        "type": "array",
+                        "description": "Optional list of quantities to search for",
+                        "items": {"type": "string"},
+                    },
+                },
+                "required": ["query_result", "operation"],
+            },
+        ),
     ]
 
 
@@ -907,6 +965,156 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                         f"{submatrices_count} submatrices"
                     ),
                 }
+
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
+                    )
+                ]
+
+        elif name == "compare_measurements":
+            quantity_name = arguments.get("quantity_name", "")
+            measurement_data = arguments.get("measurement_data", {})
+            measurement_names = arguments.get("measurement_names", {})
+
+            try:
+                if not quantity_name or not measurement_data:
+                    raise ValueError("quantity_name and measurement_data are required")
+
+                # Convert string keys to integers for measurement_data
+                converted_data = {}
+                for key, values in measurement_data.items():
+                    try:
+                        meas_id = int(key)
+                        converted_data[meas_id] = values
+                    except (ValueError, TypeError):
+                        converted_data[key] = values
+
+                # Perform multi-measurement comparison
+                comparison_result = (
+                    MeasurementAnalyzer.compare_multiple_measurements(
+                        quantity_name, converted_data
+                    )
+                )
+
+                # If measurement_names provided, generate summary
+                if measurement_names:
+                    quantity_names = [quantity_name]
+                    comparison_results = [
+                        MeasurementAnalyzer.ComparisonResult(
+                            quantity_name=c["quantity_name"],
+                            measurement_1_id=c["measurement_1_id"],
+                            measurement_2_id=c["measurement_2_id"],
+                            measurement_1_mean=c["measurement_1_mean"],
+                            measurement_2_mean=c["measurement_2_mean"],
+                            mean_difference=c["mean_difference"],
+                            mean_difference_percent=c["mean_difference_percent"],
+                            correlation=c["correlation"],
+                            notes=c["notes"],
+                        )
+                        for c in comparison_result.get("pairwise_comparisons", [])
+                    ]
+
+                    summary = MeasurementAnalyzer.generate_comparison_summary(
+                        measurement_names, quantity_names, comparison_results
+                    )
+                    comparison_result["summary"] = summary
+
+                return [TextContent(type="text", text=json.dumps(comparison_result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
+                    )
+                ]
+
+        elif name == "query_measurement_hierarchy":
+            query_result = arguments.get("query_result", {})
+            operation = arguments.get("operation", "extract_measurements")
+
+            try:
+                if operation == "extract_measurements":
+                    measurements = (
+                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
+                            query_result
+                        )
+                    )
+                    result = {
+                        "operation": operation,
+                        "num_measurements": len(measurements),
+                        "measurements": measurements[:50],  # Limit output
+                    }
+
+                elif operation == "build_hierarchy":
+                    measurements = (
+                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
+                            query_result
+                        )
+                    )
+                    hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
+                        measurements
+                    )
+                    result = {
+                        "operation": operation,
+                        "hierarchy_keys": list(hierarchy.keys()),
+                        "total_measurements": hierarchy["total_measurements"],
+                        "tests": list(hierarchy["by_test"].keys()),
+                        "statuses": list(hierarchy["by_status"].keys()),
+                    }
+
+                elif operation == "get_unique_tests":
+                    measurements = (
+                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
+                            query_result
+                        )
+                    )
+                    tests = MeasurementHierarchyExplorer.get_unique_tests(measurements)
+                    result = {
+                        "operation": operation,
+                        "unique_tests": tests,
+                        "num_tests": len(tests),
+                    }
+
+                elif operation == "get_unique_quantities":
+                    measurements = (
+                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
+                            query_result
+                        )
+                    )
+                    quantities = MeasurementHierarchyExplorer.get_unique_quantities(
+                        measurements
+                    )
+                    result = {
+                        "operation": operation,
+                        "unique_quantities": quantities,
+                        "num_quantities": len(quantities),
+                    }
+
+                elif operation == "build_index":
+                    measurements = (
+                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
+                            query_result
+                        )
+                    )
+                    index = MeasurementHierarchyExplorer.build_measurement_index(
+                        measurements
+                    )
+                    result = {
+                        "operation": operation,
+                        "total_measurements": index["total_measurements"],
+                        "index_by_id_count": len(index["by_id"]),
+                        "index_by_name_count": len(index["by_name"]),
+                        "index_by_test_count": len(index["by_test"]),
+                        "index_by_status_count": len(index["by_status"]),
+                        "available_test_names": list(index["by_test"].keys())[:10],
+                    }
+
+                else:
+                    raise ValueError(f"Unknown operation: {operation}")
 
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:

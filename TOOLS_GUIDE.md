@@ -60,6 +60,13 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 | generate_measurement_comparison_notebook | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
 | generate_plotting_code | Generate matplotlib code | Quantities, count, plot type | Python code string |
 
+### Measurement Analysis & Query Tools (2 tools)
+| Tool | Purpose | Input | Output |
+|------|---------|-------|--------|
+| compare_measurements | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
+| query_measurement_hierarchy | Explore measurement structure | Query result, operation | Hierarchy info |
+
+
 ---
 
 ## Tool Reference
@@ -1506,6 +1513,218 @@ Assistant uses tools:
 4. suggest_optimizations() → Cleans up the query
 5. explain_jaquel_query() → Explains the result
 ```
+
+---
+
+## Measurement Analysis & Query Tools (NEW)
+
+### 26. compare_measurements
+
+**Purpose**: Compare measurements across quantities with statistical analysis.
+
+**Input**:
+```json
+{
+    "quantity_name": "Motor_speed",
+    "measurement_data": {
+        "1": [50, 55, 52, 51, 54],
+        "2": [52, 56, 53, 52, 55],
+        "3": [48, 50, 49, 51, 47]
+    },
+    "measurement_names": {
+        "1": "Campaign_A",
+        "2": "Campaign_B",
+        "3": "Campaign_C"
+    }
+}
+```
+
+**Output**:
+```json
+{
+    "quantity_name": "Motor_speed",
+    "num_measurements": 3,
+    "measurement_ids": [1, 2, 3],
+    "statistics_by_measurement": {
+        "1": {
+            "name": "Motor_speed",
+            "count": 5,
+            "mean": 52.4,
+            "median": 52.0,
+            "stdev": 1.67,
+            "min": 50.0,
+            "max": 55.0,
+            "range": 5.0
+        }
+    },
+    "overall_statistics": {
+        "mean": 51.73,
+        "median": 51.5,
+        "stdev": 2.14
+    },
+    "pairwise_comparisons": [
+        {
+            "quantity_name": "Motor_speed",
+            "measurement_1_id": 1,
+            "measurement_2_id": 2,
+            "measurement_1_mean": 52.4,
+            "measurement_2_mean": 52.6,
+            "mean_difference": 0.2,
+            "mean_difference_percent": 0.38,
+            "correlation": 0.98,
+            "notes": ["Strong positive correlation detected"]
+        }
+    ],
+    "summary": {
+        "significant_differences_found": 0,
+        "strong_correlations_found": 2
+    }
+}
+```
+
+**Features**:
+- ✓ Calculate statistics per measurement (mean, median, stdev, range)
+- ✓ Pairwise comparisons between measurements
+- ✓ Correlation coefficient calculation
+- ✓ Detect significant differences (>10%)
+- ✓ Identify strong correlations (>0.95)
+- ✓ Generate comparison summary
+
+**Parameters**:
+- `quantity_name` (required): Name of quantity to compare
+- `measurement_data` (required): Dict mapping measurement_id to list of values
+- `measurement_names` (optional): Dict mapping measurement_id to display names
+
+**Use Cases**:
+- Compare engine performance across multiple test runs
+- Analyze consistency of measurements across campaigns
+- Detect correlations between measurements
+- Identify outliers or anomalies
+
+---
+
+### 27. query_measurement_hierarchy
+
+**Purpose**: Query and explore ODS measurement hierarchy and structure.
+
+**Input** (Extract Measurements):
+```json
+{
+    "query_result": {
+        "AoMeasurement": [
+            {"Id": 1, "Name": "Meas_001", "TestName": "Test1"},
+            {"Id": 2, "Name": "Meas_002", "TestName": "Test1"}
+        ]
+    },
+    "operation": "extract_measurements"
+}
+```
+
+**Output** (Extract Measurements):
+```json
+{
+    "operation": "extract_measurements",
+    "num_measurements": 2,
+    "measurements": [
+        {"Id": 1, "Name": "Meas_001", "TestName": "Test1"},
+        {"Id": 2, "Name": "Meas_002", "TestName": "Test1"}
+    ]
+}
+```
+
+**Input** (Build Hierarchy):
+```json
+{
+    "query_result": {...},
+    "operation": "build_hierarchy"
+}
+```
+
+**Output** (Build Hierarchy):
+```json
+{
+    "operation": "build_hierarchy",
+    "hierarchy_keys": ["by_test", "by_date_range", "by_status", "total_measurements"],
+    "total_measurements": 42,
+    "tests": ["ProfileTest", "AccelerationTest", "BrakingTest"],
+    "statuses": ["Complete", "Incomplete", "Failed"]
+}
+```
+
+**Input** (Get Unique Tests):
+```json
+{
+    "query_result": {...},
+    "operation": "get_unique_tests"
+}
+```
+
+**Output** (Get Unique Tests):
+```json
+{
+    "operation": "get_unique_tests",
+    "unique_tests": ["AccelerationTest", "BrakingTest", "ProfileTest"],
+    "num_tests": 3
+}
+```
+
+**Input** (Get Unique Quantities):
+```json
+{
+    "query_result": {...},
+    "operation": "get_unique_quantities"
+}
+```
+
+**Output** (Get Unique Quantities):
+```json
+{
+    "operation": "get_unique_quantities",
+    "unique_quantities": ["Current", "Speed", "Temperature", "Torque"],
+    "num_quantities": 4
+}
+```
+
+**Input** (Build Index):
+```json
+{
+    "query_result": {...},
+    "operation": "build_index"
+}
+```
+
+**Output** (Build Index):
+```json
+{
+    "operation": "build_index",
+    "total_measurements": 42,
+    "index_by_id_count": 42,
+    "index_by_name_count": 40,
+    "index_by_test_count": 3,
+    "index_by_status_count": 2,
+    "available_test_names": ["AccelerationTest", "BrakingTest", "ProfileTest"]
+}
+```
+
+**Operations**:
+- `extract_measurements`: Extract measurement objects from query result
+- `build_hierarchy`: Organize measurements by test, status, etc.
+- `get_unique_tests`: List all unique test names
+- `get_unique_quantities`: List all unique measurement quantities
+- `build_index`: Create fast lookup index by multiple keys
+
+**Parameters**:
+- `query_result` (required): ODS query result to explore
+- `operation` (required): Operation to perform (see list above)
+- `test_name` (optional): Filter by test name
+- `quantity_names` (optional): Filter by quantities
+
+**Use Cases**:
+- Discover available tests and measurements
+- Explore what quantities are available
+- Find measurements by test type
+- Build quick lookup structures
+- Understand measurement organization
 
 ---
 

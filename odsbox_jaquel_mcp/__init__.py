@@ -14,6 +14,8 @@ from .data_preparation import (
 )
 from .visualization_templates import VisualizationTemplateGenerator
 from .notebook_generator import NotebookGenerator
+from .measurement_analysis import MeasurementAnalyzer
+from .measurement_queries import MeasurementHierarchyExplorer
 
 __all__ = [
     "ODSConnectionManager",
@@ -28,4 +30,7 @@ __all__ = [
     "MeasurementDataPreparator",
     "VisualizationTemplateGenerator",
     "NotebookGenerator",
+    "MeasurementAnalyzer",
+    "MeasurementHierarchyExplorer",
 ]
+
