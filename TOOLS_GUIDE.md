@@ -1728,14 +1728,192 @@ Assistant uses tools:
 
 ---
 
+## AI Guidance Tools (NEW)
+
+### 28. get_bulk_api_help
+
+**Purpose**: Get contextual help on bulk API usage for loading timeseries data efficiently. This tool provides step-by-step guidance for AI models learning to use the bulk data access system.
+
+**Input**:
+```json
+{
+    "topic": "the_3_step_rule",
+    "tool": "read_submatrix_data"
+}
+```
+
+**Output**:
+```json
+{
+    "topic": "the_3_step_rule",
+    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with connect_ods_server\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with execute_ods_query\n   - Get quantities with get_submatrix_measurement_quantities\n   - Explore hierarchy with query_measurement_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use read_submatrix_data for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
+    "examples_count": 3,
+    "related_tools": ["connect_ods_server", "get_submatrix_measurement_quantities", "read_submatrix_data"]
+}
+```
+
+**Available Topics**:
+
+1. **the_3_step_rule** - Core workflow: CONNECT → DISCOVER → LOAD
+   - Explains fundamental pattern
+   - Shows when to use each step
+   - Includes decision points
+
+2. **bulk_vs_jaquel** - When to use bulk API vs Jaquel queries
+   - Bulk: Fast for known measurements, loads all data at once
+   - Jaquel: For discovery, filtering, complex queries
+   - Decision tree for tool selection
+
+3. **pattern_syntax** - Column matching patterns
+   - Wildcard patterns: `"Time*"`, `"*Temp*"`, `"*Speed"`
+   - Exact match: `"Temperature"`
+   - Multiple patterns: `["Time", "Motor_*", "*Pressure"]`
+   - Case sensitivity options
+
+4. **common_mistakes** - Top 5 AI mistakes and fixes
+   - Trying to query metadata with bulk API
+   - Forgetting to connect first
+   - Using wrong column names
+   - Not using pattern matching for flexibility
+   - Attempting pagination on bulk data
+
+5. **decision_tree** - How to choose the right approach
+   - "I know measurement IDs" → Use bulk API
+   - "I need to search" → Use Jaquel first
+   - "I want timeseries data" → Bulk API after discovery
+   - "I need to filter" → Combine Jaquel + bulk
+
+6. **quick_start** - 5-minute getting started guide
+   - Import statements
+   - Connection code
+   - Discovery code
+   - Data loading code
+   - Basic error handling
+
+7. **column_patterns** - Advanced pattern matching
+   - Wildcard examples
+   - Regular expressions (if supported)
+   - Case-insensitive matching
+   - Filtering for performance
+
+8. **error_handling** - Common errors and recovery
+   - "Submatrix not found" - Check measurement IDs
+   - "No quantities available" - Verify connected and ID is valid
+   - "Pattern matches nothing" - Review available quantity names
+   - Timeout issues and workarounds
+
+9. **performance_tips** - Optimize data loading
+   - Use patterns to filter columns
+   - Index selection for faster access
+   - Batch processing for multiple measurements
+   - Memory management
+
+10. **tool_comparison** - Bulk API vs odsbox library
+    - When to use MCP tools vs direct library
+    - Integration patterns
+    - Trade-offs and benefits
+
+11. **workflow_examples** - Complete workflows
+    - Find and load a measurement
+    - Compare multiple measurements
+    - Process measurement hierarchy
+    - Generate analysis notebook
+
+**Parameters**:
+
+- `topic` (required): Help topic to retrieve. One of:
+  - `"the_3_step_rule"` - Core workflow
+  - `"bulk_vs_jaquel"` - Tool selection
+  - `"pattern_syntax"` - Column patterns
+  - `"common_mistakes"` - Error avoidance
+  - `"decision_tree"` - Decision making
+  - `"quick_start"` - Getting started
+  - `"column_patterns"` - Advanced patterns
+  - `"error_handling"` - Error recovery
+  - `"performance_tips"` - Optimization
+  - `"tool_comparison"` - MCP vs library
+  - `"workflow_examples"` - Complete workflows
+
+- `tool` (optional): Get contextual help for a specific tool:
+  - `"connect_ods_server"` - Connection help
+  - `"read_submatrix_data"` - Data loading help
+  - `"get_submatrix_measurement_quantities"` - Discovery help
+  - `"generate_submatrix_fetcher_script"` - Script generation help
+  - `"query_measurement_hierarchy"` - Hierarchy exploration help
+
+**Examples**:
+
+### Get fundamental workflow:
+```python
+result = get_bulk_api_help(topic="the_3_step_rule")
+print(result["help_text"])
+# Returns: CONNECT → DISCOVER → LOAD workflow with benefits
+```
+
+### Get contextual help for specific tool:
+```python
+result = get_bulk_api_help(
+    topic="quick_start",
+    tool="read_submatrix_data"
+)
+# Returns: Quick start guide with data loading focus
+```
+
+### Decide between tools:
+```python
+result = get_bulk_api_help(topic="decision_tree")
+# Returns: Decision tree for tool selection
+```
+
+### Learn error recovery:
+```python
+result = get_bulk_api_help(topic="error_handling")
+# Returns: Common errors and how to fix them
+```
+
+**Use Cases**:
+
+1. **AI Learning**: When AI model encounters bulk API for first time
+   - Call: `get_bulk_api_help(topic="the_3_step_rule")`
+   - Then: Follow the 3-step pattern
+
+2. **Tool Selection**: Unsure whether to use bulk or Jaquel
+   - Call: `get_bulk_api_help(topic="decision_tree")`
+   - Then: Choose appropriate approach
+
+3. **Error Recovery**: Data loading failed
+   - Call: `get_bulk_api_help(topic="error_handling")`
+   - Then: Apply suggested fix
+
+4. **Pattern Matching**: Unsure about column selection
+   - Call: `get_bulk_api_help(topic="column_patterns")`
+   - Then: Use correct pattern syntax
+
+5. **Performance**: Need to optimize data loading
+   - Call: `get_bulk_api_help(topic="performance_tips")`
+   - Then: Apply optimization
+
+**Documentation Links**:
+
+For comprehensive documentation on bulk API usage, see:
+- [`00_START_HERE.md`](00_START_HERE.md) - Main entry point
+- [`BULK_API_README.md`](BULK_API_README.md) - Complete navigation guide
+- [`BULK_API_USAGE_GUIDE.md`](BULK_API_USAGE_GUIDE.md) - In-depth usage guide
+- [`BULK_API_QUICK_REF.md`](BULK_API_QUICK_REF.md) - Quick reference card
+- [`BULK_API_EXAMPLES.md`](BULK_API_EXAMPLES.md) - 8+ complete workflows
+- [`BULK_API_AI_PROMPT.md`](BULK_API_AI_PROMPT.md) - AI system prompt
+
+---
+
 ## Additional Resources
 
 - [Jaquel Documentation](https://peak-solution.github.io/odsbox/jaquel.html)
 - [Jaquel Examples](https://peak-solution.github.io/odsbox/jaquel_examples.html)
 - [ODSBox GitHub](https://github.com/peak-solution/odsbox)
 - [ASAM ODS Standard](https://www.asam.net/)
+- [Bulk API Guides](BULK_API_README.md) - Learn efficient timeseries data loading
 
 ---
 
 **Last Updated**: October 2025
-**Version**: 1.0.0
+**Version**: 1.1.0 (Added bulk API guidance tools)

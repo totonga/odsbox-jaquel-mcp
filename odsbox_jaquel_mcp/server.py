@@ -24,6 +24,7 @@ from .validators import JaquelValidator, JaquelOptimizer
 from .schemas import SchemaInspector
 from .queries import JaquelExamples, QueryDebugger
 from .submatrix import SubmatrixDataReader
+from .bulk_api_guide import BulkAPIGuide
 from .submatrix.scripts import (
     generate_basic_fetcher_script,
     generate_advanced_fetcher_script,
@@ -544,6 +545,47 @@ async def list_tools() -> list[Tool]:
                     },
                 },
                 "required": ["query_result", "operation"],
+            },
+        ),
+        Tool(
+            name="get_bulk_api_help",
+            description=(
+                "Get help and guidance on using the Bulk API for loading timeseries data. "
+                "Use this to understand the 3-step workflow and common patterns."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "topic": {
+                        "type": "string",
+                        "description": (
+                            "Help topic. Options: 3-step-rule, quick-start, bulk-vs-jaquel, "
+                            "patterns, decision-tree, mistakes, step-by-step, "
+                            "response-template, troubleshooting, tool-patterns, all"
+                        ),
+                        "enum": [
+                            "3-step-rule",
+                            "quick-start",
+                            "bulk-vs-jaquel",
+                            "patterns",
+                            "decision-tree",
+                            "mistakes",
+                            "step-by-step",
+                            "response-template",
+                            "troubleshooting",
+                            "tool-patterns",
+                            "all",
+                        ],
+                    },
+                    "tool": {
+                        "type": "string",
+                        "description": (
+                            "Optional: Get contextual help for a specific tool "
+                            "(e.g., read_submatrix_data, connect_ods_server)"
+                        ),
+                    },
+                },
+                "required": ["topic"],
             },
         ),
     ]
@@ -1115,6 +1157,43 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
                 else:
                     raise ValueError(f"Unknown operation: {operation}")
+
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
+                    )
+                ]
+
+        elif name == "get_bulk_api_help":
+            topic = arguments.get("topic", "3-step-rule")
+            tool = arguments.get("tool")
+
+            try:
+                if tool:
+                    # Get contextual help for a specific tool
+                    help_text = BulkAPIGuide.get_contextual_help(tool)
+                    result = {
+                        "topic": "contextual-help",
+                        "tool": tool,
+                        "help": help_text,
+                    }
+                elif topic == "all":
+                    # Get all help content
+                    help_text = BulkAPIGuide.get_all_help()
+                    result = {
+                        "topic": topic,
+                        "help": help_text,
+                    }
+                else:
+                    # Get specific topic help
+                    help_text = BulkAPIGuide.get_help(topic)
+                    result = {
+                        "topic": topic,
+                        "help": help_text,
+                    }
 
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:

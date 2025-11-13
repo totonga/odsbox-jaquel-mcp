@@ -13,13 +13,14 @@
 
 - 🚀 Validate, build, and optimize Jaquel queries for ASAM ODS
 - 🔌 Built-in ODS connection management (no manual model injection)
-- 🧰 27+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
+- 🧰 28+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
 - 📦 Bulk timeseries/submatrix data access and script generation
 - 📊 **NEW**: Automatic Jupyter notebook generation for measurement comparison
 - 📈 **NEW**: Matplotlib visualization code generation
 - 📉 **NEW**: Statistical measurement comparison and correlation analysis
 - 🔎 **NEW**: Measurement hierarchy exploration and discovery
-- 📝 Comprehensive examples and test suite
+- 🤖 **NEW**: AI-guided bulk API learning with `get_bulk_api_help` tool
+- 📝 Comprehensive examples, documentation, and test suite
 
 ---
 
@@ -75,6 +76,11 @@ python -m build
 
 - **Tool Reference:** See [`TOOLS_GUIDE.md`](TOOLS_GUIDE.md)
 - **API & Usage:** See [`examples/`](examples/) and docstrings
+- **Bulk API Learning:** See [`00_START_HERE.md`](00_START_HERE.md) and [`BULK_API_README.md`](BULK_API_README.md)
+  - Learn how to efficiently load timeseries data with AI guidance
+  - Use `get_bulk_api_help` tool for contextual guidance
+  - Find examples and patterns in [`BULK_API_EXAMPLES.md`](BULK_API_EXAMPLES.md)
+  - Quick reference: [`BULK_API_QUICK_REF.md`](BULK_API_QUICK_REF.md)
 - **Development:**
   - Run: `python -m odsbox_mcp_server.server`
   - Test: `python run_tests.py` or `pytest tests/`

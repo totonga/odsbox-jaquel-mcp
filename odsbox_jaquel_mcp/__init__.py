@@ -1,6 +1,6 @@
 """ASAM ODS Jaquel MCP Server - A Model Context Protocol server for Jaquel queries."""
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __author__ = "Assistant"
 
 from .connection import ODSConnectionManager
