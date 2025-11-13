@@ -30,6 +30,8 @@ from .submatrix.scripts import (
     generate_batch_fetcher_script,
     generate_analysis_fetcher_script,
 )
+from .notebook_generator import NotebookGenerator
+from .visualization_templates import VisualizationTemplateGenerator
 
 # ============================================================================
 # MCP SERVER SETUP
@@ -403,6 +405,89 @@ async def list_tools() -> list[Tool]:
                 "required": ["submatrix_id", "script_type"],
             },
         ),
+        Tool(
+            name="generate_measurement_comparison_notebook",
+            description="Generate a Jupyter notebook for comparing measurements",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "measurement_query_conditions": {
+                        "type": "object",
+                        "description": "Filter conditions for measurements",
+                    },
+                    "measurement_quantity_names": {
+                        "type": "array",
+                        "description": "Names of quantities to plot",
+                        "items": {"type": "string"},
+                    },
+                    "ods_url": {
+                        "type": "string",
+                        "description": "ODS server URL",
+                    },
+                    "ods_username": {
+                        "type": "string",
+                        "description": "ODS username",
+                    },
+                    "ods_password": {
+                        "type": "string",
+                        "description": "ODS password",
+                    },
+                    "available_quantities": {
+                        "type": "array",
+                        "description": "List of all available quantities (for documentation)",
+                        "items": {"type": "string"},
+                    },
+                    "plot_type": {
+                        "type": "string",
+                        "description": 'Type of plot ("scatter", "line", or "subplots")',
+                        "enum": ["scatter", "line", "subplots"],
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Notebook title",
+                    },
+                    "output_path": {
+                        "type": "string",
+                        "description": "Optional path to save notebook (.ipynb file)",
+                    },
+                },
+                "required": [
+                    "measurement_query_conditions",
+                    "measurement_quantity_names",
+                    "ods_url",
+                    "ods_username",
+                    "ods_password",
+                ],
+            },
+        ),
+        Tool(
+            name="generate_plotting_code",
+            description="Generate Python plotting code for measurement comparison",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "measurement_quantity_names": {
+                        "type": "array",
+                        "description": "List of quantity names to plot",
+                        "items": {"type": "string"},
+                    },
+                    "submatrices_count": {
+                        "type": "integer",
+                        "description": "Number of submatrices to plot",
+                    },
+                    "plot_type": {
+                        "type": "string",
+                        "description": 'Type of plot ("scatter", "line", or "subplots")',
+                        "enum": ["scatter", "line", "subplots"],
+                    },
+                },
+                "required": [
+                    "measurement_quantity_names",
+                    "submatrices_count",
+                    "plot_type",
+                ],
+            },
+        ),
     ]
 
 
@@ -727,6 +812,102 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                         f"4. Check output: submatrix_{submatrix_id}_data.{output_format}",
                     ],
                 }
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
+                    )
+                ]
+
+        elif name == "generate_measurement_comparison_notebook":
+            measurement_query_conditions = arguments.get("measurement_query_conditions", {})
+            measurement_quantity_names = arguments.get("measurement_quantity_names", [])
+            ods_url = arguments.get("ods_url", "")
+            ods_username = arguments.get("ods_username", "")
+            ods_password = arguments.get("ods_password", "")
+            available_quantities = arguments.get("available_quantities", None)
+            plot_type = arguments.get("plot_type", "scatter")
+            title = arguments.get("title", "Measurement Comparison")
+            output_path = arguments.get("output_path", None)
+
+            try:
+                notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+                    measurement_query_conditions=measurement_query_conditions,
+                    measurement_quantity_names=measurement_quantity_names,
+                    ods_url=ods_url,
+                    ods_username=ods_username,
+                    ods_password=ods_password,
+                    available_quantities=available_quantities,
+                    plot_type=plot_type,
+                    title=title,
+                )
+
+                result = {
+                    "title": title,
+                    "plot_type": plot_type,
+                    "measurement_quantities": measurement_quantity_names,
+                    "num_cells": len(notebook["cells"]),
+                }
+
+                if output_path:
+                    NotebookGenerator.save_notebook(notebook, output_path)
+                    result["saved_to"] = output_path
+                    result["status"] = "Notebook saved successfully"
+                else:
+                    result["status"] = "Notebook generated successfully"
+                    result["notebook"] = notebook
+
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
+                    )
+                ]
+
+        elif name == "generate_plotting_code":
+            measurement_quantity_names = arguments.get("measurement_quantity_names", [])
+            submatrices_count = arguments.get("submatrices_count", 0)
+            plot_type = arguments.get("plot_type", "scatter")
+
+            try:
+                if plot_type == "scatter":
+                    if len(measurement_quantity_names) < 2:
+                        raise ValueError(
+                            "Scatter plot requires at least 2 measurement quantities"
+                        )
+                    code = VisualizationTemplateGenerator.generate_scatter_plot_code(
+                        measurement_quantity_names=measurement_quantity_names,
+                        submatrices_count=submatrices_count,
+                    )
+                elif plot_type == "line":
+                    code = VisualizationTemplateGenerator.generate_line_plot_code(
+                        measurement_quantity_names=measurement_quantity_names,
+                        submatrices_count=submatrices_count,
+                    )
+                elif plot_type == "subplots":
+                    code = VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
+                        measurement_quantity_names=measurement_quantity_names,
+                        submatrices_count=submatrices_count,
+                    )
+                else:
+                    raise ValueError(f"Unknown plot type: {plot_type}")
+
+                result = {
+                    "plot_type": plot_type,
+                    "measurement_quantities": measurement_quantity_names,
+                    "submatrices_count": submatrices_count,
+                    "code": code,
+                    "description": (
+                        f"Generated {plot_type} plot code for "
+                        f"{len(measurement_quantity_names)} quantities and "
+                        f"{submatrices_count} submatrices"
+                    ),
+                }
+
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 return [

@@ -54,6 +54,12 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 | read_submatrix_data | Read timeseries data | Submatrix ID, patterns | DataFrame data |
 | generate_submatrix_fetcher_script | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
 
+### Notebook & Visualization Tools (2 tools)
+| Tool | Purpose | Input | Output |
+|------|---------|-------|--------|
+| generate_measurement_comparison_notebook | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
+| generate_plotting_code | Generate matplotlib code | Quantities, count, plot type | Python code string |
+
 ---
 
 ## Tool Reference
@@ -1349,6 +1355,121 @@ merged = merge_filter_conditions(conditions, "$and")
 2. **Use explain_jaquel_query** to understand complex queries
 3. **Use get_operator_documentation** to verify operator syntax
 4. **Use suggest_optimizations** to find issues and improvements
+
+---
+
+## Notebook & Visualization Tools (NEW)
+
+### 24. generate_measurement_comparison_notebook
+
+**Purpose**: Generate a complete Jupyter notebook for comparing measurements with automatic data retrieval, preparation, and visualization.
+
+**Input**:
+```json
+{
+    "measurement_query_conditions": {
+        "Name": {"$like": "Profile_*"},
+        "TestStep.Test.Name": {"$in": ["Campaign_03", "Campaign_04"]}
+    },
+    "measurement_quantity_names": ["Motor_speed", "Torque"],
+    "ods_url": "https://ods.example.com/api",
+    "ods_username": "user",
+    "ods_password": "password",
+    "available_quantities": ["Motor_speed", "Torque", "Temperature", "Coolant"],
+    "plot_type": "scatter",
+    "title": "Motor Performance Comparison",
+    "output_path": "/path/to/notebook.ipynb"
+}
+```
+
+**Output**:
+```json
+{
+    "title": "Motor Performance Comparison",
+    "plot_type": "scatter",
+    "measurement_quantities": ["Motor_speed", "Torque"],
+    "num_cells": 9,
+    "status": "Notebook generated successfully",
+    "saved_to": "/path/to/notebook.ipynb"
+}
+```
+
+**Features**:
+- ✓ Query definition cell with ODS credentials
+- ✓ Data retrieval code using odsbox library
+- ✓ Automatic data preparation with helper functions
+- ✓ Matplotlib visualization code
+- ✓ Configurable plot types: scatter, line, or subplots
+- ✓ Unit extraction and label formatting
+- ✓ Optional file output
+
+**Plot Types**:
+- `scatter` - 2D scatter plots with independent column as color mapping
+- `line` - Multi-line time series plots
+- `subplots` - Separate subplots for each quantity
+
+**Example Generated Notebook Structure**:
+1. Title and description
+2. Available quantities documentation
+3. Query definition cell
+4. ODS data retrieval code
+5. Data preparation with helper functions
+6. Visualization code
+
+---
+
+### 25. generate_plotting_code
+
+**Purpose**: Generate standalone matplotlib plotting code for measurement visualization.
+
+**Input**:
+```json
+{
+    "measurement_quantity_names": ["Speed", "Torque", "Temperature"],
+    "submatrices_count": 6,
+    "plot_type": "line"
+}
+```
+
+**Output**:
+```json
+{
+    "plot_type": "line",
+    "measurement_quantities": ["Speed", "Torque", "Temperature"],
+    "submatrices_count": 6,
+    "code": "import matplotlib.pyplot as plt\n...",
+    "description": "Generated line plot code for 3 quantities and 6 submatrices"
+}
+```
+
+**Plot Types**:
+
+**Scatter Plot** (requires 2+ quantities):
+- 2D scatter plots
+- Color mapping by independent column (e.g., time)
+- Configurable subplot layout (default: 3 per row)
+- Automatic axis labeling
+
+**Line Plot** (any number of quantities):
+- Multiple line series per plot
+- Legend, grid, and marker styling
+- Configurable subplot layout
+- Good for time series data
+
+**Subplots Per Measurement**:
+- One subplot row per quantity
+- Multiple columns for each measurement
+- Best for detailed quantity-by-measurement analysis
+
+**Example**:
+```python
+code = generate_plotting_code(
+    measurement_quantity_names=["Speed", "Torque"],
+    submatrices_count=9,
+    plot_type="scatter"
+)
+# Returns executable matplotlib code
+```
 
 ---
 

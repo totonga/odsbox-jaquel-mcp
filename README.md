@@ -13,8 +13,10 @@
 
 - 🚀 Validate, build, and optimize Jaquel queries for ASAM ODS
 - 🔌 Built-in ODS connection management (no manual model injection)
-- 🧰 23+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
+- 🧰 25+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
 - 📦 Bulk timeseries/submatrix data access and script generation
+- 📊 **NEW**: Automatic Jupyter notebook generation for measurement comparison
+- 📈 **NEW**: Matplotlib visualization code generation
 - 📝 Comprehensive examples and test suite
 
 ---
@@ -175,6 +177,71 @@ Solution: Use one of the suggested fields
 }
 ```
 Solution: Check URL, server availability, firewall
+
+## Notebook Generation & Visualization (NEW)
+
+### Generate Measurement Comparison Notebooks
+
+The server can automatically generate Jupyter notebooks for analyzing and comparing measurements:
+
+```python
+from odsbox_jaquel_mcp import NotebookGenerator
+
+notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+    measurement_query_conditions={
+        "Name": {"$like": "Profile_*"},
+        "TestStep.Test.Name": {"$in": ["Campaign_03"]},
+    },
+    measurement_quantity_names=["Motor_speed", "Torque"],
+    ods_url="https://ods.example.com/api",
+    ods_username="user",
+    ods_password="password",
+    available_quantities=["Motor_speed", "Torque", "Temperature"],
+    plot_type="scatter",
+    title="Motor Performance Analysis",
+    output_path="analysis.ipynb"
+)
+```
+
+Generated notebooks include:
+- Query definition cells
+- Automatic data retrieval code
+- Data preparation with unit extraction
+- Visualization code (scatter, line, or subplots)
+- Full documentation and metadata
+
+### Generate Visualization Code
+
+```python
+from odsbox_jaquel_mcp import VisualizationTemplateGenerator
+
+code = VisualizationTemplateGenerator.generate_scatter_plot_code(
+    measurement_quantity_names=["Speed", "Torque"],
+    submatrices_count=6
+)
+```
+
+Supported plot types:
+- **Scatter**: 2D plots with color mapping by independent column
+- **Line**: Time series plots with multiple quantities
+- **Subplots**: Separate subplots per quantity
+
+### Data Preparation Tools
+
+```python
+from odsbox_jaquel_mcp import MeasurementMetadataExtractor
+
+# Extract units and format labels
+unit_lookup = MeasurementMetadataExtractor.extract_unit_lookup(columns_df)
+labels = MeasurementMetadataExtractor.build_label_dict(columns_df, unit_lookup)
+
+# Generate descriptive titles
+titles = MeasurementMetadataExtractor.build_submatrix_title_lookup(
+    submatrices_df, measurements_df
+)
+```
+
+See [`README_EXTENSIONS.md`](README_EXTENSIONS.md) for complete documentation.
 
 ## Troubleshooting
 

@@ -8,6 +8,12 @@ from .queries import JaquelExamples, QueryDebugger
 from .schemas import EntityDescriptions, SchemaInspector
 from .validators import JaquelOptimizer, JaquelValidator
 from .submatrix import SubmatrixDataReader
+from .data_preparation import (
+    MeasurementMetadataExtractor,
+    MeasurementDataPreparator,
+)
+from .visualization_templates import VisualizationTemplateGenerator
+from .notebook_generator import NotebookGenerator
 
 __all__ = [
     "ODSConnectionManager",
@@ -18,4 +24,8 @@ __all__ = [
     "EntityDescriptions",
     "SchemaInspector",
     "SubmatrixDataReader",
+    "MeasurementMetadataExtractor",
+    "MeasurementDataPreparator",
+    "VisualizationTemplateGenerator",
+    "NotebookGenerator",
 ]
