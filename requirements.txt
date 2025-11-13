@@ -6,17 +6,12 @@
 ############################################################
 
 # Core dependencies
-odsbox
+odsbox>=1.0.14
 mcp>=0.1.0
-requests
-
-# Optional: Jupyter and plotting for examples
-jupyter
 matplotlib
 
 # Testing
 pytest
 pytest-asyncio
-
 # build package
 build
