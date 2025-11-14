@@ -264,7 +264,7 @@ class SchemaInspector:
                 }
 
             return {
-                "entity": entity_name,
+                "entity": entity.name,
                 "derived_from": entity.base_name,
                 "attributes": attributes,
                 "relationships": relationships,
