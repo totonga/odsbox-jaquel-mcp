@@ -6,6 +6,7 @@ from typing import Any
 
 try:
     from odsbox.proto import ods
+    from odsbox.model_cache import ModelCache
 
     ODSBOX_AVAILABLE = True
 except ImportError:
@@ -44,9 +45,7 @@ class EntityDescriptions:
             "characteristics in the SI system (e.g., length, time, "
             "mass)."
         ),
-        "AoQuantityGroup": (
-            "Allows for the logical grouping of quantities based on application-specific criteria."
-        ),
+        "AoQuantityGroup": ("Allows for the logical grouping of quantities based on application-specific criteria."),
         "AoUnitGroup": ("Allows for the logical grouping of units."),
         "AoMeasurement": (
             "The primary container for a complete measurement or test case. Represents a single "
@@ -185,14 +184,36 @@ class SchemaInspector:
         pass
 
     @classmethod
-    def _get_model_cache(cls) -> Any:
+    def _get_model_cache(cls) -> ModelCache:
         """Get model cache from connection manager."""
         return ODSConnectionManager.get_model_cache()
+
+    @staticmethod
+    def _get_entity(mc: ModelCache, entity_name: str) -> ods.Model.Entity:
+        """
+        Get the entity name.
+
+        :param str entity_name: case insensitive name of an entity.
+        :raises ValueError: If the entity does not exist.
+        """
+        model = mc.model()
+        entity = model.entities.get(entity_name)
+        if entity is not None:
+            return entity
+        name_casefold = entity_name.casefold()
+        for key, entity in model.entities.items():
+            if key.casefold() == name_casefold:
+                return entity
+            if name_casefold == entity.base_name.casefold():
+                # return the first found
+                return entity
+
+        raise ValueError(f"No entity named '{entity_name}' found.")
 
     @classmethod
     def get_entity_schema(cls, entity_name: str) -> dict[str, Any]:
         """Get schema for an entity from model."""
-        model_cache = cls._get_model_cache()
+        model_cache: ModelCache = cls._get_model_cache()
 
         if not model_cache:
             return {
@@ -201,7 +222,7 @@ class SchemaInspector:
             }
 
         try:
-            entity: ods.Model.Entity = model_cache.entity(entity_name)
+            entity: ods.Model.Entity = SchemaInspector._get_entity(model_cache, entity_name)
             if not entity:
                 # Try to get available entities
                 try:
