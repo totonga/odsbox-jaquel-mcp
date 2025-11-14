@@ -70,6 +70,12 @@ pytest tests/
 python -m build
 ```
 
+install whl package
+
+```bash
+pip install dist/odsbox_jaquel_mcp-0.1.0-py3-none-any.whl
+```
+
 ## Documentation
 
 - **Tool Reference:** See [`TOOLS_GUIDE.md`](TOOLS_GUIDE.md)
