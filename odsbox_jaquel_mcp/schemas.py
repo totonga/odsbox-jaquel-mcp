@@ -184,6 +184,11 @@ class SchemaInspector:
         pass
 
     @classmethod
+    def _get_model(cls) -> ods.Model:
+        """Get model cache from connection manager."""
+        return ODSConnectionManager.get_model()
+
+    @classmethod
     def _get_model_cache(cls) -> ModelCache:
         """Get model cache from connection manager."""
         return ODSConnectionManager.get_model_cache()
@@ -209,6 +214,30 @@ class SchemaInspector:
                 return entity
 
         raise ValueError(f"No entity named '{entity_name}' found.")
+
+    @classmethod
+    def list_ods_entities(cls) -> dict[str, Any]:
+        """List all entities in the ODS model."""
+        model = cls._get_model()
+        if not model:
+            return {
+                "error": "Model not loaded",
+                "hint": ("Connect to ODS server using 'connect_ods_server' tool first"),
+            }
+
+        entities = []
+        for _entity_name, entity in model.entities.items():
+            entities.append(
+                {
+                    "name": entity.name,
+                    "basename": entity.base_name,
+                    "relations": list(entity.relations.keys()),
+                    "description": EntityDescriptions.get_entity_description(entity),
+                }
+            )
+
+        result = {"count": len(entities), "entities": entities}
+        return result
 
     @classmethod
     def get_entity_schema(cls, entity_name: str) -> dict[str, Any]:

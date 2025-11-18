@@ -371,8 +371,7 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="generate_submatrix_fetcher_script",
             description=(
-                "Generate Python scripts for fetching submatrix data "
-                "with error handling and data processing"
+                "Generate Python scripts for fetching submatrix data " "with error handling and data processing"
             ),
             inputSchema={
                 "type": "object",
@@ -777,26 +776,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # ====================================================================
 
         elif name == "list_ods_entities":
-            model = ODSConnectionManager.get_model()
-            if not model:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": "Not connected to ODS server"}, indent=2),
-                    )
-                ]
-
-            entities = []
-            for entity_name, entity in model.entities.items():
-                entities.append(
-                    {
-                        "name": entity.name,
-                        "basename": entity.base_name,
-                        "relations": list(entity.relations.keys()),
-                    }
-                )
-
-            result = {"count": len(entities), "entities": entities}
+            result = SchemaInspector.list_ods_entities()
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         elif name == "execute_ods_query":
@@ -894,9 +874,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                     return [
                         TextContent(
                             type="text",
-                            text=json.dumps(
-                                {"error": f"Unknown script type: {script_type}"}, indent=2
-                            ),
+                            text=json.dumps({"error": f"Unknown script type: {script_type}"}, indent=2),
                         )
                     ]
 
@@ -976,9 +954,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             try:
                 if plot_type == "scatter":
                     if len(measurement_quantity_names) < 2:
-                        raise ValueError(
-                            "Scatter plot requires at least 2 measurement quantities"
-                        )
+                        raise ValueError("Scatter plot requires at least 2 measurement quantities")
                     code = VisualizationTemplateGenerator.generate_scatter_plot_code(
                         measurement_quantity_names=measurement_quantity_names,
                         submatrices_count=submatrices_count,
@@ -1036,11 +1012,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                         converted_data[key] = values
 
                 # Perform multi-measurement comparison
-                comparison_result = (
-                    MeasurementAnalyzer.compare_multiple_measurements(
-                        quantity_name, converted_data
-                    )
-                )
+                comparison_result = MeasurementAnalyzer.compare_multiple_measurements(quantity_name, converted_data)
 
                 # If measurement_names provided, generate summary
                 if measurement_names:
@@ -1080,11 +1052,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
             try:
                 if operation == "extract_measurements":
-                    measurements = (
-                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-                            query_result
-                        )
-                    )
+                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
                     result = {
                         "operation": operation,
                         "num_measurements": len(measurements),
@@ -1092,14 +1060,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                     }
 
                 elif operation == "build_hierarchy":
-                    measurements = (
-                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-                            query_result
-                        )
-                    )
-                    hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
-                        measurements
-                    )
+                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+                    hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
                     result = {
                         "operation": operation,
                         "hierarchy_keys": list(hierarchy.keys()),
@@ -1109,11 +1071,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                     }
 
                 elif operation == "get_unique_tests":
-                    measurements = (
-                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-                            query_result
-                        )
-                    )
+                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
                     tests = MeasurementHierarchyExplorer.get_unique_tests(measurements)
                     result = {
                         "operation": operation,
@@ -1122,14 +1080,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                     }
 
                 elif operation == "get_unique_quantities":
-                    measurements = (
-                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-                            query_result
-                        )
-                    )
-                    quantities = MeasurementHierarchyExplorer.get_unique_quantities(
-                        measurements
-                    )
+                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+                    quantities = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
                     result = {
                         "operation": operation,
                         "unique_quantities": quantities,
@@ -1137,14 +1089,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                     }
 
                 elif operation == "build_index":
-                    measurements = (
-                        MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-                            query_result
-                        )
-                    )
-                    index = MeasurementHierarchyExplorer.build_measurement_index(
-                        measurements
-                    )
+                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+                    index = MeasurementHierarchyExplorer.build_measurement_index(measurements)
                     result = {
                         "operation": operation,
                         "total_measurements": index["total_measurements"],
