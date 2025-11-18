@@ -15,18 +15,18 @@ class BulkAPIGuide:
 ╔════════════════════════════════════════════════════════════════════════╗
 ║                        THE 3-STEP RULE (MANDATORY)                     ║
 ║                                                                        ║
-║  Every interaction with bulk API MUST follow these steps IN ORDER:    ║
+║  Every interaction with bulk API MUST follow these steps IN ORDER:     ║
 ║                                                                        ║
 ║  1️⃣  CONNECT: connect_ods_server(url, username, password)             ║
-║      └─ Establish connection to ODS server                            ║
+║      └─ Establish connection to ODS server                             ║
 ║                                                                        ║
 ║  2️⃣  DISCOVER: get_submatrix_measurement_quantities(submatrix_id)     ║
-║      └─ Find what measurement columns are available                   ║
+║      └─ Find what measurement columns are available                    ║
 ║                                                                        ║
 ║  3️⃣  LOAD: read_submatrix_data(submatrix_id, patterns, ...)           ║
-║      └─ Load the actual timeseries data                               ║
+║      └─ Load the actual timeseries data                                ║
 ║                                                                        ║
-║  NO EXCEPTIONS. ALWAYS ALL 3 STEPS. ALWAYS IN THIS ORDER.             ║
+║  NO EXCEPTIONS. ALWAYS ALL 3 STEPS. ALWAYS IN THIS ORDER.              ║
 ╚════════════════════════════════════════════════════════════════════════╝
     """
 
@@ -61,7 +61,7 @@ BULK API vs JAQUEL QUERIES
 │ • Performing analysis, plotting, or statistics              │
 │ • Exporting data to files (CSV, JSON, etc.)                 │
 │                                                             │
-│ TOOLS: read_submatrix_data, generate_*_fetcher_script      │
+│ TOOLS: read_submatrix_data, generate_*_fetcher_script       │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -72,7 +72,7 @@ BULK API vs JAQUEL QUERIES
 │ • Searching for measurement definitions                     │
 │ • Checking what data exists                                 │
 │                                                             │
-│ TOOLS: execute_ods_query, validate_jaquel_query            │
+│ TOOLS: execute_ods_query, validate_jaquel_query             │
 └─────────────────────────────────────────────────────────────┘
 
 KEY DIFFERENCE:
@@ -311,7 +311,7 @@ COMMON TOOL USAGE PATTERNS
 ├─────────────────────────────────────────────────────────────┤
 │ 1. connect_ods_server                                       │
 │ 2. get_submatrix_measurement_quantities                     │
-│ 3. generate_submatrix_fetcher_script (output_format: csv)  │
+│ 3. generate_submatrix_fetcher_script (output_format: csv)   │
 │ Result: Python script that saves to CSV                     │
 └─────────────────────────────────────────────────────────────┘
 
@@ -358,8 +358,7 @@ COMMON TOOL USAGE PATTERNS
 
         return help_topics.get(
             topic,
-            f"Unknown topic: {topic}\n\nAvailable topics:\n"
-            + "\n".join(f"  - {t}" for t in help_topics.keys()),
+            f"Unknown topic: {topic}\n\nAvailable topics:\n" + "\n".join(f"  - {t}" for t in help_topics.keys()),
         )
 
     @staticmethod
@@ -457,6 +456,5 @@ This is more efficient than manually loading multiple submatrices!
 
         return contextual_tips.get(
             current_tool,
-            f"No specific help for {current_tool}. "
-            "See 'get help bulk-api' for general guidance.",
+            f"No specific help for {current_tool}. " "See 'get help bulk-api' for general guidance.",
         )
