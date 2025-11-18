@@ -13,12 +13,13 @@
 
 - 🚀 Validate, build, and optimize Jaquel queries for ASAM ODS
 - 🔌 Built-in ODS connection management (no manual model injection)
-- 🧰 28+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
+- 🧰 29+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
 - 📦 Bulk timeseries/submatrix data access and script generation
 - 📊 **NEW**: Automatic Jupyter notebook generation for measurement comparison
 - 📈 **NEW**: Matplotlib visualization code generation
 - 📉 **NEW**: Statistical measurement comparison and correlation analysis
 - 🔎 **NEW**: Measurement hierarchy exploration and discovery
+- 🏗️ **NEW**: Entity hierarchy visualization (AoTest → AoMeasurement)
 - 🤖 **NEW**: AI-guided bulk API learning with `get_bulk_api_help` tool
 - 📝 Comprehensive examples, documentation, and test suite
 
@@ -137,6 +138,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE).
 - **validate_field_exists** - Check if field exists
 - **validate_filter_against_schema** - Validate against schema
 - **list_ods_entities** - List all entities with relationships
+- **get_test_to_measurement_hierarchy** - Get ASAM ODS test hierarchy structure
 
 #### Connection Management (NEW)
 - **connect_ods_server** - Establish ODS connection
@@ -191,6 +193,62 @@ Solution: Use one of the suggested fields
 Solution: Check URL, server availability, firewall
 
 ## Measurement Analysis & Query Discovery (NEW)
+
+### Understanding ASAM ODS Entity Hierarchy
+
+The `get_test_to_measurement_hierarchy` tool helps you understand the structure of ASAM ODS data:
+
+```python
+from odsbox_jaquel_mcp import SchemaInspector
+
+# Get the main ASAM ODS hierarchy
+hierarchy = SchemaInspector.get_test_to_measurement_hierarchy()
+
+# Returns:
+# {
+#   "success": true,
+#   "hierarchy_chain": [
+#     {
+#       "name": "Test",
+#       "base_name": "AoTest",
+#       "description": "Root of test hierarchy..."
+#     },
+#     {
+#       "name": "SubTest", 
+#       "base_name": "AoSubTest",
+#       "description": "Intermediate test level..."
+#     },
+#     {
+#       "name": "Measurement",
+#       "base_name": "AoMeasurement",
+#       "description": "Individual measurement/test case..."
+#     }
+#   ],
+#   "depth": 3
+# }
+```
+
+**Key Benefits**:
+- Understand the data navigation path
+- Build correct Jaquel queries following entity relationships
+- LLM-friendly output for AI guidance
+- Discover "children" relation structure automatically
+
+**Use in Query Building**:
+```python
+# After understanding hierarchy, build queries like:
+query = {
+    "AoTest": {
+        "name": "MyProject1",
+        "children": {
+            "name": "SubTest1",
+            "children": {
+                "name": "MyMeas1"
+            }
+        }
+    }
+}
+```
 
 ### Compare Measurements Statistically
 

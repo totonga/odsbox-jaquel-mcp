@@ -366,3 +366,65 @@ class SchemaInspector:
             "issues": issues,
             "suggestions": suggestions,
         }
+
+    @classmethod
+    def get_test_to_measurement_hierarchy(cls) -> dict[str, Any]:
+        """Get hierarchical entity chain from AoTest to AoMeasurement via 'children' relation.
+
+        This traverses the main ASAM ODS hierarchy:
+        AoTest -> (children) -> AoSubTest -> (children) -> ... -> AoMeasurement
+
+        Returns:
+            Dict containing hierarchy chain and relationships
+        """
+        model_cache: ModelCache = cls._get_model_cache()
+        if not model_cache:
+            return {
+                "error": "Model not loaded",
+                "hint": "Connect to ODS server using 'connect_ods_server' tool first",
+            }
+
+        hierarchy_chain = []
+        try:
+            visited = set()
+
+            # Start with AoTest base entity
+            current_entity = model_cache.entity_by_base_name("AoTest")
+            current_children_relation = None
+
+            # Traverse from AoTest following 'children' relation
+            while current_entity and current_entity.name not in visited:
+                visited.add(current_entity.name)
+                hierarchy_chain.append(
+                    {
+                        "name": current_entity.name,
+                        "base_name": current_entity.base_name,
+                        "parent_relation": (
+                            current_children_relation.inverse_name if current_children_relation else None
+                        ),
+                        "description": EntityDescriptions.get_entity_description(current_entity),
+                    }
+                )
+
+                # Look for 'children' relation to find next entity
+                current_children_relation = model_cache.relation_no_throw(current_entity, "children")
+                if current_children_relation:
+                    current_entity = model_cache.entity(current_children_relation.entity_name)
+                else:
+                    # No more children relation
+                    break
+
+            return {
+                "success": True,
+                "hierarchy_chain": hierarchy_chain,
+                "depth": len(hierarchy_chain),
+                "note": "This is the main AoTest to AoMeasurement hierarchy in this ASAM ODS server",
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "hierarchy_chain": hierarchy_chain,
+            }

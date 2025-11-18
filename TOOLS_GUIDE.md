@@ -42,13 +42,14 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 | debug_query_steps | Break query into steps | Query dict | Debug steps |
 | suggest_error_fixes | Get error suggestions | Issue, query | Fix suggestions |
 
-### ODS Connection & Data Access Tools (8 tools)
+### ODS Connection & Data Access Tools (9 tools)
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
 | connect_ods_server | Connect to ODS server | URL, credentials | Connection status |
 | disconnect_ods_server | Disconnect from server | None | Status |
 | get_ods_connection_info | Get connection details | None | Connection info |
 | list_ods_entities | List all entities | None | Entity list |
+| get_test_to_measurement_hierarchy | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
 | execute_ods_query | Execute Jaquel query | Query dict | Query results |
 | get_submatrix_measurement_quantities | List measurement quantities | Submatrix ID | Quantity list |
 | read_submatrix_data | Read timeseries data | Submatrix ID, patterns | DataFrame data |
@@ -823,7 +824,74 @@ for suggestion in suggestions["suggestions"]:
 
 ---
 
-### 20. execute_ods_query
+### 20. get_test_to_measurement_hierarchy
+
+**Purpose**: Get the hierarchical entity chain from AoTest to AoMeasurement via the 'children' relation.
+
+This is the main ASAM ODS hierarchy for accessing test data:
+- **Root**: AoTest (test campaign or program)
+- **Intermediate**: AoSubTest (optional, may appear multiple times)
+- **Leaf**: AoMeasurement (individual measurement/test case)
+
+**Input**:
+```json
+{}
+```
+
+**Output**:
+```json
+{
+    "success": true,
+    "hierarchy_chain": [
+        {
+            "name": "Test",
+            "base_name": "AoTest",
+            "parent_relation": null,
+            "description": "The root entity of the test hierarchy representing test campaigns or programs..."
+        },
+        {
+            "name": "SubTest",
+            "base_name": "AoSubTest",
+            "parent_relation": "parent_test",
+            "description": "An intermediate level in the test hierarchy that enables the organization of complex test scenarios..."
+        },
+        {
+            "name": "Measurement",
+            "base_name": "AoMeasurement",
+            "parent_relation": "test",
+            "description": "The primary container for a complete measurement or test case..."
+        }
+    ],
+    "depth": 3,
+    "note": "This is the main AoTest to AoMeasurement hierarchy in this ASAM ODS server"
+}
+```
+
+**Requirements**: Must be connected to ODS server first using `connect_ods_server`.
+
+**Usage**: 
+Use this tool to understand the entity hierarchy for building Jaquel queries that navigate from tests down to measurements. This helps LLMs and users understand the proper entity traversal path.
+
+**Example Query Pattern**:
+After getting this hierarchy, you can build queries like:
+```python
+# Navigate from AoTest through hierarchy to AoMeasurement
+query = {
+    "AoMeasurement": {
+        "name": "MyMeas1",
+        "test": {
+            "name": "SubTest1", 
+            "parent_test": {
+                "name" : "MyProject1"
+            }
+        }
+    }
+}
+```
+
+---
+
+### 21. execute_ods_query
 
 **Purpose**: Execute a Jaquel query directly on connected ODS server.
 
@@ -850,7 +918,7 @@ for suggestion in suggestions["suggestions"]:
 
 ---
 
-### 21. get_submatrix_measurement_quantities
+### 22. get_submatrix_measurement_quantities
 
 **Purpose**: Get available measurement quantities for a submatrix.
 

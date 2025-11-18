@@ -587,6 +587,14 @@ async def list_tools() -> list[Tool]:
                 "required": ["topic"],
             },
         ),
+        Tool(
+            name="get_test_to_measurement_hierarchy",
+            description="Get hierarchical entity chain from AoTest to AoMeasurement via 'children' relation",
+            inputSchema={
+                "type": "object",
+                "properties": {},
+            },
+        ),
     ]
 
 
@@ -1141,6 +1149,18 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                         "help": help_text,
                     }
 
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text",
+                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
+                    )
+                ]
+
+        elif name == "get_test_to_measurement_hierarchy":
+            try:
+                result = SchemaInspector.get_test_to_measurement_hierarchy()
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
                 return [
