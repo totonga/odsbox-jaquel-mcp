@@ -41,7 +41,9 @@ class TestODSConnectionManager:
         mock_coni = Mock()
         mock_coni.con_i_url.return_value = "http://test:8087/api"
         mock_coni.mc = Mock()
-        mock_coni.model.return_value = Mock()
+        mock_model = Mock()
+        mock_model.entities = {"Measurement": Mock(), "Unit": Mock(), "Test": Mock()}
+        mock_coni.model.return_value = mock_model
         mock_coni_class.return_value = mock_coni
 
         result = ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
@@ -51,6 +53,7 @@ class TestODSConnectionManager:
         assert result["connection"]["url"] == "http://test:8087/api"
         assert result["connection"]["username"] == "user"
         assert result["connection"]["status"] == "connected"
+        assert result["connection"]["available_entities"] == ["Measurement", "Unit", "Test"]
         assert ODSConnectionManager.is_connected()
 
     @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", False)

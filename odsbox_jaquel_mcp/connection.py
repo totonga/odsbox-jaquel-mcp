@@ -70,6 +70,7 @@ class ODSConnectionManager:
                 "username": auth[0] if isinstance(auth, tuple) else "unknown",
                 "con_i_url": instance._con_i.con_i_url(),
                 "status": "connected",
+                "available_entities": list(instance._model.entities.keys()) if instance._model else [],
             }
 
             return {"success": True, "message": "Connected to ODS server", "connection": instance._connection_info}
