@@ -1,7 +1,6 @@
 """ASAM ODS Jaquel MCP Server - A Model Context Protocol server for Jaquel queries."""
 
 try:
-    # importlib.metadata is available in Python 3.10+
     from importlib.metadata import version
 
     __version__ = version("odsbox-jaquel-mcp")
