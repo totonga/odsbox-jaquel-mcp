@@ -35,8 +35,5 @@
     }
   },
   "postCreateCommand": "pip install -e . && pip install -e '.[dev]'",
-  "remoteUser": "vscode",
-  "mounts": [
-    "source=${localEnv:HOME}${localEnv:USERPROFILE}/.ssh,target=/home/vscode/.ssh,readonly"
-  ]
+  "remoteUser": "vscode"
 }
