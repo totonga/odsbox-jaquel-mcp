@@ -71,7 +71,10 @@ class TestGetTestToMeasurementHierarchy:
         assert result["success"] is True
         assert result["depth"] == 1
         assert len(result["hierarchy_chain"]) == 1
+        assert result["hierarchy_chain"][0]["name"] == "Test"
         assert result["hierarchy_chain"][0]["base_name"] == "AoTest"
+        assert "Test" in result["hierarchy_chain_queries"][0]
+        assert "$attributes" in result["hierarchy_chain_queries"][0]
 
     @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")

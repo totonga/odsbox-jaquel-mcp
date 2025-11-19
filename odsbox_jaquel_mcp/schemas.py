@@ -173,17 +173,6 @@ class SchemaInspector:
     """Inspect ODS model schema via ConI/ModelCache."""
 
     @classmethod
-    def set_model_cache(cls, model_cache: Any) -> None:
-        """Set the model cache from ConI.model().
-
-        Note: When using connection manager, this is done
-        automatically.
-        """
-        # This is now handled by connection manager,
-        # but kept for backward compatibility
-        pass
-
-    @classmethod
     def _get_model(cls) -> ods.Model:
         """Get model cache from connection manager."""
         return ODSConnectionManager.get_model()
@@ -354,7 +343,7 @@ class SchemaInspector:
 
             # Check data type compatibility
             if isinstance(value, dict):
-                for op, op_value in value.items():
+                for op, _op_value in value.items():
                     if op.startswith("$"):
                         if op not in (JaquelValidator.ALL_OPERATORS):
                             issues.append(f"Unknown operator: {op}")
@@ -414,9 +403,20 @@ class SchemaInspector:
                     # No more children relation
                     break
 
+            hierarchy_queries = []
+            parent_id = 4711
+            for item in hierarchy_chain:
+                condition = {"name": {"$like": "*"}}
+                if item["parent_relation"]:
+                    condition = {item["parent_relation"]: 4711}
+                    parent_id += 1
+                query = {item["name"]: condition, "$attributes": {"id": 1, "name": 1}}
+                hierarchy_queries.append(query)
+
             return {
                 "success": True,
                 "hierarchy_chain": hierarchy_chain,
+                "hierarchy_chain_queries": hierarchy_queries,
                 "depth": len(hierarchy_chain),
                 "note": "This is the main AoTest to AoMeasurement hierarchy in this ASAM ODS server",
             }
