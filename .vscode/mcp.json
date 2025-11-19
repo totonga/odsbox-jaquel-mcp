@@ -2,7 +2,7 @@
 	"servers": {
 		"odsbox-jaquel": {
 			"type": "stdio",
-			"command": ".venv/Scripts/python.exe",
+			"command": "python",
 			"args": [
 				"-m",
 				"odsbox_jaquel_mcp"

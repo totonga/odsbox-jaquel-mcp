@@ -41,7 +41,7 @@ odsbox-jaquel-mcp = "odsbox_jaquel_mcp.__main__:main"
 
 [tool.black]
 line-length = 119
-target-version = ["py310"]
+target-version = ["py313"]
 
 [tool.setuptools_scm]
 tag_regex = "^v(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+)$"
@@ -55,7 +55,7 @@ max-line-length = 119
 extend-ignore = ["E203", "W503", "W293"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false

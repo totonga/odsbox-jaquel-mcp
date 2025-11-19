@@ -4,26 +4,37 @@
 ![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Python](https://img.shields.io/badge/python-3.13%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
+![Build Status](https://img.shields.io/github/actions/workflow/status/totonga/odsbox-jaquel-mcp/ci.yml?branch=main)
+![Stars](https://img.shields.io/github/stars/totonga/odsbox-jaquel-mcp?style=social)
 
 **A Model Context Protocol (MCP) server for ASAM ODS with Jaquel query tools, ODS connection management, and bulk data access.**
 
 ---
 
-## Features
+## Overview
 
-- 🚀 Validate, build, and optimize Jaquel queries for ASAM ODS
-- 🔌 Built-in ODS connection management (no manual model injection)
+- 🔌 Built-in ODS connection management
 - 🧰 29+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
+- 🏗️ Entity hierarchy visualization (AoTest → AoMeasurement)
+- 🚀 Validate, build, and optimize Jaquel queries for ASAM ODS
 - 📦 Bulk timeseries/submatrix data access and script generation
-- 📊 **NEW**: Automatic Jupyter notebook generation for measurement comparison
-- 📈 **NEW**: Matplotlib visualization code generation
-- 📉 **NEW**: Statistical measurement comparison and correlation analysis
-- 🔎 **NEW**: Measurement hierarchy exploration and discovery
-- 🏗️ **NEW**: Entity hierarchy visualization (AoTest → AoMeasurement)
-- 🤖 **NEW**: AI-guided bulk API learning with `get_bulk_api_help` tool
+- 📊 Automatic Jupyter notebook generation for measurement comparison
+- 📈 Matplotlib visualization code generation
+- 📉 Statistical measurement comparison and correlation analysis
+- 🔎 Measurement hierarchy exploration and discovery
+- 🤖 AI-guided bulk API learning with `get_bulk_api_help` tool
 - 📝 Comprehensive examples, documentation, and test suite
 
 ---
+
+## Documentation
+
+- **Tool Reference:** See [`TOOLS_GUIDE.md`](TOOLS_GUIDE.md)
+- **Setup:** See [`docs/setup.md`](docs/setup.md) for installation and configuration
+- **Development:**
+  - Run: `python -m odsbox_jaquel_mcp`
+  - Test: `python run_tests.py` or `pytest tests/`
+  - Lint: `black .` and `flake8 .`
 
 ## Quick Start
 
@@ -42,21 +53,21 @@ python -m venv .venv
 pip install .
 ```
 
+dev requirements
+
+```bash
+pip install -e ".[dev]"
+```
+
 ### Running the Server
 
 ```bash
 python -m odsbox_jaquel_mcp
 ```
 
-The server will start on stdio and await MCP protocol messages.
+Starts on stdin/stdout and waits for MCP messages (used with an MCP client).
 
 ### Testing
-
-See examples:
-```bash
-python examples/usage_examples.py
-python examples/use_mcp_server.py
-```
 
 Run tests:
 ```bash
@@ -77,19 +88,6 @@ install whl package
 pip install dist/odsbox_jaquel_mcp-0.1.0-py3-none-any.whl
 ```
 
-## Documentation
-
-- **Tool Reference:** See [`TOOLS_GUIDE.md`](TOOLS_GUIDE.md)
-- **API & Usage:** See [`examples/`](examples/) and docstrings
-- **Bulk API Learning:** See [`00_START_HERE.md`](00_START_HERE.md) and [`BULK_API_README.md`](BULK_API_README.md)
-  - Learn how to efficiently load timeseries data with AI guidance
-  - Use `get_bulk_api_help` tool for contextual guidance
-  - Find examples and patterns in [`BULK_API_EXAMPLES.md`](BULK_API_EXAMPLES.md)
-  - Quick reference: [`BULK_API_QUICK_REF.md`](BULK_API_QUICK_REF.md)
-- **Development:**
-  - Run: `python -m odsbox_mcp_server.server`
-  - Test: `python run_tests.py` or `pytest tests/`
-  - Lint: `black .` and `flake8 .`
 
 ## Contributing
 
@@ -105,7 +103,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE).
 ## Links
 
 - [ASAM ODS](https://www.asam.net/standards/detail/ods/)
-- [MCP Protocol](https://github.com/anthropics/mcp)
+- [MCP Protocol](https://github.com/modelcontextprotocol)
 - [odsbox](https://pypi.org/project/odsbox/)
 
 
@@ -192,186 +190,6 @@ Solution: Use one of the suggested fields
 ```
 Solution: Check URL, server availability, firewall
 
-## Measurement Analysis & Query Discovery (NEW)
-
-### Understanding ASAM ODS Entity Hierarchy
-
-The `get_test_to_measurement_hierarchy` tool helps you understand the structure of ASAM ODS data:
-
-```python
-from odsbox_jaquel_mcp import SchemaInspector
-
-# Get the main ASAM ODS hierarchy
-hierarchy = SchemaInspector.get_test_to_measurement_hierarchy()
-
-# Returns:
-# {
-#   "success": true,
-#   "hierarchy_chain": [
-#     {
-#       "name": "Test",
-#       "base_name": "AoTest",
-#       "description": "Root of test hierarchy..."
-#     },
-#     {
-#       "name": "SubTest", 
-#       "base_name": "AoSubTest",
-#       "description": "Intermediate test level..."
-#     },
-#     {
-#       "name": "Measurement",
-#       "base_name": "AoMeasurement",
-#       "description": "Individual measurement/test case..."
-#     }
-#   ],
-#   "depth": 3
-# }
-```
-
-**Key Benefits**:
-- Understand the data navigation path
-- Build correct Jaquel queries following entity relationships
-- LLM-friendly output for AI guidance
-- Discover "children" relation structure automatically
-
-**Use in Query Building**:
-```python
-# After understanding hierarchy, build queries like:
-query = {
-    "AoTest": {
-        "name": "MyProject1",
-        "children": {
-            "name": "SubTest1",
-            "children": {
-                "name": "MyMeas1"
-            }
-        }
-    }
-}
-```
-
-### Compare Measurements Statistically
-
-Compare measurements across quantities with correlation and statistics:
-
-```python
-from odsbox_jaquel_mcp import MeasurementAnalyzer
-
-result = MeasurementAnalyzer.compare_multiple_measurements(
-    quantity_name="Motor_speed",
-    measurement_data={
-        1: [50, 55, 52, 51, 54],
-        2: [52, 56, 53, 52, 55],
-        3: [48, 50, 49, 51, 47]
-    }
-)
-
-# Returns:
-# - Individual statistics per measurement (mean, median, stdev)
-# - Pairwise comparisons between measurements
-# - Correlation coefficients
-# - Significance indicators
-```
-
-### Query Measurement Hierarchy
-
-Explore and discover measurements in the ODS:
-
-```python
-from odsbox_jaquel_mcp import MeasurementHierarchyExplorer
-
-# Extract measurements from ODS query result
-measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-    query_result
-)
-
-# Get unique tests and quantities
-tests = MeasurementHierarchyExplorer.get_unique_tests(measurements)
-quantities = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
-
-# Build hierarchy structure
-hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
-    measurements
-)
-
-# Create index for fast lookup
-index = MeasurementHierarchyExplorer.build_measurement_index(
-    measurements
-)
-```
-
-**Use Cases**:
-- Discover available measurements and quantities
-- Find measurements by test type
-- Compare performance across test runs
-- Analyze consistency and correlations
-- Generate analysis notebooks automatically
-
-## Notebook Generation & Visualization (NEW)
-
-### Generate Measurement Comparison Notebooks
-
-The server can automatically generate Jupyter notebooks for analyzing and comparing measurements:
-
-```python
-from odsbox_jaquel_mcp import NotebookGenerator
-
-notebook = NotebookGenerator.generate_measurement_comparison_notebook(
-    measurement_query_conditions={
-        "Name": {"$like": "Profile_*"},
-        "TestStep.Test.Name": {"$in": ["Campaign_03"]},
-    },
-    measurement_quantity_names=["Motor_speed", "Torque"],
-    ods_url="https://ods.example.com/api",
-    ods_username="user",
-    ods_password="password",
-    available_quantities=["Motor_speed", "Torque", "Temperature"],
-    plot_type="scatter",
-    title="Motor Performance Analysis",
-    output_path="analysis.ipynb"
-)
-```
-
-Generated notebooks include:
-- Query definition cells
-- Automatic data retrieval code
-- Data preparation with unit extraction
-- Visualization code (scatter, line, or subplots)
-- Full documentation and metadata
-
-### Generate Visualization Code
-
-```python
-from odsbox_jaquel_mcp import VisualizationTemplateGenerator
-
-code = VisualizationTemplateGenerator.generate_scatter_plot_code(
-    measurement_quantity_names=["Speed", "Torque"],
-    submatrices_count=6
-)
-```
-
-Supported plot types:
-- **Scatter**: 2D plots with color mapping by independent column
-- **Line**: Time series plots with multiple quantities
-- **Subplots**: Separate subplots per quantity
-
-### Data Preparation Tools
-
-```python
-from odsbox_jaquel_mcp import MeasurementMetadataExtractor
-
-# Extract units and format labels
-unit_lookup = MeasurementMetadataExtractor.extract_unit_lookup(columns_df)
-labels = MeasurementMetadataExtractor.build_label_dict(columns_df, unit_lookup)
-
-# Generate descriptive titles
-titles = MeasurementMetadataExtractor.build_submatrix_title_lookup(
-    submatrices_df, measurements_df
-)
-```
-
-See [`README_EXTENSIONS.md`](README_EXTENSIONS.md) for complete documentation.
-
 ## Troubleshooting
 
 ### Issue: Tools not discovered
@@ -406,11 +224,6 @@ See [`README_EXTENSIONS.md`](README_EXTENSIONS.md) for complete documentation.
 - Connection is cleaned up on disconnect
 - No credentials stored in config files
 - Use HTTPS with `verify_certificate: true` for production
-- Use strong credentials (not default "sa"/"sa")
-
-## License
-
-This MCP server is provided as-is for ASAM ODS integration.
 
 ## Support
 
