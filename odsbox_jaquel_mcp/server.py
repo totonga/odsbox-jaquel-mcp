@@ -15,26 +15,26 @@ import json
 from typing import Any
 
 import mcp.server.stdio
-from mcp.server import Server, InitializationOptions
 from mcp import ServerCapabilities, ToolsCapability
-from mcp.types import Tool, TextContent
+from mcp.server import InitializationOptions, Server
+from mcp.types import TextContent, Tool
 
-from .connection import ODSConnectionManager
-from .validators import JaquelValidator, JaquelOptimizer
-from .schemas import SchemaInspector
-from .queries import JaquelExamples, QueryDebugger
-from .submatrix import SubmatrixDataReader
 from .bulk_api_guide import BulkAPIGuide
-from .submatrix.scripts import (
-    generate_basic_fetcher_script,
-    generate_advanced_fetcher_script,
-    generate_batch_fetcher_script,
-    generate_analysis_fetcher_script,
-)
-from .notebook_generator import NotebookGenerator
-from .visualization_templates import VisualizationTemplateGenerator
+from .connection import ODSConnectionManager
 from .measurement_analysis import MeasurementAnalyzer
 from .measurement_queries import MeasurementHierarchyExplorer
+from .notebook_generator import NotebookGenerator
+from .queries import JaquelExamples, QueryDebugger
+from .schemas import SchemaInspector
+from .submatrix import SubmatrixDataReader
+from .submatrix.scripts import (
+    generate_advanced_fetcher_script,
+    generate_analysis_fetcher_script,
+    generate_basic_fetcher_script,
+    generate_batch_fetcher_script,
+)
+from .validators import JaquelOptimizer, JaquelValidator
+from .visualization_templates import VisualizationTemplateGenerator
 
 # ============================================================================
 # MCP SERVER SETUP

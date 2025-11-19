@@ -1,6 +1,7 @@
 """Unit tests for measurement_queries module."""
 
 import pytest
+
 from odsbox_jaquel_mcp.measurement_queries import MeasurementHierarchyExplorer
 
 
@@ -15,9 +16,7 @@ class TestExtractMeasurementsFromQueryResult:
                 {"Id": 2, "Name": "Test2"},
             ]
         }
-        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-            query_result
-        )
+        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
         assert len(result) == 2
         assert result[0]["Name"] == "Test1"
 
@@ -29,9 +28,7 @@ class TestExtractMeasurementsFromQueryResult:
                 {"Id": 2, "Name": "Test2"},
             ]
         }
-        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-            query_result
-        )
+        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
         assert len(result) == 2
 
     def test_extract_measurements_from_test_hierarchy(self):
@@ -47,9 +44,7 @@ class TestExtractMeasurementsFromQueryResult:
                 }
             ]
         }
-        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-            query_result
-        )
+        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
         assert len(result) == 2
 
     def test_extract_measurements_empty_result(self):
@@ -59,19 +54,13 @@ class TestExtractMeasurementsFromQueryResult:
 
     def test_extract_measurements_invalid_input(self):
         """Test with non-dict input."""
-        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-            "invalid"
-        )
+        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result("invalid")
         assert len(result) == 0
 
     def test_extract_measurements_single_aomeasurement(self):
         """Test extracting single AoMeasurement dict."""
-        query_result = {
-            "AoMeasurement": {"Id": 1, "Name": "Test1"}
-        }
-        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-            query_result
-        )
+        query_result = {"AoMeasurement": {"Id": 1, "Name": "Test1"}}
+        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
         assert len(result) == 1
 
 
@@ -85,9 +74,7 @@ class TestBuildMeasurementHierarchy:
             {"Id": 2, "TestName": "Test1"},
             {"Id": 3, "TestName": "Test2"},
         ]
-        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
-            measurements
-        )
+        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
         assert "Test1" in hierarchy["by_test"]
         assert "Test2" in hierarchy["by_test"]
         assert len(hierarchy["by_test"]["Test1"]) == 2
@@ -99,9 +86,7 @@ class TestBuildMeasurementHierarchy:
             {"Id": 2, "Status": "Complete"},
             {"Id": 3, "Status": "Incomplete"},
         ]
-        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
-            measurements
-        )
+        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
         assert "Complete" in hierarchy["by_status"]
         assert len(hierarchy["by_status"]["Complete"]) == 2
 
@@ -111,9 +96,7 @@ class TestBuildMeasurementHierarchy:
             {"Id": 1, "TestName": "Test1"},
             {"Id": 2, "TestName": "Test2"},
         ]
-        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
-            measurements
-        )
+        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
         assert hierarchy["total_measurements"] == 2
 
     def test_build_hierarchy_empty_measurements(self):
@@ -127,9 +110,7 @@ class TestBuildMeasurementHierarchy:
             {"Id": 1, "Test": {"Name": "Test1"}},
             {"Id": 2, "Test": {"Name": "Test1"}},
         ]
-        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
-            measurements
-        )
+        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
         assert "Test1" in hierarchy["by_test"]
 
 
@@ -144,11 +125,7 @@ class TestGetAvailableQuantities:
                 {"name": "Torque"},
             ]
         }
-        quantities = (
-            MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                measurement
-            )
-        )
+        quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(measurement)
         assert len(quantities) == 2
         assert quantities[0]["name"] == "Speed"
 
@@ -159,11 +136,7 @@ class TestGetAvailableQuantities:
                 {"name": "Speed"},
             ]
         }
-        quantities = (
-            MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                measurement
-            )
-        )
+        quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(measurement)
         assert len(quantities) == 1
 
     def test_get_quantities_from_submatrix_columns(self):
@@ -178,40 +151,24 @@ class TestGetAvailableQuantities:
                 }
             ]
         }
-        quantities = (
-            MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                measurement
-            )
-        )
+        quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(measurement)
         assert len(quantities) == 2
         assert quantities[0]["name"] == "Speed"
 
     def test_get_quantities_empty_measurement(self):
         """Test with measurement having no quantities."""
-        quantities = (
-            MeasurementHierarchyExplorer.get_available_quantities_for_measurement({})
-        )
+        quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement({})
         assert len(quantities) == 0
 
     def test_get_quantities_invalid_input(self):
         """Test with invalid input."""
-        quantities = (
-            MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                "invalid"
-            )
-        )
+        quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement("invalid")
         assert len(quantities) == 0
 
     def test_get_quantities_dict_instead_of_list(self):
         """Test with dict instead of list."""
-        measurement = {
-            "quantities": {"name": "Speed"}
-        }
-        quantities = (
-            MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                measurement
-            )
-        )
+        measurement = {"quantities": {"name": "Speed"}}
+        quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(measurement)
         assert len(quantities) == 1
 
 
@@ -225,9 +182,7 @@ class TestFilterMeasurementsByCriteria:
             {"TestName": "Test1", "Id": 2},
             {"TestName": "Test2", "Id": 3},
         ]
-        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(
-            measurements, test_name="Test1"
-        )
+        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(measurements, test_name="Test1")
         assert len(filtered) == 2
         assert all(m["TestName"] == "Test1" for m in filtered)
 
@@ -238,9 +193,7 @@ class TestFilterMeasurementsByCriteria:
             {"Status": "Incomplete", "Id": 2},
             {"Status": "Complete", "Id": 3},
         ]
-        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(
-            measurements, status="Complete"
-        )
+        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(measurements, status="Complete")
         assert len(filtered) == 2
 
     def test_filter_by_name_pattern(self):
@@ -250,9 +203,7 @@ class TestFilterMeasurementsByCriteria:
             {"Name": "Profile_002", "Id": 2},
             {"Name": "Baseline", "Id": 3},
         ]
-        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(
-            measurements, name_pattern="Profile"
-        )
+        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(measurements, name_pattern="Profile")
         assert len(filtered) == 2
 
     def test_filter_by_multiple_criteria(self):
@@ -278,13 +229,13 @@ class TestFilterMeasurementsByCriteria:
                 "quantities": [
                     {"name": "Speed"},
                     {"name": "Torque"},
-                ]
+                ],
             },
             {
                 "Id": 2,
                 "quantities": [
                     {"name": "Speed"},
-                ]
+                ],
             },
         ]
         filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(
@@ -295,9 +246,7 @@ class TestFilterMeasurementsByCriteria:
 
     def test_filter_empty_measurements(self):
         """Test filtering empty measurement list."""
-        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(
-            [], test_name="Test1"
-        )
+        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria([], test_name="Test1")
         assert len(filtered) == 0
 
 
@@ -325,7 +274,7 @@ class TestGetMeasurementSummary:
             "quantities": [
                 {"name": "Speed"},
                 {"name": "Torque"},
-            ]
+            ],
         }
         summary = MeasurementHierarchyExplorer.get_measurement_summary(measurement)
         assert summary["num_quantities"] == 2
@@ -401,9 +350,7 @@ class TestGetMeasurementsByTest:
             {"Id": 2, "TestName": "Test1"},
             {"Id": 3, "TestName": "Test2"},
         ]
-        result = MeasurementHierarchyExplorer.get_measurements_by_test(
-            measurements, "Test1"
-        )
+        result = MeasurementHierarchyExplorer.get_measurements_by_test(measurements, "Test1")
         assert len(result) == 2
 
     def test_get_measurements_by_test_nested(self):
@@ -413,9 +360,7 @@ class TestGetMeasurementsByTest:
             {"Id": 2, "Test": {"Name": "Test1"}},
             {"Id": 3, "Test": {"Name": "Test2"}},
         ]
-        result = MeasurementHierarchyExplorer.get_measurements_by_test(
-            measurements, "Test1"
-        )
+        result = MeasurementHierarchyExplorer.get_measurements_by_test(measurements, "Test1")
         assert len(result) == 2
 
     def test_get_measurements_by_test_not_found(self):
@@ -423,9 +368,7 @@ class TestGetMeasurementsByTest:
         measurements = [
             {"Id": 1, "TestName": "Test1"},
         ]
-        result = MeasurementHierarchyExplorer.get_measurements_by_test(
-            measurements, "NonExistent"
-        )
+        result = MeasurementHierarchyExplorer.get_measurements_by_test(measurements, "NonExistent")
         assert len(result) == 0
 
 
@@ -483,9 +426,7 @@ class TestQueryMeasurementsByHierarchy:
                 {"Id": 2, "TestName": "Test2"},
             ]
         }
-        result = MeasurementHierarchyExplorer.query_measurements_by_hierarchy(
-            query_result, path_filter=["Test1"]
-        )
+        result = MeasurementHierarchyExplorer.query_measurements_by_hierarchy(query_result, path_filter=["Test1"])
         assert len(result) == 1
         assert result[0]["TestName"] == "Test1"
 
@@ -497,9 +438,7 @@ class TestQueryMeasurementsByHierarchy:
                 {"Id": 2, "TestName": "Test2"},
             ]
         }
-        result = MeasurementHierarchyExplorer.query_measurements_by_hierarchy(
-            query_result
-        )
+        result = MeasurementHierarchyExplorer.query_measurements_by_hierarchy(query_result)
         assert len(result) == 2
 
     def test_query_case_insensitive_matching(self):
@@ -509,9 +448,7 @@ class TestQueryMeasurementsByHierarchy:
                 {"Id": 1, "TestName": "MyTest"},
             ]
         }
-        result = MeasurementHierarchyExplorer.query_measurements_by_hierarchy(
-            query_result, path_filter=["mytest"]
-        )
+        result = MeasurementHierarchyExplorer.query_measurements_by_hierarchy(query_result, path_filter=["mytest"])
         assert len(result) == 1
 
 
@@ -524,9 +461,7 @@ class TestEdgeCases:
             "measurements": [{"Id": 1}],
             "AoMeasurement": [{"Id": 2}],
         }
-        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-            query_result
-        )
+        result = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
         # Both sources should be extracted
         assert len(result) >= 1
 
@@ -535,9 +470,7 @@ class TestEdgeCases:
         measurements = [
             {"TestName": "Test1"},
         ]
-        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(
-            measurements, test_name="test1"
-        )
+        filtered = MeasurementHierarchyExplorer.filter_measurements_by_criteria(measurements, test_name="test1")
         # Should not match due to case sensitivity
         assert len(filtered) == 0
 
@@ -547,9 +480,7 @@ class TestEdgeCases:
             {"Id": 1},
             {"Id": 2, "TestName": "Test1"},
         ]
-        result = MeasurementHierarchyExplorer.get_measurements_by_test(
-            measurements, "Test1"
-        )
+        result = MeasurementHierarchyExplorer.get_measurements_by_test(measurements, "Test1")
         assert len(result) == 1
 
     def test_build_hierarchy_with_missing_fields(self):
@@ -557,8 +488,6 @@ class TestEdgeCases:
         measurements = [
             {"Id": 1},  # Missing TestName and Status
         ]
-        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(
-            measurements
-        )
+        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
         assert hierarchy["total_measurements"] == 1
         assert "Unknown" in hierarchy["by_status"]  # Default status

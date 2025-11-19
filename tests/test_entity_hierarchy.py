@@ -1,7 +1,8 @@
 """Tests for entity hierarchy functions."""
 
 from unittest.mock import Mock, patch
-from odsbox_jaquel_mcp.schemas import SchemaInspector, EntityDescriptions
+
+from odsbox_jaquel_mcp.schemas import EntityDescriptions, SchemaInspector
 
 
 class TestGetTestToMeasurementHierarchy:

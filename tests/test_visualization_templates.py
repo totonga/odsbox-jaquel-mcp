@@ -90,11 +90,9 @@ class TestVisualizationTemplateGenerator(unittest.TestCase):
 
     def test_generate_subplots_per_measurement_code_valid(self):
         """Test subplot-per-measurement code generation."""
-        code = (
-            VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
-                measurement_quantity_names=["Speed", "Torque"],
-                submatrices_count=4,
-            )
+        code = VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
+            measurement_quantity_names=["Speed", "Torque"],
+            submatrices_count=4,
         )
 
         self.assertIsInstance(code, str)
@@ -105,16 +103,14 @@ class TestVisualizationTemplateGenerator(unittest.TestCase):
 
     def test_generate_subplots_per_measurement_code_multiple_quantities(self):
         """Test with multiple quantities."""
-        code = (
-            VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
-                measurement_quantity_names=[
-                    "Speed",
-                    "Torque",
-                    "Temperature",
-                    "Current",
-                ],
-                submatrices_count=6,
-            )
+        code = VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
+            measurement_quantity_names=[
+                "Speed",
+                "Torque",
+                "Temperature",
+                "Current",
+            ],
+            submatrices_count=6,
         )
 
         self.assertIn("Speed", code)
@@ -154,11 +150,9 @@ class TestVisualizationTemplateGenerator(unittest.TestCase):
 
     def test_subplots_code_handles_edge_cases(self):
         """Verify subplot code handles single plots."""
-        code = (
-            VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
-                measurement_quantity_names=["A"],
-                submatrices_count=1,
-            )
+        code = VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
+            measurement_quantity_names=["A"],
+            submatrices_count=1,
         )
 
         # Should handle 1x1 case

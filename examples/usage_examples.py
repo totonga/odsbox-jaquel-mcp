@@ -1,14 +1,14 @@
 """Example usage of the Jaquel MCP Server tools."""
 
 import json
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from odsbox_jaquel_mcp import (
-    JaquelValidator,
-    JaquelOptimizer,
     JaquelExamples,
+    JaquelOptimizer,
+    JaquelValidator,
 )
 
 

@@ -75,9 +75,7 @@ class TestMeasurementMetadataExtractor(unittest.TestCase):
         """Test with empty DataFrames."""
         submatrices_df = pd.DataFrame()
         measurements_df = pd.DataFrame()
-        result = MeasurementMetadataExtractor.build_submatrix_title_lookup(
-            submatrices_df, measurements_df
-        )
+        result = MeasurementMetadataExtractor.build_submatrix_title_lookup(submatrices_df, measurements_df)
         self.assertEqual(result, {})
 
     def test_build_submatrix_title_lookup_valid_data(self):
@@ -96,11 +94,7 @@ class TestMeasurementMetadataExtractor(unittest.TestCase):
                 "Project.Name": ["Project_A", "Project_B"],
             }
         )
-        result = (
-            MeasurementMetadataExtractor.build_submatrix_title_lookup(
-                submatrices_df, measurements_df
-            )
-        )
+        result = MeasurementMetadataExtractor.build_submatrix_title_lookup(submatrices_df, measurements_df)
         expected = {
             1: "Project_A - Campaign_01 - Profile_1",
             2: "Project_B - Campaign_02 - Profile_2",
@@ -123,11 +117,7 @@ class TestMeasurementMetadataExtractor(unittest.TestCase):
                 "Project.Name": ["Project_A"],
             }
         )
-        result = (
-            MeasurementMetadataExtractor.build_submatrix_title_lookup(
-                submatrices_df, measurements_df
-            )
-        )
+        result = MeasurementMetadataExtractor.build_submatrix_title_lookup(submatrices_df, measurements_df)
         expected = {
             1: "Project_A - Campaign_01 - Profile_1",
             2: "Submatrix 2",
@@ -138,9 +128,7 @@ class TestMeasurementMetadataExtractor(unittest.TestCase):
         """Test with empty DataFrame."""
         df = pd.DataFrame()
         unit_lookup = {}
-        col_name, unit = (
-            MeasurementMetadataExtractor.get_independent_column_info(df, unit_lookup)
-        )
+        col_name, unit = MeasurementMetadataExtractor.get_independent_column_info(df, unit_lookup)
         self.assertEqual(col_name, "Index")
         self.assertEqual(unit, "-")
 
@@ -154,9 +142,7 @@ class TestMeasurementMetadataExtractor(unittest.TestCase):
             }
         )
         unit_lookup = {1: "m/s", 2: "N·m"}
-        col_name, unit = (
-            MeasurementMetadataExtractor.get_independent_column_info(df, unit_lookup)
-        )
+        col_name, unit = MeasurementMetadataExtractor.get_independent_column_info(df, unit_lookup)
         self.assertEqual(col_name, "Index")
         self.assertEqual(unit, "-")
 
@@ -170,9 +156,7 @@ class TestMeasurementMetadataExtractor(unittest.TestCase):
             }
         )
         unit_lookup = {0: "s", 1: "m/s", 2: "N·m"}
-        col_name, unit = (
-            MeasurementMetadataExtractor.get_independent_column_info(df, unit_lookup)
-        )
+        col_name, unit = MeasurementMetadataExtractor.get_independent_column_info(df, unit_lookup)
         self.assertEqual(col_name, "Time")
         self.assertEqual(unit, "s")
 
@@ -183,9 +167,7 @@ class TestMeasurementDataPreparator(unittest.TestCase):
     def test_prepare_submatrix_dataframe_empty(self):
         """Test with empty DataFrame."""
         df = pd.DataFrame()
-        result_df, error = (
-            MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed"])
-        )
+        result_df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed"])
         self.assertIsNone(result_df)
         self.assertIsNotNone(error)
 
@@ -202,11 +184,7 @@ class TestMeasurementDataPreparator(unittest.TestCase):
                 "independent": [1, 0, 0],
             }
         )
-        result_df, error = (
-            MeasurementDataPreparator.prepare_submatrix_dataframe(
-                df, ["Speed", "Torque"]
-            )
-        )
+        result_df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed", "Torque"])
         self.assertIsNone(error)
         self.assertIsNotNone(result_df)
         self.assertIn("Speed", result_df.columns)
@@ -222,10 +200,8 @@ class TestMeasurementDataPreparator(unittest.TestCase):
                 "independent": [1, 0],
             }
         )
-        result_df, error = (
-            MeasurementDataPreparator.prepare_submatrix_dataframe(
-                df, ["Speed", "Torque"]  # Torque missing
-            )
+        result_df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(
+            df, ["Speed", "Torque"]  # Torque missing
         )
         self.assertIsNone(result_df)
         self.assertIn("Missing", error)
@@ -283,14 +259,12 @@ class TestMeasurementDataPreparator(unittest.TestCase):
 
         submatrix_signals_by_id = {1: signals_df}
 
-        result = (
-            MeasurementDataPreparator.prepare_measurement_data_items(
-                submatrix_signals_by_id=submatrix_signals_by_id,
-                submatrices_df=submatrices_df,
-                measurements_df=measurements_df,
-                local_columns_df=local_columns_df,
-                measurement_quantity_names=["Speed", "Torque"],
-            )
+        result = MeasurementDataPreparator.prepare_measurement_data_items(
+            submatrix_signals_by_id=submatrix_signals_by_id,
+            submatrices_df=submatrices_df,
+            measurements_df=measurements_df,
+            local_columns_df=local_columns_df,
+            measurement_quantity_names=["Speed", "Torque"],
         )
 
         self.assertEqual(len(result), 1)

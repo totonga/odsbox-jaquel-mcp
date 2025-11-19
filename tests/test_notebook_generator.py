@@ -81,9 +81,7 @@ class TestNotebookGenerator(unittest.TestCase):
         self.assertIn("code", cell_types)
 
         # Find text content
-        all_text = "\n".join(
-            "\n".join(c["source"]) for c in cells if isinstance(c["source"], list)
-        )
+        all_text = "\n".join("\n".join(c["source"]) for c in cells if isinstance(c["source"], list))
 
         # Should mention key sections
         self.assertIn("Define measurement", all_text)
@@ -101,9 +99,7 @@ class TestNotebookGenerator(unittest.TestCase):
             ods_password="testpass",
         )
 
-        all_text = "\n".join(
-            "\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list)
-        )
+        all_text = "\n".join("\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list))
 
         self.assertIn("https://my-ods.example.com/api", all_text)
         self.assertIn("testuser", all_text)
@@ -119,9 +115,7 @@ class TestNotebookGenerator(unittest.TestCase):
             ods_password="pass",
         )
 
-        all_text = "\n".join(
-            "\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list)
-        )
+        all_text = "\n".join("\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list))
 
         for qty in quantities:
             self.assertIn(qty, all_text)
@@ -137,9 +131,7 @@ class TestNotebookGenerator(unittest.TestCase):
             plot_type="scatter",
         )
 
-        all_text = "\n".join(
-            "\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list)
-        )
+        all_text = "\n".join("\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list))
 
         self.assertIn("scatter", all_text)
         self.assertIn("colormap", all_text)
@@ -155,9 +147,7 @@ class TestNotebookGenerator(unittest.TestCase):
             plot_type="line",
         )
 
-        all_text = "\n".join(
-            "\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list)
-        )
+        all_text = "\n".join("\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list))
 
         self.assertIn("plot", all_text)
         self.assertIn("legend", all_text)
@@ -242,9 +232,7 @@ class TestNotebookGenerator(unittest.TestCase):
             available_quantities=available,
         )
 
-        all_text = "\n".join(
-            "\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list)
-        )
+        all_text = "\n".join("\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list))
 
         for qty in available:
             self.assertIn(qty, all_text)

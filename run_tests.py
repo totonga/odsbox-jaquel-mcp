@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Test runner for ODS MCP Server."""
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
 
 
