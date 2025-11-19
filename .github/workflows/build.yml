@@ -12,6 +12,10 @@ on:
       - main
       - develop
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -57,4 +61,4 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: dist/*
-        token: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ github.token }}
