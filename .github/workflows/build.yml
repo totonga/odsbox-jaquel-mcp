@@ -52,10 +52,9 @@ jobs:
         path: dist/
         retention-days: ${{ startsWith(github.ref, 'refs/tags/') && 90 || 7 }}
     
-    - name: Create Release (on main branch push with tags)
-      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    - name: Create Release (on tag push)
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
         files: dist/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
