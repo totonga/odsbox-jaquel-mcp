@@ -1,10 +1,10 @@
 # ODS Jaquel MCP Development Container
 
-This devcontainer provides a fully configured Python 3.12 development environment for the ODS Jaquel MCP project.
+This devcontainer provides a fully configured Python 3.13 development environment for the ODS Jaquel MCP project.
 
 ## Features
 
-- **Python 3.12**: Latest stable Python version specified in `pyproject.toml`
+- **Python 3.13**: Latest stable Python version specified in `pyproject.toml`
 - **Git Integration**: Pre-installed for version control
 - **VS Code Extensions**: Python development tools including Pylance, debugger, Black formatter, and Ruff linter
 - **Pre-configured Environment**: 
