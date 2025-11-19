@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 try:
-    from odsbox.proto import ods
     from odsbox.model_cache import ModelCache
+    from odsbox.proto import ods
 
     ODSBOX_AVAILABLE = True
 except ImportError:

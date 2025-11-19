@@ -1,10 +1,11 @@
 """Unit tests for measurement_analysis module."""
 
 import pytest
+
 from odsbox_jaquel_mcp.measurement_analysis import (
-    MeasurementAnalyzer,
     ColumnStatistics,
     ComparisonResult,
+    MeasurementAnalyzer,
 )
 
 
@@ -275,9 +276,7 @@ class TestMultipleMeasurementComparison:
             2: [15.0, 25.0, 35.0],
             3: [12.0, 22.0, 32.0],
         }
-        result = MeasurementAnalyzer.compare_multiple_measurements(
-            "Speed", measurement_data
-        )
+        result = MeasurementAnalyzer.compare_multiple_measurements("Speed", measurement_data)
         assert result["quantity_name"] == "Speed"
         assert result["num_measurements"] == 3
         assert 1 in result["measurement_ids"]
@@ -287,17 +286,13 @@ class TestMultipleMeasurementComparison:
     def test_compare_multiple_measurements_pairwise_count(self):
         """Test that pairwise comparisons are correct."""
         measurement_data = {1: [1.0], 2: [2.0], 3: [3.0]}
-        result = MeasurementAnalyzer.compare_multiple_measurements(
-            "Speed", measurement_data
-        )
+        result = MeasurementAnalyzer.compare_multiple_measurements("Speed", measurement_data)
         # 3 measurements = 3 pairwise comparisons (1v2, 1v3, 2v3)
         assert result["num_pairwise_comparisons"] == 3
 
     def test_compare_multiple_measurements_empty(self):
         """Test with empty measurement data."""
-        result = MeasurementAnalyzer.compare_multiple_measurements(
-            "Speed", {}
-        )
+        result = MeasurementAnalyzer.compare_multiple_measurements("Speed", {})
         assert result["num_measurements"] == 0
         assert "error" in result
 
@@ -307,9 +302,7 @@ class TestMultipleMeasurementComparison:
             1: [10.0, 20.0],
             2: [30.0, 40.0],
         }
-        result = MeasurementAnalyzer.compare_multiple_measurements(
-            "Speed", measurement_data
-        )
+        result = MeasurementAnalyzer.compare_multiple_measurements("Speed", measurement_data)
         overall_stats = result["overall_statistics"]
         assert overall_stats["mean"] == 25.0
 
@@ -390,9 +383,7 @@ class TestComparisonSummary:
 
     def test_generate_comparison_summary_empty(self):
         """Test summary with no comparisons."""
-        summary = MeasurementAnalyzer.generate_comparison_summary(
-            {}, [], []
-        )
+        summary = MeasurementAnalyzer.generate_comparison_summary({}, [], [])
         assert summary["num_comparisons"] == 0
 
 
@@ -437,9 +428,7 @@ class TestCalculateCorrelation:
 
     def test_correlation_constant_values(self):
         """Test with constant values (zero stdev)."""
-        result = MeasurementAnalyzer._calculate_correlation(
-            [5.0, 5.0, 5.0], [1.0, 2.0, 3.0]
-        )
+        result = MeasurementAnalyzer._calculate_correlation([5.0, 5.0, 5.0], [1.0, 2.0, 3.0])
         assert result is None
 
 

@@ -1,6 +1,7 @@
 """Tests for ODSConnectionManager."""
 
 from unittest.mock import Mock, patch
+
 from odsbox_jaquel_mcp import ODSConnectionManager
 
 

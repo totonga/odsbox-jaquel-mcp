@@ -16,7 +16,8 @@
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "ms-python.isort",
-        "ms-python.mypy-type-checker"
+        "ms-python.mypy-type-checker",
+        "streetsidesoftware.code-spell-checker"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",

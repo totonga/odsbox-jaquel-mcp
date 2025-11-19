@@ -34,6 +34,7 @@
 - **Development:**
   - Run: `python -m odsbox_jaquel_mcp`
   - Test: `python run_tests.py` or `pytest tests/`
+  - Sort imports: `python -m isort .` (VS Code runs this automatically on save when `source.organizeImports` is enabled)
   - Lint: `black .` and `flake8 .`
 
 ## Quick Start

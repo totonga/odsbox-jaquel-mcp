@@ -7,6 +7,7 @@ and preparing data for visualization.
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Tuple
+
 import pandas as pd
 
 
@@ -55,8 +56,7 @@ class MeasurementMetadataExtractor:
             return {}
 
         return {
-            row["name"]: f"{row['name']} [{unit_lookup.get(row['id'], '-')}]"
-            for _, row in local_columns_df.iterrows()
+            row["name"]: f"{row['name']} [{unit_lookup.get(row['id'], '-')}]" for _, row in local_columns_df.iterrows()
         }
 
     @staticmethod
@@ -90,17 +90,13 @@ class MeasurementMetadataExtractor:
             measurement_id = submatrix_row["measurement"]
 
             # Find matching measurement
-            measurement_info = measurements_df[
-                measurements_df["MeaResult.Id"] == measurement_id
-            ]
+            measurement_info = measurements_df[measurements_df["MeaResult.Id"] == measurement_id]
 
             if not measurement_info.empty:
                 project = measurement_info["Project.Name"].values[0]
                 profile = measurement_info["MeaResult.Name"].values[0]
                 campaign = measurement_info["Test.Name"].values[0]
-                title_lookup[submatrix_id] = (
-                    f"{project} - {campaign} - {profile}"
-                )
+                title_lookup[submatrix_id] = f"{project} - {campaign} - {profile}"
             else:
                 title_lookup[submatrix_id] = f"Submatrix {submatrix_id}"
 
@@ -160,23 +156,16 @@ class MeasurementDataPreparator:
 
         try:
             # Create DataFrame from signals
-            data_dict = {
-                row["name"]: row["values"]
-                for _, row in submatrix_signals_df.iterrows()
-            }
+            data_dict = {row["name"]: row["values"] for _, row in submatrix_signals_df.iterrows()}
             df = pd.DataFrame(data_dict)
 
             # Check if all required quantities are present
-            missing_cols = [
-                col for col in measurement_quantity_names if col not in df.columns
-            ]
+            missing_cols = [col for col in measurement_quantity_names if col not in df.columns]
             if missing_cols:
                 return None, f"Missing required columns: {missing_cols}"
 
             # Set independent column as index
-            independent_rows = submatrix_signals_df[
-                submatrix_signals_df["independent"] == 1
-            ]
+            independent_rows = submatrix_signals_df[submatrix_signals_df["independent"] == 1]
             if not independent_rows.empty:
                 independent_name = independent_rows["name"].iloc[0]
                 if independent_name in df.columns:
@@ -211,36 +200,25 @@ class MeasurementDataPreparator:
             List of dictionaries with keys: 'title', 'data', 'labels', 'independent_info'
         """
         if unit_lookup is None:
-            unit_lookup = MeasurementMetadataExtractor.extract_unit_lookup(
-                local_columns_df
-            )
+            unit_lookup = MeasurementMetadataExtractor.extract_unit_lookup(local_columns_df)
 
-        title_lookup = MeasurementMetadataExtractor.build_submatrix_title_lookup(
-            submatrices_df, measurements_df
-        )
-        label_dict = MeasurementMetadataExtractor.build_label_dict(
-            local_columns_df, unit_lookup
-        )
+        title_lookup = MeasurementMetadataExtractor.build_submatrix_title_lookup(submatrices_df, measurements_df)
+        label_dict = MeasurementMetadataExtractor.build_label_dict(local_columns_df, unit_lookup)
 
         measurement_data_items = []
 
         for submatrix_id, signals_df in submatrix_signals_by_id.items():
-            df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(
-                signals_df, measurement_quantity_names
-            )
+            df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(signals_df, measurement_quantity_names)
 
             if error:
                 continue
 
-            independent_name, independent_unit = (
-                MeasurementMetadataExtractor.get_independent_column_info(
-                    signals_df, unit_lookup
-                )
+            independent_name, independent_unit = MeasurementMetadataExtractor.get_independent_column_info(
+                signals_df, unit_lookup
             )
 
             title = (
-                f"{title_lookup.get(submatrix_id, 'Unknown')}\n"
-                f"(Color: {independent_name} [{independent_unit}])"
+                f"{title_lookup.get(submatrix_id, 'Unknown')}\n" f"(Color: {independent_name} [{independent_unit}])"
             )
             measurement_data_items.append(
                 {

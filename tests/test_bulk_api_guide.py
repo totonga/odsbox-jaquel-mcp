@@ -5,9 +5,10 @@ Tests the BulkAPIGuide class which provides AI assistance for efficient
 timeseries data loading using the bulk API.
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -107,7 +108,7 @@ class TestGetHelpMethod:
             "step-by-step",
             "response-template",
             "troubleshooting",
-            "tool-patterns"
+            "tool-patterns",
         ]
         for topic in topics:
             help_text = BulkAPIGuide.get_help(topic)
@@ -241,7 +242,7 @@ class TestHelpContentQuality:
         # Should contain readable text
         assert len(all_help.strip()) > 0
         # Should not contain excessive special characters
-        special_char_ratio = sum(1 for c in all_help if not c.isalnum() and c not in ' \n\t.,:-️⃣❌✅📋') / len(all_help)
+        special_char_ratio = sum(1 for c in all_help if not c.isalnum() and c not in " \n\t.,:-️⃣❌✅📋") / len(all_help)
         assert special_char_ratio < 0.5, "Help has too many special characters"
 
     def test_3_step_rule_completeness(self):
@@ -317,7 +318,7 @@ class TestContextualHelpMethods:
             "read_submatrix_data",
             "get_submatrix_measurement_quantities",
             "generate_submatrix_fetcher_script",
-            "query_measurement_hierarchy"
+            "query_measurement_hierarchy",
         ]
         for tool in tools:
             help_text = BulkAPIGuide.get_contextual_help(tool)

@@ -1,9 +1,11 @@
 """Tests for MCP server functions."""
 
 import json
-import pytest
 from unittest.mock import patch
+
+import pytest
 from mcp.types import TextContent
+
 from odsbox_jaquel_mcp.server import call_tool, list_tools
 
 
@@ -374,7 +376,7 @@ class TestMCPServer:
     async def test_call_tool_list_ods_entities(self, mock_get_model):
         """Test calling list_ods_entities tool."""
         from unittest.mock import MagicMock
-        
+
         # Mock the model and entities
         mock_model = MagicMock()
         mock_entity = MagicMock()
@@ -384,7 +386,7 @@ class TestMCPServer:
         # Mock entities as a dictionary (entity_name -> entity)
         mock_model.entities = {"TestEntity": mock_entity}
         mock_get_model.return_value = mock_model
-        
+
         arguments = {}
 
         result = await call_tool("list_ods_entities", arguments)

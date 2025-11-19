@@ -101,28 +101,19 @@ class NotebookGenerator:
             )
 
         # Query definition cell
-        query_conditions_str = NotebookGenerator._format_dict_for_code(
-            measurement_query_conditions
-        )
-        quantities_str = (
-            ", ".join(f'"{q}"' for q in measurement_quantity_names)
-        )
+        query_conditions_str = NotebookGenerator._format_dict_for_code(measurement_query_conditions)
+        quantities_str = ", ".join(f'"{q}"' for q in measurement_quantity_names)
 
         cells.append(
             NotebookGenerator.create_code_cell(
-                f"mea_result_conditions = {query_conditions_str}\n\n"
-                f'mq_names = [{quantities_str}]'
+                f"mea_result_conditions = {query_conditions_str}\n\n" f"mq_names = [{quantities_str}]"
             )
         )
 
         # Data retrieval section
-        cells.append(
-            NotebookGenerator.create_markdown_cell(
-                "#### Retrieve content from ASAM ODS service"
-            )
-        )
+        cells.append(NotebookGenerator.create_markdown_cell("#### Retrieve content from ASAM ODS service"))
 
-        retrieval_code = f'''from odsbox import ConI
+        retrieval_code = f"""from odsbox import ConI
 
 with ConI(url="{ods_url}", auth=("{ods_username}", "{ods_password}")) as con_i:
     # Query measurements to compare
@@ -187,18 +178,14 @@ with ConI(url="{ods_url}", auth=("{ods_username}", "{ods_password}")) as con_i:
     local_column_ids = local_columns["id"].tolist()
     
     # Fetch bulk data for local columns
-    local_columns_signals = con_i.bulk.query({{"id":{{"$in": local_column_ids}}}})'''
+    local_columns_signals = con_i.bulk.query({{"id":{{"$in": local_column_ids}}}})"""
 
         cells.append(NotebookGenerator.create_code_cell(retrieval_code))
 
         # Data preparation section
-        cells.append(
-            NotebookGenerator.create_markdown_cell(
-                "#### Prepare collected data for plotting"
-            )
-        )
+        cells.append(NotebookGenerator.create_markdown_cell("#### Prepare collected data for plotting"))
 
-        preparation_code = '''import pandas as pd
+        preparation_code = """import pandas as pd
 from odsbox_jaquel_mcp.data_preparation import (
     MeasurementMetadataExtractor,
     MeasurementDataPreparator,
@@ -232,20 +219,17 @@ measurement_data_items = MeasurementDataPreparator.prepare_measurement_data_item
     unit_lookup=local_column_unit_lookup,
 )
 
-print(f"Prepared {len(measurement_data_items)} measurement data items for plotting")'''
+print(f"Prepared {len(measurement_data_items)} measurement data items for plotting")"""
 
         cells.append(NotebookGenerator.create_code_cell(preparation_code))
 
         # Visualization section
-        cells.append(
-            NotebookGenerator.create_markdown_cell("#### Plot measurements")
-        )
+        cells.append(NotebookGenerator.create_markdown_cell("#### Plot measurements"))
 
         if plot_type == "scatter" and len(measurement_quantity_names) >= 2:
             qty_0 = measurement_quantity_names[0]
             qty_1 = measurement_quantity_names[1]
-            plot_code = (
-                f'''import matplotlib.pyplot as plt
+            plot_code = f"""import matplotlib.pyplot as plt
 
 # Number of submatrices
 num_of_plots = len(measurement_data_items)
@@ -277,12 +261,10 @@ for j in range(i + 1, len(axes)):
     axes[j].axis('off')
 
 plt.tight_layout()
-plt.show()'''
-            )
+plt.show()"""
         elif plot_type == "line":
             quantities_str = ", ".join(f'"{q}"' for q in measurement_quantity_names)
-            plot_code = (
-                f'''import matplotlib.pyplot as plt
+            plot_code = f"""import matplotlib.pyplot as plt
 
 # Number of submatrices
 num_of_plots = len(measurement_data_items)
@@ -320,8 +302,7 @@ for j in range(i + 1, len(axes)):
     axes[j].axis('off')
 
 plt.tight_layout()
-plt.show()'''
-            )
+plt.show()"""
         else:
             plot_code = "# Plotting code would be generated here"
 

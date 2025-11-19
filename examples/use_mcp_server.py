@@ -7,12 +7,12 @@ to help construct and validate queries.
 
 import asyncio
 import json
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from odsbox_jaquel_mcp import JaquelValidator, JaquelOptimizer, JaquelExamples
+from odsbox_jaquel_mcp import JaquelExamples, JaquelOptimizer, JaquelValidator
 
 
 async def main():

@@ -6,9 +6,9 @@ and generating comparison reports.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
 import statistics
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -170,9 +170,7 @@ class MeasurementAnalyzer:
                 mean_diff_pct = (mean_diff / mean_1) * 100
 
             # Calculate correlation
-            correlation = MeasurementAnalyzer._calculate_correlation(
-                numeric_1, numeric_2
-            )
+            correlation = MeasurementAnalyzer._calculate_correlation(numeric_1, numeric_2)
 
             if correlation is not None and correlation > 0.95:
                 notes.append("Strong positive correlation detected")
@@ -183,9 +181,7 @@ class MeasurementAnalyzer:
                 notes.append(f"Significant difference ({mean_diff_pct:.1f}%)")
 
             if len(numeric_1) != len(numeric_2):
-                notes.append(
-                    f"Different sample sizes: {len(numeric_1)} vs {len(numeric_2)}"
-                )
+                notes.append(f"Different sample sizes: {len(numeric_1)} vs {len(numeric_2)}")
 
             return ComparisonResult(
                 quantity_name=quantity_name,
@@ -338,15 +334,10 @@ class MeasurementAnalyzer:
 
         try:
             significant_diffs = [
-                c
-                for c in comparison_results
-                if c.mean_difference_percent
-                and abs(c.mean_difference_percent) > 10
+                c for c in comparison_results if c.mean_difference_percent and abs(c.mean_difference_percent) > 10
             ]
 
-            strong_correlations = [
-                c for c in comparison_results if c.correlation and abs(c.correlation) > 0.95
-            ]
+            strong_correlations = [c for c in comparison_results if c.correlation and abs(c.correlation) > 0.95]
 
             return {
                 "num_quantities": len(quantity_names),

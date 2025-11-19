@@ -33,14 +33,12 @@ class VisualizationTemplateGenerator:
             Python code string for plotting
         """
         if len(measurement_quantity_names) < 2:
-            raise ValueError(
-                "At least 2 measurement quantities required for scatter plot"
-            )
+            raise ValueError("At least 2 measurement quantities required for scatter plot")
 
         x_qty = measurement_quantity_names[0]
         y_qty = measurement_quantity_names[1]
 
-        code = f'''import matplotlib.pyplot as plt
+        code = f"""import matplotlib.pyplot as plt
 
 # Number of submatrices
 num_of_plots = {submatrices_count}
@@ -76,7 +74,7 @@ for j in range(i + 1, len(axes)):
 
 plt.tight_layout()
 plt.show()
-'''
+"""
         return code
 
     @staticmethod
@@ -102,7 +100,7 @@ plt.show()
         """
         quantities_str = ", ".join(f'"{q}"' for q in measurement_quantity_names)
 
-        code = f'''import matplotlib.pyplot as plt
+        code = f"""import matplotlib.pyplot as plt
 
 # Number of submatrices
 num_of_plots = {submatrices_count}
@@ -145,7 +143,7 @@ for j in range(i + 1, len(axes)):
 
 plt.tight_layout()
 plt.show()
-'''
+"""
         return code
 
     @staticmethod
@@ -165,7 +163,7 @@ plt.show()
         """
         quantities_str = ", ".join(f'"{q}"' for q in measurement_quantity_names)
 
-        code = f'''import matplotlib.pyplot as plt
+        code = f"""import matplotlib.pyplot as plt
 import numpy as np
 
 # Create a subplot for each measurement quantity
@@ -203,5 +201,5 @@ for q_idx, qty in enumerate(quantity_names):
 
 plt.tight_layout()
 plt.show()
-'''
+"""
         return code

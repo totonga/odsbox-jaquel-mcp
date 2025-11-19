@@ -152,9 +152,7 @@ class MeasurementHierarchyExplorer:
                         if isinstance(submatrix_data, list):
                             for sm in submatrix_data:
                                 if isinstance(sm, dict):
-                                    cols = sm.get("LocalColumns") or sm.get(
-                                        "AoLocalColumn"
-                                    )
+                                    cols = sm.get("LocalColumns") or sm.get("AoLocalColumn")
                                     if isinstance(cols, list):
                                         for col in cols:
                                             if isinstance(col, dict):
@@ -170,9 +168,7 @@ class MeasurementHierarchyExplorer:
             return quantities
 
         except Exception as e:
-            raise ValueError(
-                f"Failed to get quantities for measurement: {e}"
-            ) from e
+            raise ValueError(f"Failed to get quantities for measurement: {e}") from e
 
     @staticmethod
     def filter_measurements_by_criteria(
@@ -202,8 +198,7 @@ class MeasurementHierarchyExplorer:
                 filtered = [
                     m
                     for m in filtered
-                    if (m.get("TestName") == test_name
-                        or m.get("Test", {}).get("Name") == test_name)
+                    if (m.get("TestName") == test_name or m.get("Test", {}).get("Name") == test_name)
                 ]
 
             # Filter by status
@@ -215,21 +210,18 @@ class MeasurementHierarchyExplorer:
                 filtered = [
                     m
                     for m in filtered
-                    if (name_pattern.lower()
-                        in str(m.get("Name", "")).lower()
-                        or name_pattern.lower()
-                        in str(m.get("Id", "")).lower())
+                    if (
+                        name_pattern.lower() in str(m.get("Name", "")).lower()
+                        or name_pattern.lower() in str(m.get("Id", "")).lower()
+                    )
                 ]
 
             # Filter by quantities
             if has_quantities:
+
                 def has_all_quantities(meas: Dict[str, Any]) -> bool:
-                    meas_quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                        meas
-                    )
-                    meas_qty_names = {
-                        q.get("name", q.get("Name", "")) for q in meas_quantities
-                    }
+                    meas_quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(meas)
+                    meas_qty_names = {q.get("name", q.get("Name", "")) for q in meas_quantities}
                     return all(qty in meas_qty_names for qty in has_quantities)
 
                 filtered = [m for m in filtered if has_all_quantities(m)]
@@ -257,8 +249,7 @@ class MeasurementHierarchyExplorer:
                 "name": measurement.get("Name"),
                 "status": measurement.get("Status"),
                 "date": measurement.get("Date"),
-                "test_name": measurement.get("TestName")
-                or measurement.get("Test", {}).get("Name"),
+                "test_name": measurement.get("TestName") or measurement.get("Test", {}).get("Name"),
                 "num_submatrices": 0,
                 "num_quantities": 0,
                 "metadata": {},
@@ -278,13 +269,9 @@ class MeasurementHierarchyExplorer:
                         break
 
             # Get quantities
-            quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                measurement
-            )
+            quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(measurement)
             summary["num_quantities"] = len(quantities)
-            summary["quantity_names"] = [
-                q.get("name") or q.get("Name") for q in quantities
-            ]
+            summary["quantity_names"] = [q.get("name") or q.get("Name") for q in quantities]
 
             # Extract other metadata
             metadata_keys = [
@@ -319,9 +306,7 @@ class MeasurementHierarchyExplorer:
             List of matching measurements
         """
         try:
-            measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(
-                query_result
-            )
+            measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
 
             if not path_filter:
                 return measurements
@@ -332,10 +317,10 @@ class MeasurementHierarchyExplorer:
                 filtered = [
                     m
                     for m in filtered
-                    if (path_component.lower()
-                        in str(m.get("TestName", "")).lower()
-                        or path_component.lower()
-                        in str(m.get("Test", {}).get("Name", "")).lower())
+                    if (
+                        path_component.lower() in str(m.get("TestName", "")).lower()
+                        or path_component.lower() in str(m.get("Test", {}).get("Name", "")).lower()
+                    )
                 ]
 
             return filtered
@@ -413,10 +398,7 @@ class MeasurementHierarchyExplorer:
             List of measurements for that test
         """
         return [
-            m
-            for m in measurements
-            if (m.get("TestName") == test_name
-                or m.get("Test", {}).get("Name") == test_name)
+            m for m in measurements if (m.get("TestName") == test_name or m.get("Test", {}).get("Name") == test_name)
         ]
 
     @staticmethod
@@ -452,9 +434,7 @@ class MeasurementHierarchyExplorer:
         """
         quantity_names = set()
         for m in measurements:
-            quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(
-                m
-            )
+            quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(m)
             for q in quantities:
                 qty_name = q.get("name") or q.get("Name")
                 if qty_name:

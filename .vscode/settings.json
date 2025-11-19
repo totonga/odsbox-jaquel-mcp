@@ -16,19 +16,36 @@
         }
     },
     "cSpell.words": [
+        "dataframe",
         "dcount",
+        "groupby",
+        "isort",
         "Jaquel",
+        "Matplotlib",
+        "notnull",
         "nullable",
         "odsbox",
+        "pyplot",
         "rowlimit",
         "rowskip",
+        "seaborn",
         "seqlimit",
-        "seqskip"
+        "seqskip",
+        "stddev",
+        "stdev",
+        "submatrix",
+        "venv"
     ],
     "[python]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ms-python.black-formatter",
-        "editor.rulers": [119]
+        "editor.rulers": [
+            119
+        ]
+    },
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
     },
     "python.testing.pytestArgs": [
         "tests"
