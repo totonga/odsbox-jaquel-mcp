@@ -12,7 +12,11 @@
         "ms-python.debugpy",
         "ms-python.black-formatter",
         "charliermarsh.ruff",
-        "ms-vscode.makefile-tools"
+        "ms-vscode.makefile-tools",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-python.isort",
+        "ms-python.mypy-type-checker"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
