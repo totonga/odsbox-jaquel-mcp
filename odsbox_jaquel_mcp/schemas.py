@@ -384,6 +384,16 @@ class SchemaInspector:
             # Traverse from AoTest following 'children' relation
             while current_entity and current_entity.name not in visited:
                 visited.add(current_entity.name)
+
+                condition = {"name": {"$like": "*"}}
+                if current_children_relation:
+                    condition[current_children_relation.inverse_name] = 4711
+                query_example = {
+                    current_entity.name: condition,
+                    "$attributes": {"id": 1, "name": 1},
+                    "$options": {"$rowlimit": 100},
+                }
+
                 hierarchy_chain.append(
                     {
                         "name": current_entity.name,
@@ -391,6 +401,7 @@ class SchemaInspector:
                         "parent_relation": (
                             current_children_relation.inverse_name if current_children_relation else None
                         ),
+                        "query_example": query_example,
                         "description": EntityDescriptions.get_entity_description(current_entity),
                     }
                 )
@@ -403,20 +414,9 @@ class SchemaInspector:
                     # No more children relation
                     break
 
-            hierarchy_queries = []
-            parent_id = 4711
-            for item in hierarchy_chain:
-                condition = {"name": {"$like": "*"}}
-                if item["parent_relation"]:
-                    condition = {item["parent_relation"]: 4711}
-                    parent_id += 1
-                query = {item["name"]: condition, "$attributes": {"id": 1, "name": 1}, "$options": {"$rowlimit", 100}}
-                hierarchy_queries.append(query)
-
             return {
                 "success": True,
                 "hierarchy_chain": hierarchy_chain,
-                "hierarchy_chain_queries": hierarchy_queries,
                 "depth": len(hierarchy_chain),
                 "note": "This is the main AoTest to AoMeasurement hierarchy in this ASAM ODS server",
             }
