@@ -65,12 +65,28 @@ class ODSConnectionManager:
             instance._model_cache = instance._con_i.mc
             instance._model = instance._con_i.model()
 
+            initial_query = {
+                "AoTest": {"name": {"$like": "*"}},
+                "$attributes": {"id": 1, "name": 1},
+                "$options": {"$rowlimit", 100},
+            }
+            if instance._model is not None and instance._model.entities is not None:
+                for e_name, e in instance._model.entities.items():
+                    if e.base_name.lower() == "aotest":
+                        initial_query = {
+                            e_name: {"name": {"$like": "*"}},
+                            "$attributes": {"id": 1, "name": 1},
+                            "$options": {"$rowlimit", 100},
+                        }
+                        break
+
             instance._connection_info = {
                 "url": url,
                 "username": auth[0] if isinstance(auth, tuple) else "unknown",
                 "con_i_url": instance._con_i.con_i_url(),
                 "status": "connected",
                 "available_entities": list(instance._model.entities.keys()) if instance._model else [],
+                "initial_query": initial_query,
             }
 
             return {"success": True, "message": "Connected to ODS server", "connection": instance._connection_info}

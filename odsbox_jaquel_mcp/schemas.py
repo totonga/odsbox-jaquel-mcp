@@ -410,7 +410,7 @@ class SchemaInspector:
                 if item["parent_relation"]:
                     condition = {item["parent_relation"]: 4711}
                     parent_id += 1
-                query = {item["name"]: condition, "$attributes": {"id": 1, "name": 1}}
+                query = {item["name"]: condition, "$attributes": {"id": 1, "name": 1}, "$options": {"$rowlimit", 100}}
                 hierarchy_queries.append(query)
 
             return {
