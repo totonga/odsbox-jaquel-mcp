@@ -43,6 +43,10 @@ odsbox-jaquel-mcp = "odsbox_jaquel_mcp.__main__:main"
 line-length = 119
 target-version = ["py310"]
 
+[tool.setuptools_scm]
+write_to = "odsbox_jaquel_mcp/_version.py"
+tag_regex = "^v(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+)$"
+
 [tool.isort]
 profile = "black"
 line_length = 119
