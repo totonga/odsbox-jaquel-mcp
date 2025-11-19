@@ -9,6 +9,7 @@ dynamic = ["version"]
 description = "ASAM ODS Jaquel MCP Server - A Model Context Protocol server for creating and validating Jaquel queries"
 readme = "README.md"
 requires-python = ">=3.13"
+license = {text = "MIT"}
 authors = [
     {name = "Assistant", email = "assistant@example.com"}
 ]
@@ -16,7 +17,6 @@ keywords = ["mcp", "jaquel", "odsbox", "asam", "ods"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: MIT License",
 ]
 
 dependencies = [
