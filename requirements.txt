@@ -14,5 +14,14 @@ matplotlib
 # Testing
 pytest
 pytest-asyncio
+
 # build package
 build
+
+# application building
+flask
+plotly
+seaborn
+scipy
+PyQt5
+jupyter

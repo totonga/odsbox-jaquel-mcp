@@ -24,6 +24,12 @@ dependencies = [
     "odsbox>=1.0.14",
     "pip-system-certs",
     "matplotlib",
+    "flask",
+    "plotly",
+    "seaborn",
+    "scipy",
+    "PyQt5",
+    "jupyter",
 ]
 
 [project.optional-dependencies]
