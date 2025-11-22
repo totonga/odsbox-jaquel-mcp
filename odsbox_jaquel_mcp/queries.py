@@ -133,7 +133,7 @@ class JaquelExamples:
             "get_by_name": {entity_name: {"name": "SearchName"}, "$attributes": {"*": 1}},
             "search_and_select": {
                 entity_name: {"name": {"$like": "Search*"}},
-                "$attributes": {"id": 1, "name": 1, "description": 1},
+                "$attributes": {"id": 1, "name": 1},
                 "$orderby": {"name": 1},
                 "$options": {"$rowlimit": 10},
             },

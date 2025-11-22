@@ -15,15 +15,16 @@ import json
 from typing import Any
 
 import mcp.server.stdio
-from mcp import ServerCapabilities, ToolsCapability
+from mcp import PromptsCapability, ServerCapabilities, ToolsCapability
 from mcp.server import InitializationOptions, Server
-from mcp.types import TextContent, Tool
+from mcp.types import GetPromptResult, PromptMessage, TextContent, Tool
 
 from .bulk_api_guide import BulkAPIGuide
 from .connection import ODSConnectionManager
 from .measurement_analysis import MeasurementAnalyzer
 from .measurement_queries import MeasurementHierarchyExplorer
 from .notebook_generator import NotebookGenerator
+from .prompts import PromptLibrary
 from .queries import JaquelExamples, QueryDebugger
 from .schemas import SchemaInspector
 from .submatrix import SubmatrixDataReader
@@ -596,6 +597,41 @@ async def list_tools() -> list[Tool]:
             },
         ),
     ]
+
+
+# ============================================================================
+# MCP PROMPTS
+# ============================================================================
+
+
+@server.list_prompts()
+async def list_prompts() -> list:
+    """List all available starting prompts."""
+    return PromptLibrary.get_all_prompts()
+
+
+@server.get_prompt()
+async def get_prompt(name: str, arguments: dict | None = None) -> GetPromptResult:
+    """Get a specific prompt with optional arguments."""
+    # Find the prompt by name
+    all_prompts = PromptLibrary.get_all_prompts()
+    prompt = next((p for p in all_prompts if p.name == name), None)
+
+    if not prompt:
+        raise ValueError(f"Unknown prompt: {name}")
+
+    # Generate the prompt content
+    content = PromptLibrary.get_prompt_content(name, arguments or {})
+
+    return GetPromptResult(
+        description=prompt.description,
+        messages=[
+            PromptMessage(
+                role="user",
+                content=TextContent(type="text", text=content),
+            )
+        ],
+    )
 
 
 def _explain_query(query: dict[str, Any]) -> str:
@@ -1196,7 +1232,10 @@ async def main():
             InitializationOptions(
                 server_name="odsbox-jaquel",
                 server_version="1.0.0",
-                capabilities=ServerCapabilities(tools=ToolsCapability(listChanged=True)),
+                capabilities=ServerCapabilities(
+                    tools=ToolsCapability(listChanged=True),
+                    prompts=PromptsCapability(listChanged=True),
+                ),
             ),
         )
 
