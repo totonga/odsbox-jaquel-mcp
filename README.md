@@ -22,6 +22,7 @@
 - 📈 Matplotlib visualization code generation
 - 📉 Statistical measurement comparison and correlation analysis
 - 🔎 Measurement hierarchy exploration and discovery
+- 💡 Interactive starting prompts for guided workflows
 - 🤖 AI-guided bulk API learning with `get_bulk_api_help` tool
 - 📝 Comprehensive examples, documentation, and test suite
 
@@ -29,6 +30,7 @@
 
 ## Documentation
 
+- **Prompts Guide:** See [`PROMPTS.md`](PROMPTS.md) for starting prompts documentation
 - **Tool Reference:** See [`TOOLS_GUIDE.md`](TOOLS_GUIDE.md)
 - **Setup:** See [`docs/setup.md`](docs/setup.md) for installation and configuration
 - **Development:**
@@ -147,6 +149,18 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE).
 - **get_submatrix_measurement_quantities** - List measurement quantities for submatrix
 - **read_submatrix_data** - Read timeseries data from submatrix
 - **generate_submatrix_fetcher_script** - Generate Python scripts for data fetching
+
+### Starting Prompts
+Discover and use the server's capabilities through **interactive guided prompts**:
+- **Validate a Jaquel Query** - Learn query validation
+- **Explore Query Patterns** - Find common query templates
+- **ODS Server Connection** - Set up and manage connections
+- **Build Filter Conditions** - Master WHERE clause construction
+- **Bulk Data Access** - Master the 3-step Bulk API workflow
+- **Measurement Analysis** - Compare measurements and visualize data
+- **Optimize & Debug** - Improve query performance
+
+See [`PROMPTS.md`](PROMPTS.md) for complete details on all starting prompts.
 
 
 ## Error Handling
