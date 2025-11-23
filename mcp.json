@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "ASAM ODS Jaquel MCP Server - Query builder and validator for ASAM ODS Jaquel database queries",
     "author": "totonga",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "homepage": "https://github.com/totonga/odsbox-jaquel-mcp",
     "documentation": "https://github.com/totonga/odsbox-jaquel-mcp/blob/main/README.md",
     "repository": {

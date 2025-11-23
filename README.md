@@ -1,7 +1,7 @@
 
 # ASAM ODS Jaquel MCP Server
 
-![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
+![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 ![Python](https://img.shields.io/badge/python-3.13%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/totonga/odsbox-jaquel-mcp/ci.yml?branch=main)
@@ -101,7 +101,7 @@ Pull requests and issues are welcome! Please:
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE).
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
 
 ## Links
 
