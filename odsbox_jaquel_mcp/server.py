@@ -683,9 +683,18 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         elif name == "get_operator_documentation":
-            operator = arguments.get("operator")
-            result = JaquelValidator.get_operator_info(operator)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                operator = arguments.get("operator")
+                if not operator or not isinstance(operator, str) or not operator.strip():
+                    raise ValueError("operator must be a non-empty string")
+                result = JaquelValidator.get_operator_info(operator)
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
+                    )
+                ]
 
         elif name == "suggest_optimizations":
             query = arguments.get("query", {})
@@ -702,9 +711,18 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # ====================================================================
 
         elif name == "get_query_pattern":
-            pattern = arguments.get("pattern")
-            result = JaquelExamples.get_pattern(pattern)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                pattern = arguments.get("pattern")
+                if not pattern or not isinstance(pattern, str) or not pattern.strip():
+                    raise ValueError("pattern must be a non-empty string")
+                result = JaquelExamples.get_pattern(pattern)
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
+                    )
+                ]
 
         elif name == "list_query_patterns":
             patterns = JaquelExamples.list_patterns()
@@ -731,36 +749,46 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # ====================================================================
 
         elif name == "build_filter_condition":
-            field = arguments.get("field")
-            operator = arguments.get("operator")
-            value = arguments.get("value")
+            try:
+                field = arguments.get("field")
+                if not field or not isinstance(field, str) or not field.strip():
+                    raise ValueError("field must be a non-empty string")
+                operator = arguments.get("operator")
+                value = arguments.get("value")
 
-            # Validate operator
-            if operator not in JaquelValidator.ALL_OPERATORS:
+                # Validate operator
+                if not operator or not isinstance(operator, str) or not operator.strip():
+                    raise ValueError("operator must be a non-empty string")
+                if operator not in JaquelValidator.ALL_OPERATORS:
+                    raise ValueError(f"Unknown operator: {operator}")
+
+                result = {field: {operator: value}}
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
                 return [
                     TextContent(
-                        type="text",
-                        text=json.dumps({"error": f"Unknown operator: {operator}"}, indent=2),
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
                     )
                 ]
-
-            result = {field: {operator: value}}
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         elif name == "merge_filter_conditions":
-            conditions = arguments.get("conditions", [])
-            operator = arguments.get("operator", "$and")
+            try:
+                conditions = arguments.get("conditions", [])
+                operator = arguments.get("operator", "$and")
 
-            if not conditions:
+                if not operator or not isinstance(operator, str) or not operator.strip():
+                    raise ValueError("operator must be a non-empty string")
+                if not conditions:
+                    raise ValueError("No conditions to merge")
+
+                result = {operator: conditions}
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
                 return [
                     TextContent(
-                        type="text",
-                        text=json.dumps({"error": "No conditions to merge"}, indent=2),
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
                     )
                 ]
-
-            result = {operator: conditions}
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         # ====================================================================
         # QUERY EXPLANATION & DEBUGGING TOOLS
@@ -824,6 +852,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
                     raise ValueError("entity_name must be a non-empty string")
                 filter_condition = arguments.get("filter_condition")
+                if not filter_condition or not isinstance(filter_condition, dict):
+                    raise ValueError("filter_condition must be a non-empty dict")
                 result = SchemaInspector.validate_filter_against_schema(entity_name, filter_condition)
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             except Exception as e:
@@ -838,12 +868,25 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # ====================================================================
 
         elif name == "connect_ods_server":
-            url = arguments.get("url")
-            username = arguments.get("username")
-            password = arguments.get("password")
+            try:
+                url = arguments.get("url")
+                if not url or not isinstance(url, str) or not url.strip():
+                    raise ValueError("url must be a non-empty string")
+                username = arguments.get("username")
+                if not username or not isinstance(username, str) or not username.strip():
+                    raise ValueError("username must be a non-empty string")
+                password = arguments.get("password")
+                if not password or not isinstance(password, str) or not password.strip():
+                    raise ValueError("password must be a non-empty string")
 
-            result = ODSConnectionManager.connect(url=url, auth=(username, password))
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+                result = ODSConnectionManager.connect(url=url, auth=(username, password))
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
+                    )
+                ]
 
         elif name == "disconnect_ods_server":
             result = ODSConnectionManager.disconnect()
