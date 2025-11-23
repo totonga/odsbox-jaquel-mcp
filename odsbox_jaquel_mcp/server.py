@@ -628,37 +628,6 @@ async def get_prompt(name: str, arguments: dict | None = None) -> GetPromptResul
         ],
     )
 
-
-def _explain_query(query: dict[str, Any]) -> str:
-    """Generate human-readable explanation of a query."""
-    if not query:
-        return "Empty query"
-
-    explanation_parts = []
-
-    for entity_name, entity_spec in query.items():
-        explanation_parts.append(f"Query for entity: {entity_name}")
-
-        if isinstance(entity_spec, dict):
-            if entity_spec.get("$where"):
-                where_clause = entity_spec["$where"]
-                explanation_parts.append(f"  Filter: {QueryDebugger.explain_filter(where_clause)}")
-
-            if entity_spec.get("$select"):
-                select_fields = entity_spec["$select"]
-                explanation_parts.append(f"  Select: {', '.join(select_fields)}")
-
-            if entity_spec.get("$orderby"):
-                order_fields = entity_spec["$orderby"]
-                explanation_parts.append(f"  Order by: {', '.join(order_fields)}")
-
-            if entity_spec.get("$limit"):
-                limit = entity_spec["$limit"]
-                explanation_parts.append(f"  Limit: {limit} results")
-
-    return "\n".join(explanation_parts)
-
-
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     """Handle MCP tool calls by delegating to appropriate tool handlers."""
