@@ -712,10 +712,19 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         elif name == "generate_query_skeleton":
-            entity_name = arguments.get("entity_name")
-            operation = arguments.get("operation", "get_all")
-            result = JaquelExamples.generate_query_skeleton(entity_name, operation)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                entity_name = arguments.get("entity_name")
+                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
+                    raise ValueError("entity_name must be a non-empty string")
+                operation = arguments.get("operation", "get_all")
+                result = JaquelExamples.generate_query_skeleton(entity_name, operation)
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
+                    )
+                ]
 
         # ====================================================================
         # FILTER BUILDING TOOLS
@@ -779,21 +788,50 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # ====================================================================
 
         elif name == "check_entity_schema":
-            entity_name = arguments.get("entity_name")
-            result = SchemaInspector.get_entity_schema(entity_name)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                entity_name = arguments.get("entity_name")
+                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
+                    raise ValueError("entity_name must be a non-empty string")
+                result = SchemaInspector.get_entity_schema(entity_name)
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
+                    )
+                ]
 
         elif name == "validate_field_exists":
-            entity_name = arguments.get("entity_name")
-            field_name = arguments.get("field_name")
-            result = SchemaInspector.validate_field_exists(entity_name, field_name)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                entity_name = arguments.get("entity_name")
+                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
+                    raise ValueError("entity_name must be a non-empty string")
+                field_name = arguments.get("field_name")
+                if not field_name or not isinstance(field_name, str) or not field_name.strip():
+                    raise ValueError("field_name must be a non-empty string")
+                result = SchemaInspector.validate_field_exists(entity_name, field_name)
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
+                    )
+                ]
 
         elif name == "validate_filter_against_schema":
-            entity_name = arguments.get("entity_name")
-            filter_condition = arguments.get("filter_condition")
-            result = SchemaInspector.validate_filter_against_schema(entity_name, filter_condition)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            try:
+                entity_name = arguments.get("entity_name")
+                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
+                    raise ValueError("entity_name must be a non-empty string")
+                filter_condition = arguments.get("filter_condition")
+                result = SchemaInspector.validate_filter_against_schema(entity_name, filter_condition)
+                return [TextContent(type="text", text=json.dumps(result, indent=2))]
+            except Exception as e:
+                return [
+                    TextContent(
+                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
+                    )
+                ]
 
         # ====================================================================
         # CONNECTION MANAGEMENT TOOLS
