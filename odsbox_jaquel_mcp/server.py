@@ -838,9 +838,13 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # ====================================================================
 
         elif name == "get_submatrix_measurement_quantities":
-            submatrix_id = arguments.get("submatrix_id")
-
             try:
+                submatrix_id_raw = arguments.get("submatrix_id")
+                if submatrix_id_raw is None:
+                    raise ValueError("submatrix_id is required")
+                submatrix_id = int(submatrix_id_raw)
+                if submatrix_id <= 0:
+                    raise ValueError("submatrix_id must be a positive integer (> 0)")
                 quantities = SubmatrixDataReader.get_measurement_quantities(submatrix_id)
                 result = {
                     "submatrix_id": submatrix_id,
@@ -856,13 +860,18 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 ]
 
         elif name == "read_submatrix_data":
-            submatrix_id = arguments.get("submatrix_id")
-            measurement_quantity_patterns = arguments.get("measurement_quantity_patterns", [])
-            case_insensitive = arguments.get("case_insensitive", False)
-            date_as_timestamp = arguments.get("date_as_timestamp", True)
-            set_independent_as_index = arguments.get("set_independent_as_index", True)
-
             try:
+                submatrix_id_raw = arguments.get("submatrix_id")
+                if submatrix_id_raw is None:
+                    raise ValueError("submatrix_id is required")
+                submatrix_id = int(submatrix_id_raw)
+                if submatrix_id <= 0:
+                    raise ValueError("submatrix_id must be a positive integer (> 0)")
+                measurement_quantity_patterns = arguments.get("measurement_quantity_patterns", [])
+                case_insensitive = arguments.get("case_insensitive", False)
+                date_as_timestamp = arguments.get("date_as_timestamp", True)
+                set_independent_as_index = arguments.get("set_independent_as_index", True)
+
                 result = SubmatrixDataReader.read_submatrix_data(
                     submatrix_id=submatrix_id,
                     measurement_quantity_patterns=measurement_quantity_patterns,
@@ -880,14 +889,19 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 ]
 
         elif name == "generate_submatrix_fetcher_script":
-            submatrix_id = arguments.get("submatrix_id")
-            script_type = arguments.get("script_type", "basic")
-            output_format = arguments.get("output_format", "csv")
-            measurement_quantity_patterns = arguments.get("measurement_quantity_patterns", [])
-            include_analysis = arguments.get("include_analysis", False)
-            include_visualization = arguments.get("include_visualization", False)
-
             try:
+                submatrix_id_raw = arguments.get("submatrix_id")
+                if submatrix_id_raw is None:
+                    raise ValueError("submatrix_id is required")
+                submatrix_id = int(submatrix_id_raw)
+                if submatrix_id <= 0:
+                    raise ValueError("submatrix_id must be a positive integer (> 0)")
+                script_type = arguments.get("script_type", "basic")
+                output_format = arguments.get("output_format", "csv")
+                measurement_quantity_patterns = arguments.get("measurement_quantity_patterns", [])
+                include_analysis = arguments.get("include_analysis", False)
+                include_visualization = arguments.get("include_visualization", False)
+
                 # Get available measurement quantities
                 quantities = SubmatrixDataReader.get_measurement_quantities(submatrix_id)
 
