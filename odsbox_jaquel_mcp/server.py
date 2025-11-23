@@ -1125,11 +1125,11 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
                 elif operation == "get_unique_quantities":
                     measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-                    quantities = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
+                    unique_quantities: list[str] = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
                     result = {
                         "operation": operation,
-                        "unique_quantities": quantities,
-                        "num_quantities": len(quantities),
+                        "unique_quantities": unique_quantities,
+                        "num_quantities": len(unique_quantities),
                     }
 
                 elif operation == "build_index":
