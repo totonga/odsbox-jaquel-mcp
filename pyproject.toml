@@ -9,7 +9,7 @@ dynamic = ["version"]
 description = "ASAM ODS Jaquel MCP Server - A Model Context Protocol server for creating and validating Jaquel queries"
 readme = "README.md"
 requires-python = ">=3.13"
-license = {text = "MIT"}
+license = {text = "Apache-2.0"}
 authors = [
     {name = "Assistant", email = "assistant@example.com"}
 ]

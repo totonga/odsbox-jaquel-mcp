@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import statistics
 from dataclasses import asdict, dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -17,14 +17,14 @@ class ColumnStatistics:
 
     name: str
     count: int
-    mean: Optional[float]
-    median: Optional[float]
-    stdev: Optional[float]
-    min: Optional[float]
-    max: Optional[float]
-    range: Optional[float]
+    mean: float | None
+    median: float | None
+    stdev: float | None
+    min: float | None
+    max: float | None
+    range: float | None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return asdict(self)
 
@@ -36,14 +36,14 @@ class ComparisonResult:
     quantity_name: str
     measurement_1_id: int
     measurement_2_id: int
-    measurement_1_mean: Optional[float]
-    measurement_2_mean: Optional[float]
-    mean_difference: Optional[float]
-    mean_difference_percent: Optional[float]
-    correlation: Optional[float]
-    notes: List[str]
+    measurement_1_mean: float | None
+    measurement_2_mean: float | None
+    mean_difference: float | None
+    mean_difference_percent: float | None
+    correlation: float | None
+    notes: list[str]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return asdict(self)
 
@@ -52,7 +52,7 @@ class MeasurementAnalyzer:
     """Analyze and compare measurement data."""
 
     @staticmethod
-    def calculate_statistics(values: List[float]) -> ColumnStatistics:
+    def calculate_statistics(values: list[float]) -> ColumnStatistics:
         """Calculate statistics for a list of numeric values.
 
         Args:
@@ -112,8 +112,8 @@ class MeasurementAnalyzer:
     @staticmethod
     def compare_quantities(
         quantity_name: str,
-        values_1: List[float],
-        values_2: List[float],
+        values_1: list[float],
+        values_2: list[float],
         measurement_1_id: int = 1,
         measurement_2_id: int = 2,
     ) -> ComparisonResult:
@@ -129,7 +129,7 @@ class MeasurementAnalyzer:
         Returns:
             ComparisonResult with comparison metrics
         """
-        notes: List[str] = []
+        notes: list[str] = []
 
         if not values_1 or not values_2:
             return ComparisonResult(
@@ -209,7 +209,7 @@ class MeasurementAnalyzer:
             )
 
     @staticmethod
-    def _calculate_correlation(values_1: List[float], values_2: List[float]) -> Optional[float]:
+    def _calculate_correlation(values_1: list[float], values_2: list[float]) -> float | None:
         """Calculate Pearson correlation coefficient.
 
         Args:
@@ -247,8 +247,8 @@ class MeasurementAnalyzer:
     @staticmethod
     def compare_multiple_measurements(
         quantity_name: str,
-        measurement_data: Dict[int, List[float]],
-    ) -> Dict[str, Any]:
+        measurement_data: dict[int, list[float]],
+    ) -> dict[str, Any]:
         """Compare a quantity across multiple measurements.
 
         Args:
@@ -266,7 +266,7 @@ class MeasurementAnalyzer:
             }
 
         try:
-            stats_by_measurement: Dict[int, Dict[str, Any]] = {}
+            stats_by_measurement: dict[int, dict[str, Any]] = {}
             measurement_ids = sorted(measurement_data.keys())
 
             for meas_id, values in measurement_data.items():
@@ -310,10 +310,10 @@ class MeasurementAnalyzer:
 
     @staticmethod
     def generate_comparison_summary(
-        measurement_names: Dict[int, str],
-        quantity_names: List[str],
-        comparison_results: List[ComparisonResult],
-    ) -> Dict[str, Any]:
+        measurement_names: dict[int, str],
+        quantity_names: list[str],
+        comparison_results: list[ComparisonResult],
+    ) -> dict[str, Any]:
         """Generate a summary report of all comparisons.
 
         Args:

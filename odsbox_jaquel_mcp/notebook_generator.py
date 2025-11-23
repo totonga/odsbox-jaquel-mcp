@@ -7,14 +7,14 @@ including data retrieval, preparation, and visualization.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class NotebookGenerator:
     """Generate Jupyter notebooks for measurement comparison."""
 
     @staticmethod
-    def create_markdown_cell(content: str) -> Dict[str, Any]:
+    def create_markdown_cell(content: str) -> dict[str, Any]:
         """
         Create a markdown cell.
 
@@ -31,7 +31,7 @@ class NotebookGenerator:
         }
 
     @staticmethod
-    def create_code_cell(code: str, description: str = "") -> Dict[str, Any]:
+    def create_code_cell(code: str, description: str = "") -> dict[str, Any]:
         """
         Create a code cell.
 
@@ -52,15 +52,15 @@ class NotebookGenerator:
 
     @staticmethod
     def generate_measurement_comparison_notebook(
-        measurement_query_conditions: Dict[str, Any],
-        measurement_quantity_names: List[str],
+        measurement_query_conditions: dict[str, Any],
+        measurement_quantity_names: list[str],
         ods_url: str,
         ods_username: str,
         ods_password: str,
-        available_quantities: Optional[List[str]] = None,
+        available_quantities: list[str | None] = None,
         plot_type: str = "scatter",
         title: str = "Measurement Comparison",
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Generate a complete Jupyter notebook for comparing measurements.
 
@@ -328,7 +328,7 @@ plt.show()"""
 
     @staticmethod
     def save_notebook(
-        notebook: Dict[str, Any],
+        notebook: dict[str, Any],
         output_path: str,
     ) -> None:
         """
@@ -342,7 +342,7 @@ plt.show()"""
             json.dump(notebook, f, indent=2)
 
     @staticmethod
-    def _format_dict_for_code(d: Dict[str, Any]) -> str:
+    def _format_dict_for_code(d: dict[str, Any]) -> str:
         """
         Format a dictionary for Python code representation.
 

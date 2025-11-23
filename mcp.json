@@ -1,0 +1,189 @@
+{
+    "name": "odsbox-jaquel-mcp",
+    "version": "0.1.0",
+    "description": "ASAM ODS Jaquel MCP Server - Query builder and validator for ASAM ODS Jaquel database queries",
+    "author": "totonga",
+    "license": "Apache-2.0",
+    "homepage": "https://github.com/totonga/odsbox-jaquel-mcp",
+    "documentation": "https://github.com/totonga/odsbox-jaquel-mcp/blob/main/README.md",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/totonga/odsbox-jaquel-mcp.git"
+    },
+    "command": "python",
+    "args": [
+        "-m",
+        "odsbox_jaquel_mcp"
+    ],
+    "env": {},
+    "categories": [
+        "database",
+        "data-analysis",
+        "testing"
+    ],
+    "tools": [
+        {
+            "name": "validate_jaquel_query",
+            "description": "Validate a Jaquel query structure for syntax errors and best practices",
+            "category": "query-validation"
+        },
+        {
+            "name": "validate_filter_condition",
+            "description": "Validate a WHERE clause filter condition in a Jaquel query",
+            "category": "query-validation"
+        },
+        {
+            "name": "get_operator_documentation",
+            "description": "Get documentation and examples for Jaquel operators like $like, $in, $gt, $lt, etc.",
+            "category": "query-help"
+        },
+        {
+            "name": "suggest_optimizations",
+            "description": "Suggest optimizations and simplifications for a Jaquel query to improve performance",
+            "category": "query-optimization"
+        },
+        {
+            "name": "get_query_pattern",
+            "description": "Get a template for common Jaquel query patterns (get_all, get_by_id, search, joins, aggregates)",
+            "category": "query-templates"
+        },
+        {
+            "name": "list_query_patterns",
+            "description": "List all available Jaquel query patterns and templates",
+            "category": "query-templates"
+        },
+        {
+            "name": "generate_query_skeleton",
+            "description": "Generate a query skeleton for a specific entity and operation type",
+            "category": "query-generation"
+        },
+        {
+            "name": "build_filter_condition",
+            "description": "Build a filter condition for WHERE clause with proper syntax",
+            "category": "query-builder"
+        },
+        {
+            "name": "explain_jaquel_query",
+            "description": "Explain what a Jaquel query does in plain English",
+            "category": "query-help"
+        },
+        {
+            "name": "merge_filter_conditions",
+            "description": "Merge multiple filter conditions with AND/OR logic",
+            "category": "query-builder"
+        },
+        {
+            "name": "check_entity_schema",
+            "description": "Get available fields for an entity from ODS model schema",
+            "category": "schema-exploration"
+        },
+        {
+            "name": "validate_field_exists",
+            "description": "Check if a field exists in entity schema",
+            "category": "schema-validation"
+        },
+        {
+            "name": "validate_filter_against_schema",
+            "description": "Validate filter against actual entity schema to ensure field compatibility",
+            "category": "schema-validation"
+        },
+        {
+            "name": "debug_query_steps",
+            "description": "Break down a query into steps for debugging and understanding",
+            "category": "query-debugging"
+        },
+        {
+            "name": "suggest_error_fixes",
+            "description": "Get suggestions to fix query syntax errors or validation issues",
+            "category": "query-debugging"
+        },
+        {
+            "name": "connect_ods_server",
+            "description": "Establish connection to ASAM ODS server for live model inspection and query execution",
+            "category": "server-management"
+        },
+        {
+            "name": "disconnect_ods_server",
+            "description": "Close connection to ODS server",
+            "category": "server-management"
+        },
+        {
+            "name": "get_ods_connection_info",
+            "description": "Get current ODS server connection information and available entities",
+            "category": "server-management"
+        },
+        {
+            "name": "list_ods_entities",
+            "description": "Return list of all available entities from ODS server ModelCache with their descriptions",
+            "category": "schema-exploration"
+        },
+        {
+            "name": "execute_ods_query",
+            "description": "Execute a Jaquel query directly on connected ODS server and get results",
+            "category": "query-execution"
+        },
+        {
+            "name": "get_submatrix_measurement_quantities",
+            "description": "Get measurement quantities and submatrices for a measurement",
+            "category": "data-access"
+        },
+        {
+            "name": "read_submatrix_data",
+            "description": "Read timeseries data from a submatrix using bulk data access API",
+            "category": "data-access"
+        },
+        {
+            "name": "get_test_to_measurement_hierarchy",
+            "description": "Get hierarchical entity chain from AoTest to AoMeasurement with relations",
+            "category": "schema-exploration"
+        },
+        {
+            "name": "generate_submatrix_fetcher_script",
+            "description": "Generate Python scripts for fetching submatrix data with error handling and data processing",
+            "category": "code-generation"
+        },
+        {
+            "name": "generate_plotting_code",
+            "description": "Generate Python plotting code for measurement comparison visualizations",
+            "category": "code-generation"
+        },
+        {
+            "name": "generate_measurement_comparison_notebook",
+            "description": "Generate a Jupyter notebook for comparing measurements with analysis and plots",
+            "category": "code-generation"
+        },
+        {
+            "name": "get_bulk_api_help",
+            "description": "Get help and guidance on using the Bulk API for loading timeseries data",
+            "category": "query-help"
+        }
+    ],
+    "resources": [
+        {
+            "type": "documentation",
+            "name": "README",
+            "url": "https://github.com/totonga/odsbox-jaquel-mcp/blob/main/README.md"
+        },
+        {
+            "type": "documentation",
+            "name": "TOOLS_GUIDE",
+            "url": "https://github.com/totonga/odsbox-jaquel-mcp/blob/main/TOOLS_GUIDE.md"
+        },
+        {
+            "type": "examples",
+            "name": "Usage Examples",
+            "url": "https://github.com/totonga/odsbox-jaquel-mcp/blob/main/examples/"
+        }
+    ],
+    "features": [
+        "Jaquel query validation and optimization",
+        "ODS server connection management",
+        "Schema inspection and entity exploration",
+        "Query execution and result retrieval",
+        "Timeseries data access via Bulk API",
+        "Measurement analysis and comparison",
+        "Code generation for data analysis",
+        "Jupyter notebook generation",
+        "Interactive query building with templates"
+    ]
+}

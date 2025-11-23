@@ -127,7 +127,7 @@ class JaquelExamples:
             entity_name: Name of the entity
             operation: Type of query
         """
-        skeletons = {
+        skeletons: dict[str, dict[str, Any]] = {
             "get_all": {entity_name: {}, "$attributes": {"id": 1, "name": 1}, "$options": {"$rowlimit": 5}},
             "get_by_id": {entity_name: 123, "$attributes": {"*": 1}},
             "get_by_name": {entity_name: {"name": "SearchName"}, "$attributes": {"*": 1}},
@@ -139,10 +139,7 @@ class JaquelExamples:
             },
         }
 
-        if operation not in skeletons:
-            return {"error": f"Unknown operation: {operation}"}
-
-        return skeletons[operation]
+        return skeletons.get(operation, {"error": f"Unknown operation: {operation}"})
 
 
 class QueryDebugger:
