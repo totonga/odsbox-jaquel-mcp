@@ -19,23 +19,18 @@ from mcp import PromptsCapability, ServerCapabilities, ToolsCapability
 from mcp.server import InitializationOptions, Server
 from mcp.types import GetPromptResult, PromptMessage, TextContent, Tool
 
-from .bulk_api_guide import BulkAPIGuide
-from .connection import ODSConnectionManager
-from .measurement_analysis import ComparisonResult, MeasurementAnalyzer
-from .measurement_queries import MeasurementHierarchyExplorer
-from .notebook_generator import NotebookGenerator
 from .prompts import PromptLibrary
-from .queries import JaquelExamples, QueryDebugger
-from .schemas import SchemaInspector
-from .submatrix import SubmatrixDataReader
-from .submatrix.scripts import (
-    generate_advanced_fetcher_script,
-    generate_analysis_fetcher_script,
-    generate_basic_fetcher_script,
-    generate_batch_fetcher_script,
+from .queries import QueryDebugger
+from .tools import (
+    ConnectionToolHandler,
+    FilterToolHandler,
+    HelpToolHandler,
+    MeasurementToolHandler,
+    QueryToolHandler,
+    SchemaToolHandler,
+    SubmatrixToolHandler,
+    ValidationToolHandler,
 )
-from .validators import JaquelOptimizer, JaquelValidator
-from .visualization_templates import VisualizationTemplateGenerator
 
 # ============================================================================
 # MCP SERVER SETUP
@@ -666,654 +661,129 @@ def _explain_query(query: dict[str, Any]) -> str:
 
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
-    """Handle MCP tool calls."""
-    try:
-        # ====================================================================
-        # VALIDATION TOOLS
-        # ====================================================================
+    """Handle MCP tool calls by delegating to appropriate tool handlers."""
+    # ========================================================================
+    # VALIDATION TOOLS
+    # ========================================================================
+    if name == "validate_jaquel_query":
+        return ValidationToolHandler.validate_jaquel_query(arguments)
+
+    elif name == "validate_filter_condition":
+        return ValidationToolHandler.validate_filter_condition(arguments)
+
+    elif name == "get_operator_documentation":
+        return ValidationToolHandler.get_operator_documentation(arguments)
+
+    elif name == "suggest_optimizations":
+        return ValidationToolHandler.suggest_optimizations(arguments)
+
+    # ========================================================================
+    # QUERY PATTERN TOOLS
+    # ========================================================================
+    elif name == "get_query_pattern":
+        return QueryToolHandler.get_query_pattern(arguments)
+
+    elif name == "list_query_patterns":
+        return QueryToolHandler.list_query_patterns(arguments)
+
+    elif name == "generate_query_skeleton":
+        return QueryToolHandler.generate_query_skeleton(arguments)
+
+    # ========================================================================
+    # FILTER BUILDING TOOLS
+    # ========================================================================
+    elif name == "build_filter_condition":
+        return FilterToolHandler.build_filter_condition(arguments)
+
+    elif name == "merge_filter_conditions":
+        return FilterToolHandler.merge_filter_conditions(arguments)
+
+    # ========================================================================
+    # QUERY EXPLANATION & DEBUGGING TOOLS
+    # ========================================================================
+    elif name == "explain_jaquel_query":
+        return QueryToolHandler.explain_jaquel_query(arguments)
+
+    elif name == "debug_query_steps":
+        return QueryToolHandler.debug_query_steps(arguments)
+
+    elif name == "suggest_error_fixes":
+        return QueryToolHandler.suggest_error_fixes(arguments)
+
+    # ========================================================================
+    # SCHEMA VALIDATION TOOLS
+    # ========================================================================
+    elif name == "check_entity_schema":
+        return SchemaToolHandler.check_entity_schema(arguments)
+
+    elif name == "validate_field_exists":
+        return SchemaToolHandler.validate_field_exists(arguments)
+
+    elif name == "validate_filter_against_schema":
+        return SchemaToolHandler.validate_filter_against_schema(arguments)
+
+    # ========================================================================
+    # CONNECTION MANAGEMENT TOOLS
+    # ========================================================================
+    elif name == "connect_ods_server":
+        return ConnectionToolHandler.connect_ods_server(arguments)
+
+    elif name == "disconnect_ods_server":
+        return ConnectionToolHandler.disconnect_ods_server(arguments)
+
+    elif name == "get_ods_connection_info":
+        return ConnectionToolHandler.get_ods_connection_info(arguments)
+
+    # ========================================================================
+    # ODS QUERY EXECUTION TOOLS
+    # ========================================================================
+    elif name == "list_ods_entities":
+        return SchemaToolHandler.list_ods_entities(arguments)
+
+    elif name == "execute_ods_query":
+        return ConnectionToolHandler.execute_ods_query(arguments)
+
+    # ========================================================================
+    # SUBMATRIX DATA ACCESS TOOLS
+    # ========================================================================
+    elif name == "get_submatrix_measurement_quantities":
+        return SubmatrixToolHandler.get_submatrix_measurement_quantities(arguments)
+
+    elif name == "read_submatrix_data":
+        return SubmatrixToolHandler.read_submatrix_data(arguments)
+
+    elif name == "generate_submatrix_fetcher_script":
+        return SubmatrixToolHandler.generate_submatrix_fetcher_script(arguments)
+
+    # ========================================================================
+    # MEASUREMENT & VISUALIZATION TOOLS
+    # ========================================================================
+    elif name == "generate_measurement_comparison_notebook":
+        return MeasurementToolHandler.generate_measurement_comparison_notebook(arguments)
+
+    elif name == "generate_plotting_code":
+        return MeasurementToolHandler.generate_plotting_code(arguments)
 
-        if name == "validate_jaquel_query":
-            query = arguments.get("query", {})
-            result = JaquelValidator.validate_query(query)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+    elif name == "compare_measurements":
+        return MeasurementToolHandler.compare_measurements(arguments)
 
-        elif name == "validate_filter_condition":
-            condition = arguments.get("condition", {})
-            result = JaquelValidator.validate_filter_condition(condition)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+    elif name == "query_measurement_hierarchy":
+        return MeasurementToolHandler.query_measurement_hierarchy(arguments)
 
-        elif name == "get_operator_documentation":
-            try:
-                operator = arguments.get("operator")
-                if not operator or not isinstance(operator, str) or not operator.strip():
-                    raise ValueError("operator must be a non-empty string")
-                result = JaquelValidator.get_operator_info(operator)
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
+    # ========================================================================
+    # HELP & DOCUMENTATION TOOLS
+    # ========================================================================
+    elif name == "get_bulk_api_help":
+        return HelpToolHandler.get_bulk_api_help(arguments)
 
-        elif name == "suggest_optimizations":
-            query = arguments.get("query", {})
-            suggestions = JaquelOptimizer.suggest_simplifications(query)
-            result = {
-                "query_summary": str(query),
-                "suggestions": suggestions,
-                "suggestion_count": len(suggestions),
-            }
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
+    elif name == "get_test_to_measurement_hierarchy":
+        return SchemaToolHandler.get_test_to_measurement_hierarchy(arguments)
 
-        # ====================================================================
-        # QUERY PATTERN TOOLS
-        # ====================================================================
-
-        elif name == "get_query_pattern":
-            try:
-                pattern = arguments.get("pattern")
-                if not pattern or not isinstance(pattern, str) or not pattern.strip():
-                    raise ValueError("pattern must be a non-empty string")
-                result = JaquelExamples.get_pattern(pattern)
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        elif name == "list_query_patterns":
-            patterns = JaquelExamples.list_patterns()
-            result = {"available_patterns": patterns, "description": "Available query patterns"}
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-        elif name == "generate_query_skeleton":
-            try:
-                entity_name = arguments.get("entity_name")
-                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
-                    raise ValueError("entity_name must be a non-empty string")
-                operation = arguments.get("operation", "get_all")
-                result = JaquelExamples.generate_query_skeleton(entity_name, operation)
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        # ====================================================================
-        # FILTER BUILDING TOOLS
-        # ====================================================================
-
-        elif name == "build_filter_condition":
-            try:
-                field = arguments.get("field")
-                if not field or not isinstance(field, str) or not field.strip():
-                    raise ValueError("field must be a non-empty string")
-                operator = arguments.get("operator")
-                value = arguments.get("value")
-
-                # Validate operator
-                if not operator or not isinstance(operator, str) or not operator.strip():
-                    raise ValueError("operator must be a non-empty string")
-                if operator not in JaquelValidator.ALL_OPERATORS:
-                    raise ValueError(f"Unknown operator: {operator}")
-
-                result = {field: {operator: value}}
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        elif name == "merge_filter_conditions":
-            try:
-                conditions = arguments.get("conditions", [])
-                operator = arguments.get("operator", "$and")
-
-                if not operator or not isinstance(operator, str) or not operator.strip():
-                    raise ValueError("operator must be a non-empty string")
-                if not conditions:
-                    raise ValueError("No conditions to merge")
-
-                result = {operator: conditions}
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        # ====================================================================
-        # QUERY EXPLANATION & DEBUGGING TOOLS
-        # ====================================================================
-
-        elif name == "explain_jaquel_query":
-            query = arguments.get("query", {})
-            explanation = _explain_query(query)
-            return [TextContent(type="text", text=explanation)]
-
-        elif name == "debug_query_steps":
-            query = arguments.get("query", {})
-            result = QueryDebugger.debug_query_step_by_step(query)
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-        elif name == "suggest_error_fixes":
-            issue = arguments.get("issue", "Unknown issue")
-            query = arguments.get("query")
-            suggestions = QueryDebugger.suggest_fixes_for_issue(issue, query)
-            result = {"issue": issue, "suggestions": suggestions}
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-        # ====================================================================
-        # SCHEMA VALIDATION TOOLS
-        # ====================================================================
-
-        elif name == "check_entity_schema":
-            try:
-                entity_name = arguments.get("entity_name")
-                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
-                    raise ValueError("entity_name must be a non-empty string")
-                result = SchemaInspector.get_entity_schema(entity_name)
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        elif name == "validate_field_exists":
-            try:
-                entity_name = arguments.get("entity_name")
-                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
-                    raise ValueError("entity_name must be a non-empty string")
-                field_name = arguments.get("field_name")
-                if not field_name or not isinstance(field_name, str) or not field_name.strip():
-                    raise ValueError("field_name must be a non-empty string")
-                result = SchemaInspector.validate_field_exists(entity_name, field_name)
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        elif name == "validate_filter_against_schema":
-            try:
-                entity_name = arguments.get("entity_name")
-                if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
-                    raise ValueError("entity_name must be a non-empty string")
-                filter_condition = arguments.get("filter_condition")
-                if not filter_condition or not isinstance(filter_condition, dict):
-                    raise ValueError("filter_condition must be a non-empty dict")
-                result = SchemaInspector.validate_filter_against_schema(entity_name, filter_condition)
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        # ====================================================================
-        # CONNECTION MANAGEMENT TOOLS
-        # ====================================================================
-
-        elif name == "connect_ods_server":
-            try:
-                url = arguments.get("url")
-                if not url or not isinstance(url, str) or not url.strip():
-                    raise ValueError("url must be a non-empty string")
-                username = arguments.get("username")
-                if not username or not isinstance(username, str) or not username.strip():
-                    raise ValueError("username must be a non-empty string")
-                password = arguments.get("password")
-                if not password or not isinstance(password, str) or not password.strip():
-                    raise ValueError("password must be a non-empty string")
-
-                result = ODSConnectionManager.connect(url=url, auth=(username, password))
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text", text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2)
-                    )
-                ]
-
-        elif name == "disconnect_ods_server":
-            result = ODSConnectionManager.disconnect()
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-        elif name == "get_ods_connection_info":
-            info = ODSConnectionManager.get_connection_info()
-            return [TextContent(type="text", text=json.dumps(info, indent=2))]
-
-        # ====================================================================
-        # ODS QUERY EXECUTION TOOLS
-        # ====================================================================
-
-        elif name == "list_ods_entities":
-            result = SchemaInspector.list_ods_entities()
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-        elif name == "execute_ods_query":
-            query = arguments.get("query", {})
-            result = ODSConnectionManager.query(query)
-
-            # Convert non-serializable objects to strings for JSON serialization
-            if "result" in result and result["result"] is not None:
-                result["result"] = str(result["result"])
-
-            return [TextContent(type="text", text=json.dumps(result, indent=2))]
-
-        # ====================================================================
-        # SUBMATRIX DATA ACCESS TOOLS
-        # ====================================================================
-
-        elif name == "get_submatrix_measurement_quantities":
-            try:
-                submatrix_id_raw = arguments.get("submatrix_id")
-                if submatrix_id_raw is None:
-                    raise ValueError("submatrix_id is required")
-                submatrix_id = int(submatrix_id_raw)
-                if submatrix_id <= 0:
-                    raise ValueError("submatrix_id must be a positive integer (> 0)")
-                quantities = SubmatrixDataReader.get_measurement_quantities(submatrix_id)
-                result = {
-                    "submatrix_id": submatrix_id,
-                    "measurement_quantities": quantities,
-                }
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "read_submatrix_data":
-            try:
-                submatrix_id_raw = arguments.get("submatrix_id")
-                if submatrix_id_raw is None:
-                    raise ValueError("submatrix_id is required")
-                submatrix_id = int(submatrix_id_raw)
-                if submatrix_id <= 0:
-                    raise ValueError("submatrix_id must be a positive integer (> 0)")
-                measurement_quantity_patterns = arguments.get("measurement_quantity_patterns", [])
-                case_insensitive = arguments.get("case_insensitive", False)
-                date_as_timestamp = arguments.get("date_as_timestamp", True)
-                set_independent_as_index = arguments.get("set_independent_as_index", True)
-
-                result = SubmatrixDataReader.read_submatrix_data(
-                    submatrix_id=submatrix_id,
-                    measurement_quantity_patterns=measurement_quantity_patterns,
-                    case_insensitive=case_insensitive,
-                    date_as_timestamp=date_as_timestamp,
-                    set_independent_as_index=set_independent_as_index,
-                )
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "generate_submatrix_fetcher_script":
-            try:
-                submatrix_id_raw = arguments.get("submatrix_id")
-                if submatrix_id_raw is None:
-                    raise ValueError("submatrix_id is required")
-                submatrix_id = int(submatrix_id_raw)
-                if submatrix_id <= 0:
-                    raise ValueError("submatrix_id must be a positive integer (> 0)")
-                script_type = arguments.get("script_type", "basic")
-                output_format = arguments.get("output_format", "csv")
-                measurement_quantity_patterns = arguments.get("measurement_quantity_patterns", [])
-                include_analysis = arguments.get("include_analysis", False)
-                include_visualization = arguments.get("include_visualization", False)
-
-                # Get available measurement quantities
-                quantities = SubmatrixDataReader.get_measurement_quantities(submatrix_id)
-
-                # Use provided patterns or all quantities
-                if measurement_quantity_patterns:
-                    mq_list = measurement_quantity_patterns
-                else:
-                    mq_list = [q["name"] for q in quantities]
-
-                # Generate script based on type
-                if script_type == "basic":
-                    script = generate_basic_fetcher_script(submatrix_id, mq_list, output_format)
-                elif script_type == "advanced":
-                    script = generate_advanced_fetcher_script(
-                        submatrix_id,
-                        mq_list,
-                        output_format,
-                        include_visualization,
-                        include_analysis,
-                    )
-                elif script_type == "batch":
-                    script = generate_batch_fetcher_script(submatrix_id, mq_list, output_format)
-                elif script_type == "analysis":
-                    script = generate_analysis_fetcher_script(
-                        submatrix_id, mq_list, output_format, include_visualization
-                    )
-                else:
-                    return [
-                        TextContent(
-                            type="text",
-                            text=json.dumps({"error": f"Unknown script type: {script_type}"}, indent=2),
-                        )
-                    ]
-
-                result = {
-                    "submatrix_id": submatrix_id,
-                    "script_type": script_type,
-                    "output_format": output_format,
-                    "script": script,
-                    "instructions": [
-                        "1. Update the configuration section with your ODS server details",
-                        "2. Install required packages: pip install odsbox pandas",
-                        f"3. Run the script: python submatrix_{submatrix_id}_fetcher.py",
-                        f"4. Check output: submatrix_{submatrix_id}_data.{output_format}",
-                    ],
-                }
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "generate_measurement_comparison_notebook":
-            measurement_query_conditions = arguments.get("measurement_query_conditions", {})
-            measurement_quantity_names = arguments.get("measurement_quantity_names", [])
-            ods_url = arguments.get("ods_url", "")
-            ods_username = arguments.get("ods_username", "")
-            ods_password = arguments.get("ods_password", "")
-            available_quantities = arguments.get("available_quantities", None)
-            plot_type = arguments.get("plot_type", "scatter")
-            title = arguments.get("title", "Measurement Comparison")
-            output_path = arguments.get("output_path", None)
-
-            try:
-                notebook = NotebookGenerator.generate_measurement_comparison_notebook(
-                    measurement_query_conditions=measurement_query_conditions,
-                    measurement_quantity_names=measurement_quantity_names,
-                    ods_url=ods_url,
-                    ods_username=ods_username,
-                    ods_password=ods_password,
-                    available_quantities=available_quantities,
-                    plot_type=plot_type,
-                    title=title,
-                )
-
-                result = {
-                    "title": title,
-                    "plot_type": plot_type,
-                    "measurement_quantities": measurement_quantity_names,
-                    "num_cells": len(notebook["cells"]),
-                }
-
-                if output_path:
-                    NotebookGenerator.save_notebook(notebook, output_path)
-                    result["saved_to"] = output_path
-                    result["status"] = "Notebook saved successfully"
-                else:
-                    result["status"] = "Notebook generated successfully"
-                    result["notebook"] = notebook
-
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "generate_plotting_code":
-            measurement_quantity_names = arguments.get("measurement_quantity_names", [])
-            submatrices_count = arguments.get("submatrices_count", 0)
-            plot_type = arguments.get("plot_type", "scatter")
-
-            try:
-                if plot_type == "scatter":
-                    if len(measurement_quantity_names) < 2:
-                        raise ValueError("Scatter plot requires at least 2 measurement quantities")
-                    code = VisualizationTemplateGenerator.generate_scatter_plot_code(
-                        measurement_quantity_names=measurement_quantity_names,
-                        submatrices_count=submatrices_count,
-                    )
-                elif plot_type == "line":
-                    code = VisualizationTemplateGenerator.generate_line_plot_code(
-                        measurement_quantity_names=measurement_quantity_names,
-                        submatrices_count=submatrices_count,
-                    )
-                elif plot_type == "subplots":
-                    code = VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
-                        measurement_quantity_names=measurement_quantity_names,
-                        submatrices_count=submatrices_count,
-                    )
-                else:
-                    raise ValueError(f"Unknown plot type: {plot_type}")
-
-                result = {
-                    "plot_type": plot_type,
-                    "measurement_quantities": measurement_quantity_names,
-                    "submatrices_count": submatrices_count,
-                    "code": code,
-                    "description": (
-                        f"Generated {plot_type} plot code for "
-                        f"{len(measurement_quantity_names)} quantities and "
-                        f"{submatrices_count} submatrices"
-                    ),
-                }
-
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "compare_measurements":
-            quantity_name = arguments.get("quantity_name", "")
-            measurement_data = arguments.get("measurement_data", {})
-            measurement_names = arguments.get("measurement_names", {})
-
-            try:
-                if not quantity_name or not measurement_data:
-                    raise ValueError("quantity_name and measurement_data are required")
-
-                # Convert string keys to integers for measurement_data
-                converted_data = {}
-                for key, values in measurement_data.items():
-                    try:
-                        meas_id = int(key)
-                        converted_data[meas_id] = values
-                    except (ValueError, TypeError):
-                        converted_data[key] = values
-
-                # Perform multi-measurement comparison
-                comparison_result = MeasurementAnalyzer.compare_multiple_measurements(quantity_name, converted_data)
-
-                # If measurement_names provided, generate summary
-                if measurement_names:
-                    quantity_names = [quantity_name]
-                    comparison_results = [
-                        ComparisonResult(
-                            quantity_name=c["quantity_name"],
-                            measurement_1_id=c["measurement_1_id"],
-                            measurement_2_id=c["measurement_2_id"],
-                            measurement_1_mean=c["measurement_1_mean"],
-                            measurement_2_mean=c["measurement_2_mean"],
-                            mean_difference=c["mean_difference"],
-                            mean_difference_percent=c["mean_difference_percent"],
-                            correlation=c["correlation"],
-                            notes=c["notes"],
-                        )
-                        for c in comparison_result.get("pairwise_comparisons", [])
-                    ]
-
-                    summary = MeasurementAnalyzer.generate_comparison_summary(
-                        measurement_names, quantity_names, comparison_results
-                    )
-                    comparison_result["summary"] = summary
-
-                return [TextContent(type="text", text=json.dumps(comparison_result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "query_measurement_hierarchy":
-            query_result = arguments.get("query_result", {})
-            operation = arguments.get("operation", "extract_measurements")
-
-            try:
-                if operation == "extract_measurements":
-                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-                    result = {
-                        "operation": operation,
-                        "num_measurements": len(measurements),
-                        "measurements": measurements[:50],  # Limit output
-                    }
-
-                elif operation == "build_hierarchy":
-                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-                    hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
-                    result = {
-                        "operation": operation,
-                        "hierarchy_keys": list(hierarchy.keys()),
-                        "total_measurements": hierarchy["total_measurements"],
-                        "tests": list(hierarchy["by_test"].keys()),
-                        "statuses": list(hierarchy["by_status"].keys()),
-                    }
-
-                elif operation == "get_unique_tests":
-                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-                    tests = MeasurementHierarchyExplorer.get_unique_tests(measurements)
-                    result = {
-                        "operation": operation,
-                        "unique_tests": tests,
-                        "num_tests": len(tests),
-                    }
-
-                elif operation == "get_unique_quantities":
-                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-                    unique_quantities: list[str] = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
-                    result = {
-                        "operation": operation,
-                        "unique_quantities": unique_quantities,
-                        "num_quantities": len(unique_quantities),
-                    }
-
-                elif operation == "build_index":
-                    measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-                    index = MeasurementHierarchyExplorer.build_measurement_index(measurements)
-                    result = {
-                        "operation": operation,
-                        "total_measurements": index["total_measurements"],
-                        "index_by_id_count": len(index["by_id"]),
-                        "index_by_name_count": len(index["by_name"]),
-                        "index_by_test_count": len(index["by_test"]),
-                        "index_by_status_count": len(index["by_status"]),
-                        "available_test_names": list(index["by_test"].keys())[:10],
-                    }
-
-                else:
-                    raise ValueError(f"Unknown operation: {operation}")
-
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "get_bulk_api_help":
-            topic = arguments.get("topic", "3-step-rule")
-            tool = arguments.get("tool")
-
-            try:
-                if tool:
-                    # Get contextual help for a specific tool
-                    help_text = BulkAPIGuide.get_contextual_help(tool)
-                    result = {
-                        "topic": "contextual-help",
-                        "tool": tool,
-                        "help": help_text,
-                    }
-                elif topic == "all":
-                    # Get all help content
-                    help_text = BulkAPIGuide.get_all_help()
-                    result = {
-                        "topic": topic,
-                        "help": help_text,
-                    }
-                else:
-                    # Get specific topic help
-                    help_text = BulkAPIGuide.get_help(topic)
-                    result = {
-                        "topic": topic,
-                        "help": help_text,
-                    }
-
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        elif name == "get_test_to_measurement_hierarchy":
-            try:
-                result = SchemaInspector.get_test_to_measurement_hierarchy()
-                return [TextContent(type="text", text=json.dumps(result, indent=2))]
-            except Exception as e:
-                return [
-                    TextContent(
-                        type="text",
-                        text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
-                    )
-                ]
-
-        else:
-            return [
-                TextContent(
-                    type="text",
-                    text=json.dumps({"error": f"Unknown tool: {name}"}, indent=2),
-                )
-            ]
-
-    except Exception as e:
+    else:
         return [
             TextContent(
                 type="text",
-                text=json.dumps({"error": str(e), "error_type": type(e).__name__}, indent=2),
+                text=json.dumps({"error": f"Unknown tool: {name}"}, indent=2),
             )
         ]
 
