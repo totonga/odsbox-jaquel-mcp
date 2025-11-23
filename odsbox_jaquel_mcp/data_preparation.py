@@ -6,7 +6,7 @@ and preparing data for visualization.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import pandas as pd
 
@@ -17,7 +17,7 @@ class MeasurementMetadataExtractor:
     @staticmethod
     def extract_unit_lookup(
         local_columns_df: pd.DataFrame,
-    ) -> Dict[int, str]:
+    ) -> dict[int, str]:
         """
         Create a lookup dictionary mapping local column IDs to unit names.
 
@@ -40,8 +40,8 @@ class MeasurementMetadataExtractor:
     @staticmethod
     def build_label_dict(
         local_columns_df: pd.DataFrame,
-        unit_lookup: Dict[int, str],
-    ) -> Dict[str, str]:
+        unit_lookup: dict[int, str],
+    ) -> dict[str, str]:
         """
         Build a dictionary mapping column names to formatted labels with units.
 
@@ -63,7 +63,7 @@ class MeasurementMetadataExtractor:
     def build_submatrix_title_lookup(
         submatrices_df: pd.DataFrame,
         measurements_df: pd.DataFrame,
-    ) -> Dict[int, str]:
+    ) -> dict[int, str]:
         """
         Build a lookup dictionary mapping submatrix IDs to descriptive titles.
 
@@ -105,8 +105,8 @@ class MeasurementMetadataExtractor:
     @staticmethod
     def get_independent_column_info(
         local_columns_df: pd.DataFrame,
-        unit_lookup: Dict[int, str],
-    ) -> Tuple[Optional[str], str]:
+        unit_lookup: dict[int, str],
+    ) -> tuple[str | None, str]:
         """
         Extract independent column information.
 
@@ -138,8 +138,8 @@ class MeasurementDataPreparator:
     @staticmethod
     def prepare_submatrix_dataframe(
         submatrix_signals_df: pd.DataFrame,
-        measurement_quantity_names: List[str],
-    ) -> Tuple[Optional[pd.DataFrame], Optional[str]]:
+        measurement_quantity_names: list[str],
+    ) -> tuple[pd.DataFrame | None, str | None]:
         """
         Prepare a DataFrame from submatrix signals for plotting.
 
@@ -178,13 +178,13 @@ class MeasurementDataPreparator:
 
     @staticmethod
     def prepare_measurement_data_items(
-        submatrix_signals_by_id: Dict[int, pd.DataFrame],
+        submatrix_signals_by_id: dict[int, pd.DataFrame],
         submatrices_df: pd.DataFrame,
         measurements_df: pd.DataFrame,
         local_columns_df: pd.DataFrame,
-        measurement_quantity_names: List[str],
-        unit_lookup: Optional[Dict[int, str]] = None,
-    ) -> List[Dict[str, Any]]:
+        measurement_quantity_names: list[str],
+        unit_lookup: dict[int, str | None] = None,
+    ) -> list[dict[str, Any]]:
         """
         Prepare all measurement data items for visualization.
 

@@ -5,7 +5,7 @@ Generates Python code for creating matplotlib plots with various configurations.
 
 from __future__ import annotations
 
-from typing import List
+# Removed obsolete typing imports
 
 
 class VisualizationTemplateGenerator:
@@ -13,7 +13,7 @@ class VisualizationTemplateGenerator:
 
     @staticmethod
     def generate_scatter_plot_code(
-        measurement_quantity_names: List[str],
+        measurement_quantity_names: list[str],
         submatrices_count: int,
         subplots_per_row: int = 3,
         figsize_width: float = 15.0,
@@ -79,7 +79,7 @@ plt.show()
 
     @staticmethod
     def generate_line_plot_code(
-        measurement_quantity_names: List[str],
+        measurement_quantity_names: list[str],
         submatrices_count: int,
         subplots_per_row: int = 3,
         figsize_width: float = 15.0,
@@ -148,7 +148,7 @@ plt.show()
 
     @staticmethod
     def generate_subplots_per_measurement_code(
-        measurement_quantity_names: List[str],
+        measurement_quantity_names: list[str],
         submatrices_count: int,
     ) -> str:
         """

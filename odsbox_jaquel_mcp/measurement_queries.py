@@ -6,7 +6,7 @@ by criteria, and extracting metadata from queries.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class MeasurementHierarchyExplorer:
@@ -14,8 +14,8 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def extract_measurements_from_query_result(
-        query_result: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        query_result: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """Extract measurement metadata from ODS query result.
 
         Args:
@@ -63,8 +63,8 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def build_measurement_hierarchy(
-        measurements: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        measurements: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """Build hierarchical view of measurements.
 
         Args:
@@ -74,7 +74,7 @@ class MeasurementHierarchyExplorer:
             Hierarchical structure organized by test/campaign
         """
         try:
-            hierarchy: Dict[str, Any] = {
+            hierarchy: dict[str, Any] = {
                 "by_test": {},
                 "by_date_range": {},
                 "by_status": {},
@@ -105,8 +105,8 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def get_available_quantities_for_measurement(
-        measurement: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        measurement: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """Get list of available quantities for a measurement.
 
         Args:
@@ -172,12 +172,12 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def filter_measurements_by_criteria(
-        measurements: List[Dict[str, Any]],
-        test_name: Optional[str] = None,
-        status: Optional[str] = None,
-        name_pattern: Optional[str] = None,
-        has_quantities: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        measurements: list[dict[str, Any]],
+        test_name: str | None = None,
+        status: str | None = None,
+        name_pattern: str | None = None,
+        has_quantities: list[str | None] = None,
+    ) -> list[dict[str, Any]]:
         """Filter measurements by various criteria.
 
         Args:
@@ -219,7 +219,7 @@ class MeasurementHierarchyExplorer:
             # Filter by quantities
             if has_quantities:
 
-                def has_all_quantities(meas: Dict[str, Any]) -> bool:
+                def has_all_quantities(meas: dict[str, Any]) -> bool:
                     meas_quantities = MeasurementHierarchyExplorer.get_available_quantities_for_measurement(meas)
                     meas_qty_names = {q.get("name", q.get("Name", "")) for q in meas_quantities}
                     return all(qty in meas_qty_names for qty in has_quantities)
@@ -233,8 +233,8 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def get_measurement_summary(
-        measurement: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        measurement: dict[str, Any],
+    ) -> dict[str, Any]:
         """Get summary information for a measurement.
 
         Args:
@@ -293,9 +293,9 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def query_measurements_by_hierarchy(
-        query_result: Dict[str, Any],
-        path_filter: Optional[List[str]] = None,
-    ) -> List[Dict[str, Any]]:
+        query_result: dict[str, Any],
+        path_filter: list[str | None] = None,
+    ) -> list[dict[str, Any]]:
         """Query measurements following ODS hierarchy structure.
 
         Args:
@@ -330,8 +330,8 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def build_measurement_index(
-        measurements: List[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        measurements: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """Build an index of measurements for fast lookup.
 
         Args:
@@ -385,9 +385,9 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def get_measurements_by_test(
-        measurements: List[Dict[str, Any]],
+        measurements: list[dict[str, Any]],
         test_name: str,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get all measurements for a specific test.
 
         Args:
@@ -403,8 +403,8 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def get_unique_tests(
-        measurements: List[Dict[str, Any]],
-    ) -> List[str]:
+        measurements: list[dict[str, Any]],
+    ) -> list[str]:
         """Get list of unique test names in measurements.
 
         Args:
@@ -422,8 +422,8 @@ class MeasurementHierarchyExplorer:
 
     @staticmethod
     def get_unique_quantities(
-        measurements: List[Dict[str, Any]],
-    ) -> List[str]:
+        measurements: list[dict[str, Any]],
+    ) -> list[str]:
         """Get list of unique quantity names across all measurements.
 
         Args:

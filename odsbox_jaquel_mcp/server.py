@@ -21,7 +21,7 @@ from mcp.types import GetPromptResult, PromptMessage, TextContent, Tool
 
 from .bulk_api_guide import BulkAPIGuide
 from .connection import ODSConnectionManager
-from .measurement_analysis import MeasurementAnalyzer
+from .measurement_analysis import ComparisonResult, MeasurementAnalyzer
 from .measurement_queries import MeasurementHierarchyExplorer
 from .notebook_generator import NotebookGenerator
 from .prompts import PromptLibrary
@@ -1062,7 +1062,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
                 if measurement_names:
                     quantity_names = [quantity_name]
                     comparison_results = [
-                        MeasurementAnalyzer.ComparisonResult(
+                        ComparisonResult(
                             quantity_name=c["quantity_name"],
                             measurement_1_id=c["measurement_1_id"],
                             measurement_2_id=c["measurement_2_id"],
