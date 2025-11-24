@@ -112,7 +112,7 @@ class ODSConnectionManager:
                 except Exception as close_err:
                     # Log but don't fail if close has issues
                     pass
-            
+
             # Reset all connection state
             instance._con_i = None
             instance._model_cache = None
