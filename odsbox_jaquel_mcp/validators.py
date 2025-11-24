@@ -64,9 +64,9 @@ class JaquelValidator:
             dict with 'valid', 'errors', 'warnings',
             'suggestions'.
         """
-        errors = []
-        warnings = []
-        suggestions = []
+        errors: list[str] = []
+        warnings: list[str] = []
+        suggestions: list[str] = []
 
         if not isinstance(query, dict):
             return {"valid": False, "errors": ["Query must be a dictionary"], "warnings": [], "suggestions": []}
@@ -295,7 +295,7 @@ class JaquelOptimizer:
         Returns:
             list of optimization suggestions.
         """
-        suggestions = []
+        suggestions: list[str] = []
 
         # Get entity name
         entity_name = None

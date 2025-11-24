@@ -108,7 +108,7 @@ class TestODSConnectionManager:
     @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_disconnect_failure(self, mock_coni_class):
-        """Test disconnect failure."""
+        """Test disconnect handles close errors gracefully."""
         # First connect
         mock_coni = Mock()
         mock_coni.close.side_effect = Exception("Close failed")
@@ -116,11 +116,12 @@ class TestODSConnectionManager:
 
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
-        # Then disconnect
+        # Then disconnect - should succeed despite close error
         result = ODSConnectionManager.disconnect()
 
-        assert result["success"] is False
-        assert result["error"] == "Close failed"
+        assert result["success"] is True
+        assert "Disconnected from ODS server" in result["message"]
+        assert not ODSConnectionManager.is_connected()
 
     def test_get_connection_info(self):
         """Test getting connection info."""
