@@ -27,6 +27,14 @@ class ODSConnectionManager:
         """Initialize connection manager (singleton)."""
         pass
 
+    def __del__(self):
+        """Ensure connection is closed on cleanup."""
+        try:
+            if self._con_i:
+                self._con_i.close()
+        except Exception:
+            pass
+
     @classmethod
     def get_instance(cls) -> ODSConnectionManager:
         """Get singleton instance."""
@@ -99,7 +107,13 @@ class ODSConnectionManager:
 
         try:
             if instance._con_i:
-                instance._con_i.close()
+                try:
+                    instance._con_i.close()
+                except Exception as close_err:
+                    # Log but don't fail if close has issues
+                    pass
+            
+            # Reset all connection state
             instance._con_i = None
             instance._model_cache = None
             instance._model = None

@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from google.protobuf.json_format import MessageToDict
 from mcp.types import TextContent
+from odsbox.jaquel import Jaquel
+from odsbox.proto import ods
 
+from ..connection import ODSConnectionManager
 from ..queries import JaquelExamples, QueryDebugger
 from .base_handler import BaseToolHandler
 
@@ -73,7 +77,7 @@ class QueryToolHandler(BaseToolHandler):
         """Suggest fixes for query errors."""
         try:
             issue = arguments.get("issue", "Unknown issue")
-            query = arguments.get("query")
+            query = arguments.get("query", {})
             suggestions = QueryDebugger.suggest_fixes_for_issue(issue, query)
             result = {"issue": issue, "suggestions": suggestions}
             return QueryToolHandler.json_response(result)
@@ -88,24 +92,185 @@ class QueryToolHandler(BaseToolHandler):
 
         explanation_parts = []
 
-        for entity_name, entity_spec in query.items():
-            explanation_parts.append(f"Query for entity: {entity_name}")
+        # Get model cache from ODS connection
+        connection = ODSConnectionManager.get_instance()
+        if not connection or not connection.is_connected():
+            raise RuntimeError("Not connected to ODS server. Cannot access model cache.")
 
-            if isinstance(entity_spec, dict):
-                if entity_spec.get("$where"):
-                    where_clause = entity_spec["$where"]
-                    explanation_parts.append(f"  Filter: {QueryDebugger.explain_filter(where_clause)}")
+        mc = connection.get_model_cache()
+        if not mc:
+            raise RuntimeError("Model cache not available. Ensure connection is properly established.")
 
-                if entity_spec.get("$select"):
-                    select_fields = entity_spec["$select"]
-                    explanation_parts.append(f"  Select: {', '.join(select_fields)}")
+        jaquel = Jaquel(model=mc.model(), jaquel_query=query)
+        select_statement: ods.SelectStatement = jaquel.select_statement
+        if select_statement.columns:
+            explanation_parts.append("Select Statement Columns:")
+            for column in select_statement.columns:
+                col_aggregate = (
+                    ods.AggregateEnum.Name(column.aggregate).replace("AG_", "")
+                    if column.aggregate != ods.AggregateEnum.AG_NONE
+                    else ""
+                )
+                entity_name = mc.entity_by_aid(column.aid).name
+                column_name = f"{entity_name}.{column.attribute}"
+                if col_aggregate:
+                    explanation_parts.append(f"  - {col_aggregate}({column_name})")
+                else:
+                    explanation_parts.append(f"  - {column_name}")
+        if select_statement.where:
+            explanation_parts.append("Where Clause:")
+            for condition in select_statement.where:
+                if condition.condition is not None:
+                    c_entity = mc.entity_by_aid(condition.condition.aid)
+                    c_attribute = condition.condition.attribute
+                    c_operator = ods.SelectStatement.ConditionItem.Condition.OperatorEnum.Name(
+                        condition.condition.operator
+                    ).replace("OP_", "")
+                    c_value = getattr(condition.condition, condition.condition.WhichOneof("ValueOneOf")).values
+                    c_value = c_value[0] if len(c_value) == 1 else c_value
+                    if isinstance(c_value, str):
+                        c_value = f"'{c_value}'"
+                    explanation_parts.append(f"  - Condition: {c_entity.name}.{c_attribute} {c_operator} {c_value}")
+                if condition.conjunction is not None:
+                    conjunction = ods.SelectStatement.ConditionItem.ConjuctionEnum.Name(condition.conjunction).replace(
+                        "CO_", ""
+                    )
+                    # conjunction OPEN and CLOSE are used as open brackets and close brackets in complex conditions
+                    explanation_parts.append(f"  - Conjunction: {conjunction}")
+        if select_statement.joins:
+            explanation_parts.append("Joins:")
+            for join in select_statement.joins:
+                left_entity = mc.entity_by_aid(join.aid_from)
+                right_entity = mc.entity_by_aid(join.aid_to)
+                join_rel = mc.relation_no_throw(left_entity, join.relation)
+                right_id = mc.attribute_by_base_name(right_entity, "id")
+                join_type = ods.SelectStatement.JoinItem.JoinTypeEnum.Name(join.join_type).replace("JT_", "")
+                explanation_parts.append(
+                    f"  - {join_type} Join: {left_entity.name}.{join_rel.name} "
+                    f"= {right_entity.name}.{right_id.name}"
+                )
+        if select_statement.order_by:
+            explanation_parts.append("Order By:")
+            for order in select_statement.order_by:
+                o_entity = mc.entity_by_aid(order.aid)
+                o_attribute = order.attribute
+                o_direction = ods.SelectStatement.OrderByItem.OrderEnum.Name(order.order).replace("OD_", "")
+                explanation_parts.append(f"  - {o_entity.name}.{o_attribute} {o_direction}")
+        if select_statement.group_by:
+            explanation_parts.append("Group By:")
+            for group in select_statement.group_by:
+                g_entity = mc.entity_by_aid(group.aid)
+                g_attribute = group.attribute
+                explanation_parts.append(f"  - {g_entity.name}.{g_attribute}")
+        if select_statement.row_limit > 0 or select_statement.row_start > 0:
+            explanation_parts.append(
+                f"Row Limit: {select_statement.row_limit}, Row Offset: {select_statement.row_start}"
+            )
+        if select_statement.values_limit > 0 or select_statement.values_start > 0:
+            explanation_parts.append(
+                f"Values Limit: {select_statement.values_limit}, " f"Values Offset: {select_statement.values_start}"
+            )
 
-                if entity_spec.get("$orderby"):
-                    order_fields = entity_spec["$orderby"]
-                    explanation_parts.append(f"  Order by: {', '.join(order_fields)}")
+        # Build SQL-like SELECT statement
+        explanation_parts.append("\n" + "=" * 50)
+        explanation_parts.append("SQL-like Representation:")
+        explanation_parts.append("=" * 50)
 
-                if entity_spec.get("$limit"):
-                    limit = entity_spec["$limit"]
-                    explanation_parts.append(f"  Limit: {limit} results")
+        # SELECT clause
+        select_parts = []
+        if select_statement.columns:
+            for column in select_statement.columns:
+                col_aggregate = (
+                    ods.AggregateEnum.Name(column.aggregate).replace("AG_", "")
+                    if column.aggregate != ods.AggregateEnum.AG_NONE
+                    else ""
+                )
+                entity_name = mc.entity_by_aid(column.aid).name
+                column_name = f"{entity_name}.{column.attribute}"
+                if col_aggregate:
+                    select_parts.append(f"{col_aggregate}({column_name})")
+                else:
+                    select_parts.append(column_name)
+
+        sql_lines = [f"SELECT {', '.join(select_parts) if select_parts else '*'}"]
+
+        # FROM clause
+        if select_statement.columns:
+            main_entity = mc.entity_by_aid(select_statement.columns[0].aid)
+            sql_lines.append(f"FROM {main_entity.name}")
+
+        # JOIN clause
+        if select_statement.joins:
+            for join in select_statement.joins:
+                left_entity = mc.entity_by_aid(join.aid_from)
+                right_entity = mc.entity_by_aid(join.aid_to)
+                join_rel = mc.relation_no_throw(left_entity, join.relation)
+                join_id = mc.attribute_by_base_name(right_entity, "id")
+                join_type = ods.SelectStatement.JoinItem.JoinTypeEnum.Name(join.join_type).replace("JT_", "")
+                if join_type == "DEFAULT":
+                    join_type = "INNER"
+                sql_lines.append(
+                    f"{join_type} JOIN {right_entity.name} ON {left_entity.name}.{join_rel.name} = {right_entity.name}.{join_id.name}"
+                )
+
+        # WHERE clause
+        if select_statement.where:
+            where_parts = []
+            for condition in select_statement.where:
+                if condition.condition is not None:
+                    c_entity = mc.entity_by_aid(condition.condition.aid)
+                    c_attribute = condition.condition.attribute
+                    c_operator = ods.SelectStatement.ConditionItem.Condition.OperatorEnum.Name(
+                        condition.condition.operator
+                    ).replace("OP_", "")
+                    c_value = getattr(condition.condition, condition.condition.WhichOneof("ValueOneOf")).values
+                    c_value = c_value[0] if len(c_value) == 1 else c_value
+                    if isinstance(c_value, str):
+                        c_value = f"'{c_value}'"
+                    where_parts.append(f"{c_entity.name}.{c_attribute} {c_operator} {c_value}")
+                if condition.conjunction is not None:
+                    conjunction = ods.SelectStatement.ConditionItem.ConjuctionEnum.Name(condition.conjunction).replace(
+                        "CO_", ""
+                    )
+                    if conjunction == "OPEN":
+                        where_parts.append("(")
+                    elif conjunction == "CLOSE":
+                        where_parts.append(")")
+                    elif conjunction in ("AND", "OR"):
+                        where_parts.append(conjunction)
+
+            if where_parts:
+                # Remove trailing AND/OR if present, but keep parentheses
+                while where_parts and where_parts[-1] in ("AND", "OR"):
+                    where_parts.pop()
+                if where_parts:
+                    sql_lines.append("WHERE " + " ".join(where_parts))
+
+        # GROUP BY clause
+        if select_statement.group_by:
+            group_parts = []
+            for group in select_statement.group_by:
+                g_entity = mc.entity_by_aid(group.aid)
+                g_attribute = group.attribute
+                group_parts.append(f"{g_entity.name}.{g_attribute}")
+            sql_lines.append("GROUP BY " + ", ".join(group_parts))
+
+        # ORDER BY clause
+        if select_statement.order_by:
+            order_parts = []
+            for order in select_statement.order_by:
+                o_entity = mc.entity_by_aid(order.aid)
+                o_attribute = order.attribute
+                o_direction = ods.SelectStatement.OrderByItem.OrderEnum.Name(order.order).replace("OD_", "")
+                order_parts.append(f"{o_entity.name}.{o_attribute} {o_direction}")
+            sql_lines.append("ORDER BY " + ", ".join(order_parts))
+
+        # LIMIT clause
+        if select_statement.row_limit > 0:
+            sql_lines.append(f"LIMIT {select_statement.row_limit}")
+        if select_statement.row_start > 0:
+            sql_lines.append(f"OFFSET {select_statement.row_start}")
+
+        explanation_parts.append("\n".join(sql_lines))
 
         return "\n".join(explanation_parts)
