@@ -215,8 +215,12 @@ class QueryToolHandler(BaseToolHandler):
         if not mc:
             raise RuntimeError("Model cache not available. Ensure connection is properly established.")
 
-        jaquel = Jaquel(model=mc.model(), jaquel_query=query)
-        select_statement: ods.SelectStatement = jaquel.select_statement
+        try:
+            jaquel = Jaquel(model=mc.model(), jaquel_query=query)
+            select_statement: ods.SelectStatement = jaquel.select_statement
+        except Exception as e:
+            raise RuntimeError(f"Failed to parse query: {str(e)}")
+
         if select_statement.columns:
             explanation_parts.append("Select Statement Columns:")
             for column in select_statement.columns:
