@@ -87,11 +87,11 @@ class QueryToolHandler(BaseToolHandler):
     @staticmethod
     def _generate_sql_representation(select_statement: ods.SelectStatement, mc) -> str:
         """Generate SQL-like representation of a SelectStatement.
-        
+
         Args:
             select_statement: Protobuf SelectStatement object
             mc: ModelCache object for entity/attribute lookups
-            
+
         Returns:
             SQL-like query string
         """
@@ -202,6 +202,10 @@ class QueryToolHandler(BaseToolHandler):
 
         explanation_parts = []
 
+        explanation_parts.append("\n" + "=" * 50)
+        explanation_parts.append("Textual Representation:")
+        explanation_parts.append("=" * 50)
+
         # Get model cache from ODS connection
         connection = ODSConnectionManager.get_instance()
         if not connection or not connection.is_connected():
@@ -281,11 +285,10 @@ class QueryToolHandler(BaseToolHandler):
                 f"Values Limit: {select_statement.values_limit}, " f"Values Offset: {select_statement.values_start}"
             )
 
-        # Build SQL-like SELECT statement
         explanation_parts.append("\n" + "=" * 50)
         explanation_parts.append("SQL-like Representation:")
         explanation_parts.append("=" * 50)
-        
+
         sql_representation = QueryToolHandler._generate_sql_representation(select_statement, mc)
         explanation_parts.append(sql_representation)
 
