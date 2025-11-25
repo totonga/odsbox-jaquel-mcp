@@ -13,9 +13,11 @@
   ```
 * Install mcp server and dependencies to local `.venv`
   ```
-  pip install ????\odsbox_jaquel_mcp-0.2.10-py3-none-any.whl
+  pip install odsbox_jaquel_mcp
   ```
-* Add MCP Server to VSCode with path `????\.venv\Scripts\odsbox-jaquel-mcp.exe` as `stdio`
+* Call `Add MCP Server` in VSCode with
+  * type: `stdio`
+  * path: `????\.venv\Scripts\odsbox-jaquel-mcp.exe`
 
 ## VSCode
 

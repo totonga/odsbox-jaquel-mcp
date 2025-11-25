@@ -41,6 +41,25 @@
 
 ## Quick Start
 
+### Install Requirements
+
+```bash
+python -m venv .venv
+.venv/bin/activate
+pip install odsbox-jaquel-mcp
+```
+
+### Running the Server
+
+```bash
+.venv/bin/activate
+python -m odsbox_jaquel_mcp
+```
+
+Starts on stdin/stdout and waits for MCP messages (used with an MCP client).
+
+## Development
+
 ### Clone
 
 ```bash
@@ -54,21 +73,8 @@ cd odsbox-jaquel-mcp
 python -m venv .venv
 .venv/bin/activate
 pip install .
-```
-
-dev requirements
-
-```bash
 pip install -e ".[dev]"
 ```
-
-### Running the Server
-
-```bash
-python -m odsbox_jaquel_mcp
-```
-
-Starts on stdin/stdout and waits for MCP messages (used with an MCP client).
 
 ### Testing
 
