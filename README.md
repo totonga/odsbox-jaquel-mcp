@@ -4,7 +4,7 @@
 ![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 ![Python](https://img.shields.io/badge/python-3.13%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
-![Build Status](https://img.shields.io/github/actions/workflow/status/totonga/odsbox-jaquel-mcp/ci.yml?branch=main)
+![Build Status](https://img.shields.io/github/actions/workflow/status/totonga/odsbox-jaquel-mcp/build.yml?branch=main)
 ![Stars](https://img.shields.io/github/stars/totonga/odsbox-jaquel-mcp?style=social)
 
 **A Model Context Protocol (MCP) server for ASAM ODS with Jaquel query tools, ODS connection management, and bulk data access.**
