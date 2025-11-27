@@ -184,7 +184,32 @@ class PromptLibrary:
         """
         arguments = arguments or {}
 
-        if prompt_name == "validate_query":
+        if prompt_name == "setup_ods_connection":
+            server_details = arguments.get("server_details", "")
+            content = (
+                "# Setting Up ODS Server Connection\n\n"
+                "Connect to your ASAM ODS server to enable live data model inspection and query data execution.\n\n"
+                "## Connection Steps:\n"
+                "1. Use `connect_ods_server` with your server URL, username, and password\n"
+                "2. Verify connection with `get_ods_connection_info`\n"
+                "3. Use `get_test_to_measurement_hierarchy` to explore hierarchy entity relations\n"
+                "4. List entities with `list_ods_entities` to explore the entity relationship model\n"
+                "5. Generate query templates with `generate_query_skeleton` for specific entity\n"
+                "6. Execute queries directly with `execute_ods_query`\n\n"
+                "## Available ODS Connection Tools:\n"
+                "- `connect_ods_server` - Establish connection\n"
+                "- `disconnect_ods_server` - Close connection\n"
+                "- `get_ods_connection_info` - Check current connection status\n"
+                "- `get_test_to_measurement_hierarchy` - Explore test-measurement relationships\n"
+                "- `list_ods_entities` - List available entities in the data model\n"
+                "- `generate_query_skeleton` - Create query templates for entity\n"
+                "- `execute_ods_query` - Run queries on live server\n\n"
+            )
+            if server_details:
+                content += f"**Your server details:** {server_details}\n"
+            return content
+
+        elif prompt_name == "validate_query":
             query_example = arguments.get("query_example", "")
             content = (
                 "# Validating Jaquel Queries\n\n"
@@ -225,31 +250,6 @@ class PromptLibrary:
             )
             if pattern_type:
                 content += f"**Pattern of interest:** {pattern_type}\n"
-            return content
-
-        elif prompt_name == "setup_ods_connection":
-            server_details = arguments.get("server_details", "")
-            content = (
-                "# Setting Up ODS Server Connection\n\n"
-                "Connect to your ASAM ODS server to enable live data model inspection and query data execution.\n\n"
-                "## Connection Steps:\n"
-                "1. Use `connect_ods_server` with your server URL, username, and password\n"
-                "2. Verify connection with `get_ods_connection_info`\n"
-                "3. Use `get_test_to_measurement_hierarchy` to explore hierarchy entity relations\n"
-                "4. List entities with `list_ods_entities` to explore the entity relationship model\n"
-                "5. Generate query templates with `generate_query_skeleton` for specific entity\n"
-                "6. Execute queries directly with `execute_ods_query`\n\n"
-                "## Available ODS Connection Tools:\n"
-                "- `connect_ods_server` - Establish connection\n"
-                "- `disconnect_ods_server` - Close connection\n"
-                "- `get_ods_connection_info` - Check current connection status\n"
-                "- `get_test_to_measurement_hierarchy` - Explore test-measurement relationships\n"
-                "- `list_ods_entities` - List available entities in the data model\n"
-                "- `generate_query_skeleton` - Create query templates for entity\n"
-                "- `execute_ods_query` - Run queries on live server\n\n"
-            )
-            if server_details:
-                content += f"**Your server details:** {server_details}\n"
             return content
 
         elif prompt_name == "build_filters":
