@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any
 
 import mcp.server.stdio
 from mcp import PromptsCapability, ServerCapabilities, ToolsCapability
@@ -21,7 +20,6 @@ from mcp.types import GetPromptResult, PromptMessage, TextContent, Tool, ToolAnn
 
 from . import __version__
 from .prompts import PromptLibrary
-from .queries import QueryDebugger
 from .tools import (
     ConnectionToolHandler,
     FilterToolHandler,
@@ -51,6 +49,7 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="validate_jaquel_query",
+            title="Validate Jaquel Query",
             description="Validate a Jaquel query structure for syntax errors and best practices",
             inputSchema={
                 "type": "object",
@@ -66,6 +65,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="validate_filter_condition",
+            title="Validate Filter Condition",
             description="Validate a WHERE clause filter condition in a Jaquel query",
             inputSchema={
                 "type": "object",
@@ -81,6 +81,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="get_operator_documentation",
+            title="Get Operator Documentation",
             description="Get documentation and examples for a Jaquel operator",
             inputSchema={
                 "type": "object",
@@ -96,6 +97,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="suggest_optimizations",
+            title="Suggest Query Optimizations",
             description="Suggest optimizations and simplifications for a Jaquel query",
             inputSchema={
                 "type": "object",
@@ -111,6 +113,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="get_query_pattern",
+            title="Get Query Pattern Template",
             description="Get a template for a common Jaquel query pattern",
             inputSchema={
                 "type": "object",
@@ -130,6 +133,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="list_query_patterns",
+            title="List Available Query Patterns",
             description="list all available Jaquel query patterns and templates",
             inputSchema={
                 "type": "object",
@@ -139,6 +143,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="generate_query_skeleton",
+            title="Generate Query Skeleton",
             description="Generate a query skeleton for a specific entity and operation",
             inputSchema={
                 "type": "object",
@@ -158,6 +163,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="build_filter_condition",
+            title="Build Filter Condition",
             description="Build a filter condition for WHERE clause",
             inputSchema={
                 "type": "object",
@@ -172,6 +178,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="explain_jaquel_query",
+            title="Explain Jaquel Query",
             description="Explain what a Jaquel query does",
             inputSchema={
                 "type": "object",
@@ -187,6 +194,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="merge_filter_conditions",
+            title="Merge Filter Conditions",
             description="Merge multiple filter conditions with AND/OR logic",
             inputSchema={
                 "type": "object",
@@ -208,6 +216,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="check_entity_schema",
+            title="Check Entity Schema",
             description="Get available fields for an entity from ODS model",
             inputSchema={
                 "type": "object",
@@ -223,6 +232,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="validate_field_exists",
+            title="Validate Field Exists",
             description="Check if a field exists in entity schema",
             inputSchema={
                 "type": "object",
@@ -236,6 +246,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="validate_filter_against_schema",
+            title="Validate Filter Against Schema",
             description="Validate filter against actual entity schema",
             inputSchema={
                 "type": "object",
@@ -252,6 +263,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="debug_query_steps",
+            title="Debug Query Steps",
             description="Break down a query into steps for debugging",
             inputSchema={
                 "type": "object",
@@ -267,6 +279,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="suggest_error_fixes",
+            title="Suggest Error Fixes",
             description="Get suggestions to fix query errors",
             inputSchema={
                 "type": "object",
@@ -283,6 +296,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="connect_ods_server",
+            title="Connect to ODS Server",
             description="Establish connection to ASAM ODS server for live model inspection",
             inputSchema={
                 "type": "object",
@@ -300,6 +314,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="disconnect_ods_server",
+            title="Disconnect from ODS Server",
             description="Close connection to ODS server",
             inputSchema={
                 "type": "object",
@@ -309,6 +324,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="get_ods_connection_info",
+            title="Get ODS Connection Information",
             description="Get current ODS connection information",
             inputSchema={
                 "type": "object",
@@ -318,6 +334,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="list_ods_entities",
+            title="List ODS Entities",
             description="Return a list of existing entities from the ODS server ModelCache",
             inputSchema={
                 "type": "object",
@@ -327,6 +344,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="execute_ods_query",
+            title="Execute ODS Query",
             description="Execute a Jaquel query directly on connected ODS server",
             inputSchema={
                 "type": "object",
@@ -342,6 +360,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="get_submatrix_measurement_quantities",
+            title="Get Submatrix Measurement Quantities",
             description="Get available measurement quantities for a submatrix",
             inputSchema={
                 "type": "object",
@@ -357,6 +376,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="read_submatrix_data",
+            title="Read Submatrix Data",
             description="Read timeseries data from a submatrix using bulk data access",
             inputSchema={
                 "type": "object",
@@ -389,6 +409,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="generate_submatrix_fetcher_script",
+            title="Generate Submatrix Fetcher Script",
             description=(
                 "Generate Python scripts for fetching submatrix data " "with error handling and data processing"
             ),
@@ -429,6 +450,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="generate_measurement_comparison_notebook",
+            title="Generate Measurement Comparison Notebook",
             description="Generate a Jupyter notebook for comparing measurements",
             inputSchema={
                 "type": "object",
@@ -485,6 +507,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="generate_plotting_code",
+            title="Generate Plotting Code",
             description="Generate Python plotting code for measurement comparison",
             inputSchema={
                 "type": "object",
@@ -514,6 +537,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="compare_measurements",
+            title="Compare Measurements",
             description="Compare measurements across quantities with statistical analysis",
             inputSchema={
                 "type": "object",
@@ -537,6 +561,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="query_measurement_hierarchy",
+            title="Query Measurement Hierarchy",
             description="Query and explore ODS measurement hierarchy and structure",
             inputSchema={
                 "type": "object",
@@ -572,6 +597,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="get_bulk_api_help",
+            title="Get Bulk API Help",
             description=(
                 "Get help and guidance on using the Bulk API for loading timeseries data. "
                 "Use this to understand the 3-step workflow and common patterns."
@@ -614,6 +640,7 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="get_test_to_measurement_hierarchy",
+            title="Get Test to Measurement Hierarchy",
             description="Get hierarchical entity chain from AoTest to AoMeasurement via 'children' relation",
             inputSchema={
                 "type": "object",
