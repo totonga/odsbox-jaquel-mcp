@@ -99,6 +99,13 @@ install whl package
 pip install dist/odsbox_jaquel_mcp-0.1.0-py3-none-any.whl
 ```
 
+### MCP Inspector
+
+Make sure npm and uv are installed, then run:
+
+```
+npx @modelcontextprotocol/inspector uvx odsbox-jaquel-mcp
+```
 
 ## Contributing
 
