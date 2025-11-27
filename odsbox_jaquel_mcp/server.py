@@ -19,6 +19,7 @@ from mcp import PromptsCapability, ServerCapabilities, ToolsCapability
 from mcp.server import InitializationOptions, Server
 from mcp.types import GetPromptResult, PromptMessage, TextContent, Tool
 
+from . import __version__
 from .prompts import PromptLibrary
 from .queries import QueryDebugger
 from .tools import (
@@ -628,6 +629,7 @@ async def get_prompt(name: str, arguments: dict | None = None) -> GetPromptResul
         ],
     )
 
+
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     """Handle MCP tool calls by delegating to appropriate tool handlers."""
@@ -764,8 +766,8 @@ async def main():
             read_stream,
             write_stream,
             InitializationOptions(
-                server_name="odsbox-jaquel",
-                server_version="1.0.0",
+                server_name="odsbox-jaquel-mcp",
+                server_version=__version__,
                 capabilities=ServerCapabilities(
                     tools=ToolsCapability(listChanged=True),
                     prompts=PromptsCapability(listChanged=True),
