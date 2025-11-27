@@ -46,8 +46,10 @@
 ```bash
 python -m venv .venv
 .venv/bin/activate
-pip install odsbox-jaquel-mcp
+pip install odsbox-jaquel-mcp[play]
 ```
+
+> Remark: [play] extra includes optional data analysis and visualization dependencies to allow using the virtual environment to work with the MCP server and do data analysis in Jupyter notebooks ans so on.
 
 ### Running the Server
 
