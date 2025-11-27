@@ -17,7 +17,7 @@ from typing import Any
 import mcp.server.stdio
 from mcp import PromptsCapability, ServerCapabilities, ToolsCapability
 from mcp.server import InitializationOptions, Server
-from mcp.types import GetPromptResult, PromptMessage, TextContent, Tool
+from mcp.types import GetPromptResult, PromptMessage, TextContent, Tool, ToolAnnotations
 
 from . import __version__
 from .prompts import PromptLibrary
@@ -62,6 +62,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["query"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="validate_filter_condition",
@@ -76,6 +77,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["condition"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="get_operator_documentation",
@@ -90,6 +92,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["operator"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="suggest_optimizations",
@@ -104,6 +107,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["query"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="get_query_pattern",
@@ -122,6 +126,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["pattern"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="list_query_patterns",
@@ -130,6 +135,7 @@ async def list_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {},
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="generate_query_skeleton",
@@ -148,6 +154,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["entity_name"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="build_filter_condition",
@@ -161,6 +168,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["field", "operator", "value"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="explain_jaquel_query",
@@ -175,6 +183,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["query"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="merge_filter_conditions",
@@ -195,6 +204,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["conditions", "operator"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="check_entity_schema",
@@ -209,6 +219,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["entity_name"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="validate_field_exists",
@@ -221,6 +232,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["entity_name", "field_name"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="validate_filter_against_schema",
@@ -236,6 +248,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["entity_name", "filter_condition"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="debug_query_steps",
@@ -250,6 +263,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["query"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="suggest_error_fixes",
@@ -265,6 +279,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["issue"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="connect_ods_server",
@@ -281,6 +296,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["url", "username", "password"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="disconnect_ods_server",
@@ -289,6 +305,7 @@ async def list_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {},
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="get_ods_connection_info",
@@ -297,6 +314,7 @@ async def list_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {},
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="list_ods_entities",
@@ -305,6 +323,7 @@ async def list_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {},
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="execute_ods_query",
@@ -319,6 +338,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["query"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="get_submatrix_measurement_quantities",
@@ -333,6 +353,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["submatrix_id"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="read_submatrix_data",
@@ -364,6 +385,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["submatrix_id"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="generate_submatrix_fetcher_script",
@@ -403,6 +425,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["submatrix_id", "script_type"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="generate_measurement_comparison_notebook",
@@ -458,6 +481,7 @@ async def list_tools() -> list[Tool]:
                     "ods_password",
                 ],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="generate_plotting_code",
@@ -486,6 +510,7 @@ async def list_tools() -> list[Tool]:
                     "plot_type",
                 ],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="compare_measurements",
@@ -508,6 +533,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["quantity_name", "measurement_data"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="query_measurement_hierarchy",
@@ -542,6 +568,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["query_result", "operation"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="get_bulk_api_help",
@@ -583,6 +610,7 @@ async def list_tools() -> list[Tool]:
                 },
                 "required": ["topic"],
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
         Tool(
             name="get_test_to_measurement_hierarchy",
@@ -591,6 +619,7 @@ async def list_tools() -> list[Tool]:
                 "type": "object",
                 "properties": {},
             },
+            annotations=ToolAnnotations(readOnlyHint=True),
         ),
     ]
 
