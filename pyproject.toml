@@ -2,7 +2,6 @@
 requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
-
 [project]
 name = "odsbox-jaquel-mcp"
 dynamic = ["version"]
@@ -11,25 +10,37 @@ readme = "README.md"
 requires-python = ">=3.13"
 license = {text = "Apache-2.0"}
 authors = [
-    {name = "Assistant", email = "assistant@example.com"}
+    {name = "Andreas K", email = "totonga@gmail.com"}
 ]
-keywords = ["mcp", "jaquel", "odsbox", "asam", "ods"]
+keywords = [
+    "mcp",
+    "jaquel",
+    "odsbox",
+    "asam",
+    "ods",
+    "measurement",
+    "data access",
+    "data science",
+    "data analysis"
+]
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+    "Topic :: System :: Monitoring",
+    "Topic :: Database :: Front-Ends",
 ]
-
 dependencies = [
     "mcp>=0.1.0",
     "odsbox>=1.0.14",
     "pip-system-certs",
     "matplotlib",
-    "flask",
-    "plotly",
-    "seaborn",
-    "scipy",
-    "PyQt5",
-    "jupyter",
 ]
 
 [project.optional-dependencies]
@@ -42,9 +53,23 @@ dev = [
     "mypy>=1.0",
     "build>=0.8.0",
 ]
+play = [
+    "flask",
+    "plotly",
+    "seaborn",
+    "scipy",
+    "PyQt5",
+    "jupyter",
+]
 
 [project.scripts]
 odsbox-jaquel-mcp = "odsbox_jaquel_mcp.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/totonga/odsbox-jaquel-mcp/tree/main#readme"
+Documentation = "https://github.com/totonga/odsbox-jaquel-mcp/tree/main#readme"
+Repository = "https://github.com/totonga/odsbox-jaquel-mcp"
+Tracker = "https://github.com/totonga/odsbox-jaquel-mcp/issues"
 
 [tool.black]
 line-length = 119
