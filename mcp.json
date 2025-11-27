@@ -1,6 +1,6 @@
 {
     "name": "odsbox-jaquel-mcp",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "ASAM ODS Jaquel MCP Server - Query builder and validator for ASAM ODS Jaquel database queries",
     "author": "totonga",
     "license": "Apache-2.0",
