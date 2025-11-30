@@ -1,0 +1,22 @@
+{
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "name": "io.github.totonga/odsbox-jaquel-mcp",
+    "title": "ASAM ODS odsbox jaquel MCP Server",
+    "description": "A Model Context Protocol server for ASAM ODS with odsbox Jaquel query tools, ODS connection management, and measurement data access",
+    "repository": {
+        "url": "https://github.com/totonga/odsbox-jaquel-mcp",
+        "source": "github"
+    },
+    "version": "0.3.5",
+    "packages": [
+        {
+            "registryType": "pypi",
+            "identifier": "odsbox-jaquel-mcp",
+            "version": "0.3.5",
+            "transport": {
+                "type": "stdio"
+            },
+            "runtimeHint": "uvx"
+        }
+    ]
+}

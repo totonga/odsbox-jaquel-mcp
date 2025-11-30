@@ -8,6 +8,8 @@
 ![Build Status](https://img.shields.io/github/actions/workflow/status/totonga/odsbox-jaquel-mcp/build.yml?branch=main)
 ![Stars](https://img.shields.io/github/stars/totonga/odsbox-jaquel-mcp?style=social)
 
+<!-- mcp-name: io.github.totonga/odsbox-jaquel-mcp -->
+
 **A Model Context Protocol (MCP) server for ASAM ODS with odsbox Jaquel query tools, ODS connection management, and measurement data access.**
 
 ---
