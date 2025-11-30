@@ -44,6 +44,10 @@ Desktop.ini
 # Logs
 *.log
 
+# MCP Registry tokens
+.mcpregistry_registry_token
+.mcpregistry_github_token
+
 # Testing
 .pytest_cache/
 .coverage

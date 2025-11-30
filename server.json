@@ -2,7 +2,7 @@
     "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
     "name": "io.github.totonga/odsbox-jaquel-mcp",
     "title": "ASAM ODS odsbox jaquel MCP Server",
-    "description": "A Model Context Protocol server for ASAM ODS with odsbox Jaquel query tools, ODS connection management, and measurement data access",
+    "description": "MCP server for ASAM ODS with Jaquel query tools, connection management, and data access",
     "repository": {
         "url": "https://github.com/totonga/odsbox-jaquel-mcp",
         "source": "github"
