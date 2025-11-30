@@ -1,7 +1,7 @@
 {
     "name": "odsbox-jaquel-mcp",
     "version": "0.3.4",
-    "description": "ASAM ODS Jaquel MCP Server - Query builder and validator for ASAM ODS Jaquel database queries",
+    "description": "ASAM ODS odsbox MCP Server - Query server using jaquel queries and load measurement data",
     "author": "totonga",
     "license": "Apache-2.0",
     "homepage": "https://github.com/totonga/odsbox-jaquel-mcp",
@@ -10,10 +10,9 @@
         "type": "git",
         "url": "https://github.com/totonga/odsbox-jaquel-mcp.git"
     },
-    "command": "python",
+    "command": "uvx",
     "args": [
-        "-m",
-        "odsbox_jaquel_mcp"
+        "odsbox-jaquel-mcp"
     ],
     "env": {},
     "categories": [
