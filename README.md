@@ -1,13 +1,14 @@
 
 # ASAM ODS Jaquel MCP Server
 
+![PyPI version](https://img.shields.io/pypi/v/odsbox-jaquel-mcp.svg)
 ![Apache 2.0 License](https://img.shields.io/badge/license-Apache%202.0-green.svg)
 ![Python](https://img.shields.io/badge/python-3.13%2B-blue.svg)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/totonga/odsbox-jaquel-mcp/build.yml?branch=main)
 ![Stars](https://img.shields.io/github/stars/totonga/odsbox-jaquel-mcp?style=social)
 
-**A Model Context Protocol (MCP) server for ASAM ODS with Jaquel query tools, ODS connection management, and bulk data access.**
+**A Model Context Protocol (MCP) server for ASAM ODS with odsbox Jaquel query tools, ODS connection management, and measurement data access.**
 
 ---
 
@@ -30,80 +31,116 @@
 
 ## Documentation
 
-- **Prompts Guide:** See [`PROMPTS.md`](PROMPTS.md) for starting prompts documentation
-- **Tool Reference:** See [`TOOLS_GUIDE.md`](TOOLS_GUIDE.md)
-- **Setup:** See [`docs/setup.md`](docs/setup.md) for installation and configuration
-- **Development:**
-  - Run: `python -m odsbox_jaquel_mcp`
-  - Test: `python run_tests.py` or `pytest tests/`
-  - Sort imports: `python -m isort .` (VS Code runs this automatically on save when `source.organizeImports` is enabled)
-  - Lint: `black .` and `flake8 .`
+- **Prompts Guide:** See [`PROMPTS.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/PROMPTS.md) for starting prompts documentation
+- **Tool Reference:** See [`TOOLS_GUIDE.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/TOOLS_GUIDE.md)
 
 ## Quick Start
 
-### Install Requirements
+### Installation
+
+#### Using uvx (Recommended)
+
+The easiest way to use this MCP server is with `uvx`:
+
+```bash
+uvx odsbox-jaquel-mcp
+```
+
+This automatically installs and runs the server without managing virtual environments.
+
+#### Using pipx
+
+For a persistent installation:
+
+```bash
+pipx install odsbox-jaquel-mcp
+odsbox-jaquel-mcp
+```
+
+#### Traditional pip Installation
 
 ```bash
 python -m venv .venv
-.venv/bin/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install odsbox-jaquel-mcp[play]
 ```
 
-> Remark: [play] extra includes optional data analysis and visualization dependencies to allow using the virtual environment to work with the MCP server and do data analysis in Jupyter notebooks ans so on.
+> **Note:** The `[play]` extra includes optional data analysis and visualization dependencies (pandas, matplotlib, scipy) for working with Jupyter notebooks and data analysis.
 
 ### Running the Server
 
+The server runs on stdin/stdout and waits for MCP messages from an MCP client:
+
 ```bash
-.venv/bin/activate
+# With uvx (auto-installs and runs)
+uvx odsbox-jaquel-mcp
+
+# With pipx (if installed)
+odsbox-jaquel-mcp
+
+# With pip in virtual environment
 python -m odsbox_jaquel_mcp
 ```
 
-Starts on stdin/stdout and waits for MCP messages (used with an MCP client).
+### Configuration for MCP Clients
+
+Add to your MCP client configuration (e.g., Claude Desktop, VS Code):
+
+```json
+{
+  "mcpServers": {
+    "odsbox-jaquel": {
+      "command": "uvx",
+      "args": ["odsbox-jaquel-mcp"]
+    }
+  }
+}
+```
+
+Or with pipx:
+
+```json
+{
+  "mcpServers": {
+    "odsbox-jaquel": {
+      "command": "odsbox-jaquel-mcp"
+    }
+  }
+}
+```
 
 ## Development
 
-### Clone
+### Setup
 
 ```bash
 git clone https://github.com/totonga/odsbox-jaquel-mcp.git
 cd odsbox-jaquel-mcp
-```
-
-### Install Requirements
-
-```bash
 python -m venv .venv
-.venv/bin/activate
-pip install .
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 ```
 
-### Testing
+### Common Tasks
 
-Run tests:
 ```bash
-python run_tests.py
-# or
+# Run server locally
+python -m odsbox_jaquel_mcp
+
+# Run tests
 pytest tests/
-```
+# or
+python run_tests.py
 
-### Building the Package
+# Code formatting and linting
+black .
+isort .
+flake8 .
 
-```bash
+# Build package
 python -m build
-```
 
-install whl package
-
-```bash
-pip install dist/odsbox_jaquel_mcp-0.1.0-py3-none-any.whl
-```
-
-### MCP Inspector
-
-Make sure npm and uv are installed, then run:
-
-```
+# Test with MCP Inspector
 npx @modelcontextprotocol/inspector uvx odsbox-jaquel-mcp
 ```
 
@@ -116,7 +153,7 @@ Pull requests and issues are welcome! Please:
 
 ## License
 
-This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
+This project is licensed under the Apache License 2.0. See [LICENSE](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/LICENSE).
 
 ## Links
 
@@ -175,7 +212,7 @@ Discover and use the server's capabilities through **interactive guided prompts*
 - **Measurement Analysis** - Compare measurements and visualize data
 - **Optimize & Debug** - Improve query performance
 
-See [`PROMPTS.md`](PROMPTS.md) for complete details on all starting prompts.
+See [`PROMPTS.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/PROMPTS.md) for complete details on all starting prompts.
 
 
 ## Error Handling
