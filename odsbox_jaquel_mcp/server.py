@@ -14,15 +14,17 @@ import asyncio
 import json
 
 import mcp.server.stdio
-from mcp import PromptsCapability, ServerCapabilities, ToolsCapability
 from mcp.server import InitializationOptions, Server
 from mcp.types import (
     GetPromptResult,
     Icon,
     PromptMessage,
+    PromptsCapability,
+    ServerCapabilities,
     TextContent,
     Tool,
     ToolAnnotations,
+    ToolsCapability,
 )
 
 from . import __version__
@@ -864,6 +866,28 @@ async def main():
                     tools=ToolsCapability(listChanged=True),
                     prompts=PromptsCapability(listChanged=True),
                 ),
+                instructions="""
+This MCP server helps you to access content of an ASAM ODS server using odsbox Jaquel queries.
+
+Key capabilities:
+- Connect to ODS servers for live model inspection
+- Extract ASAM ODS model hierarchy and entity schemas
+- Generate query skeletons for common patterns
+- Read and analyze submatrix measurement data
+- Explain and optimize jaquel queries
+- Generate comparison notebooks and visualizations
+
+Use the available tools to:
+1. Access ODS data directly with connection tools
+2. Inspect server model and entity schemas
+3. Build queries with query patterns and skeletons
+4. Explain jaquel queries against actual entity schemas
+5. Generate analysis scripts for measurement inspection and comparisons
+
+For detailed documentation, visit: https://github.com/totonga/odsbox-jaquel-mcp
+""",
+                website_url="https://github.com/totonga/odsbox-jaquel-mcp/tree/main#readme",
+                icons=[Icon(src="📦")],
             ),
         )
 
