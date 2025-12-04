@@ -744,6 +744,12 @@ async def list_resources() -> list[Resource]:
     return ResourceLibrary.get_all_resources()
 
 
+@server.list_resource_templates()
+async def list_resource_templates():
+    """List available resource templates for dynamic content."""
+    return ResourceLibrary.get_all_resource_templates()
+
+
 @server.read_resource()
 async def read_resource(uri: AnyUrl):
     """Read reference resources about ODS connection and workflows."""

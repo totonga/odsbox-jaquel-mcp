@@ -293,6 +293,63 @@ class SchemaInspector:
             return {"error": str(e), "entity": entity_name}
 
     @classmethod
+    def format_entity_schema_as_markdown(cls, entity_name: str) -> str:
+        """Format entity schema as markdown for resource template.
+
+        Args:
+            entity_name: Name of the entity
+
+        Returns:
+            Markdown-formatted schema documentation
+        """
+        schema = cls.get_entity_schema(entity_name)
+
+        if "error" in schema:
+            return f"""# Entity Schema: {entity_name}
+
+**Error**: {schema['error']}
+
+{f"**Available entities**: {', '.join(schema.get('available_entities', []))}" if schema.get('available_entities') else ""}
+
+Use `list_ods_entities` tool to see all available entities.
+"""
+
+        entity = schema.get("entity", entity_name)
+        description = schema.get("description", "No description available")
+        derived_from = schema.get("derived_from", "Unknown")
+
+        md = f"""# Entity Schema: {entity}
+
+**Base Name**: `{derived_from}`
+
+{f"**Description**: {description}" if description else ""}
+
+## Attributes
+
+| Name | Base Name | Data Type | Array | Nullable |
+|------|-----------|-----------|-------|----------|
+"""
+
+        for attr_name, attr_info in sorted(schema.get("attributes", {}).items()):
+            is_array = "✓" if attr_info.get("is_array") else "✗"
+            nullable = "✓" if attr_info.get("nullable") else "✗"
+            md += f"| `{attr_name}` | `{attr_info['base_name']}` | {attr_info['data_type']} | {is_array} | {nullable} |\n"
+
+        md += "\n## Relationships\n\n"
+        md += "| Name | Target Entity | Type | Nullable | Inverse | Inverse Type |\n"
+        md += "|------|---------------|------|----------|---------|---------------|\n"
+
+        for rel_name, rel_info in sorted(schema.get("relationships", {}).items()):
+            nullable = "✓" if rel_info.get("nullable") else "✗"
+            md += (
+                f"| `{rel_name}` | `{rel_info['target_entity']}` | "
+                f"{rel_info['relationship_type']} | {nullable} | "
+                f"`{rel_info['inverse_name']}` | {rel_info['relationship']} |\n"
+            )
+
+        return md
+
+    @classmethod
     def validate_field_exists(cls, entity_name: str, field_name: str) -> dict[str, Any]:
         """Check if field exists in entity."""
         schema = cls.get_entity_schema(entity_name)
