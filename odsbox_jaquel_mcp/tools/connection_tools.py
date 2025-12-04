@@ -26,8 +26,11 @@ class ConnectionToolHandler(BaseToolHandler):
             password = arguments.get("password")
             if not password or not isinstance(password, str) or not password.strip():
                 raise ValueError("password must be a non-empty string")
+            verify = arguments.get("verify", True)
+            if not isinstance(verify, bool):
+                raise ValueError("verify must be a boolean")
 
-            result = ODSConnectionManager.connect(url=url, auth=(username, password))
+            result = ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify)
             return ConnectionToolHandler.json_response(result)
         except Exception as e:
             return ConnectionToolHandler.error_response(str(e), type(e).__name__)
