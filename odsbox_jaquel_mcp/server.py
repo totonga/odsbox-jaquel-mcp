@@ -872,24 +872,122 @@ async def main():
                     prompts=PromptsCapability(listChanged=True),
                 ),
                 instructions="""
-This MCP server helps you to access content of an ASAM ODS server using odsbox Jaquel queries.
+# ASAM ODS Jaquel MCP Server
 
-Key capabilities:
-- Connect to ODS servers for live model inspection
-- Extract ASAM ODS model hierarchy and entity schemas
-- Generate query skeletons for common patterns
-- Read and analyze submatrix measurement data
-- Explain and optimize jaquel queries
-- Generate comparison notebooks and visualizations
+This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. It provides 29+ tools across 7 categories.
 
-Use the available tools to:
-1. Access ODS data directly with connection tools
-2. Inspect server model and entity schemas
-3. Build queries with query patterns and skeletons
-4. Explain jaquel queries against actual entity schemas
-5. Generate analysis scripts for measurement inspection and comparisons
+## 🚀 QUICK START - Choose Your Path
 
-For detailed documentation, visit: https://github.com/totonga/odsbox-jaquel-mcp
+**Path 1: Connect to ODS & Execute Queries**
+- `connect_ods_server` → `list_ods_entities` → `get_test_to_measurement_hierarchy` → `execute_ods_query`
+- Or: `read_submatrix_data` for efficient timeseries access
+- Generate reusable scripts: `generate_submatrix_fetcher_script`
+
+**Path 2: Analysis & Visualization**
+- Execute queries to get data
+- `compare_measurements` for statistical analysis
+- `generate_measurement_comparison_notebook` for Jupyter notebooks
+- `generate_plotting_code` for matplotlib visualizations
+
+**Path 3: Query Validation & Optimization**
+- Use `validate_jaquel_query` to check query syntax
+- `suggest_optimizations` for performance improvements
+- `debug_query_steps` to troubleshoot issues
+
+## 📚 TOOL CATEGORIES
+
+**Validation & Debugging (7 tools)**
+- Check queries: `validate_jaquel_query`, `explain_jaquel_query`, `debug_query_steps`
+- Fix errors: `suggest_error_fixes`, `suggest_optimizations`
+- Check operators: `get_operator_documentation`
+
+**Query Building (9 tools)**
+- Skeletons: `generate_query_skeleton`
+- Patterns: `list_query_patterns`, `get_query_pattern`
+- Build filters: `build_filter_condition`, `merge_filter_conditions`
+
+**Schema & Entity Inspection (5 tools)**
+- List entities: `list_ods_entities`, `get_test_to_measurement_hierarchy`
+- Check fields: `check_entity_schema`, `validate_field_exists`
+- Validate against schema: `validate_filter_against_schema`
+
+**ODS Connection (3 tools)**
+- Manage: `connect_ods_server`, `disconnect_ods_server`, `get_ods_connection_info`
+
+**Data Access (3 tools)**
+- Submatrix: `read_submatrix_data`, `get_submatrix_measurement_quantities`
+- Scripts: `generate_submatrix_fetcher_script`
+
+**Analysis & Visualization (4 tools)**
+- Compare: `compare_measurements`, `query_measurement_hierarchy`
+- Notebooks: `generate_measurement_comparison_notebook`
+- Plots: `generate_plotting_code`
+
+**Help & Documentation (1 tool)**
+- `get_bulk_api_help` - Comprehensive Bulk API guidance
+
+## 💡 COMMON WORKFLOWS
+
+**Workflow 1: Connect to ODS & Execute Query**
+1. `connect_ods_server` - Provide URL, username, password
+2. `list_ods_entities` - See available entities
+3. `get_test_to_measurement_hierarchy` - Explore test to measurement structure
+4. `check_entity_schema` - Inspect entity fields
+5. `validate_filter_against_schema` - Test filter with real schema
+6. `execute_ods_query` - Run your query
+7. Analyze results with measurement tools
+
+**Workflow 2: Read Timeseries Data Efficiently**
+1. `get_submatrix_measurement_quantities` - See available data
+2. `read_submatrix_data` - Fetch with pattern matching
+3. `generate_submatrix_fetcher_script` - Create reusable Python script
+4. Use script for automation
+
+**Workflow 3: Compare Multiple Measurements**
+1. Execute query to get measurements
+2. `query_measurement_hierarchy` - Explore structure (extract_measurements, get_unique_quantities)
+3. `generate_measurement_comparison_notebook` - Create Jupyter notebook
+4. `compare_measurements` - Statistical analysis
+5. `generate_plotting_code` - Matplotlib code for custom plots
+
+## ⚠️ KEY TIPS
+
+- **Connection State**: Connection persists across tool calls. Call `disconnect_ods_server` when done.
+- **Bulk API**: For large timeseries data (submatrices), prefer `read_submatrix_data` over `execute_ods_query`
+- **Pattern Matching**: `read_submatrix_data` supports wildcards for efficient data filtering (e.g., "Temp*", "*Speed")
+
+## ❓ WHEN TO USE WHICH TOOL
+
+**"How do I...?"**
+- "...start building a query?" → `list_query_patterns`
+- "...validate query?" → `explain_jaquel_query`
+- "...connect to ODS?" → `connect_ods_server`
+- "...connect to ASAM ODS?" → `connect_ods_server`
+- "...find entities?" → `list_ods_entities`
+- "...understand structure?" → `get_test_to_measurement_hierarchy` or `check_entity_schema`
+- "...read measurement data?" → `read_submatrix_data` or `execute_ods_query`
+- "...create a reusable script?" → `generate_submatrix_fetcher_script`
+- "...compare measurements?" → `compare_measurements` + `generate_measurement_comparison_notebook`
+- "...understand submatrix data access?" → `get_bulk_api_help`
+
+## 📖 INTERACTIVE STARTING PROMPTS
+
+Use these for guided workflows:
+- `setup_ods_connection` - Learn connection management
+- `validate_query` - Validate queries step-by-step
+- `explore_patterns` - Discover query patterns
+- `build_filters` - Master filter conditions
+- `bulk_data_access` - Learn Bulk API 3-step workflow
+- `analyze_measurements` - Statistical analysis & visualization
+- `optimize_query` - Debug and optimize queries
+
+## 🔗 DOCUMENTATION & EXAMPLES
+
+- **Tool Guide**: https://github.com/totonga/odsbox-jaquel-mcp/blob/main/TOOLS_GUIDE.md
+- **Prompts Guide**: https://github.com/totonga/odsbox-jaquel-mcp/blob/main/PROMPTS.md
+- **Full README**: https://github.com/totonga/odsbox-jaquel-mcp
+
+**Pro Tip**: Always review tool descriptions and examples to understand input/output formats!
 """,
                 website_url="https://github.com/totonga/odsbox-jaquel-mcp/tree/main#readme",
                 icons=[Icon(src="📦")],
