@@ -1,7 +1,7 @@
 """Tests for MCP resource handler integration."""
 
 import pytest
-from mcp.types import Resource, TextResourceContents
+from mcp.types import Resource
 
 from odsbox_jaquel_mcp.server import list_resources, read_resource
 
@@ -43,84 +43,101 @@ class TestResourceHandlers:
         assert resource_uris == valid_uris
 
     @pytest.mark.asyncio
-    async def test_read_resource_returns_text_content(self):
-        """Test that read_resource handler returns TextResourceContents object."""
-        content = await read_resource("file:///odsbox/ods-connection-guide")
+    async def test_read_resource_returns_list(self):
+        """Test that read_resource handler returns a list of resource content items."""
+        result = await read_resource("file:///odsbox/ods-connection-guide")
 
-        assert isinstance(content, TextResourceContents)
-        assert hasattr(content, "uri")
-        assert hasattr(content, "mimeType")
-        assert hasattr(content, "text")
-        assert content.mimeType == "text/markdown"
+        assert isinstance(result, list)
+        assert len(result) == 1
+
+    @pytest.mark.asyncio
+    async def test_read_resource_item_has_correct_attributes(self):
+        """Test that resource content items have .content and .mime_type attributes."""
+        result = await read_resource("file:///odsbox/ods-connection-guide")
+
+        assert len(result) > 0
+        content_item = result[0]
+        assert hasattr(content_item, "content")
+        assert hasattr(content_item, "mime_type")
 
     @pytest.mark.asyncio
     async def test_read_resource_content_is_not_empty(self):
         """Test that read_resource returns non-empty content."""
-        content = await read_resource("file:///odsbox/ods-connection-guide")
+        result = await read_resource("file:///odsbox/ods-connection-guide")
 
-        assert isinstance(content.text, str)
-        assert len(content.text) > 0
+        assert len(result) > 0
+        content_item = result[0]
+        assert isinstance(content_item.content, str)
+        assert len(content_item.content) > 0
 
     @pytest.mark.asyncio
     async def test_read_resource_ods_connection_guide(self):
         """Test reading ODS connection guide resource."""
-        content = await read_resource("file:///odsbox/ods-connection-guide")
+        result = await read_resource("file:///odsbox/ods-connection-guide")
 
-        assert "ODS Connection" in content.text
-        assert "Prerequisites" in content.text
+        content = result[0].content
+        assert "ODS Connection" in content
+        assert "Prerequisites" in content
 
     @pytest.mark.asyncio
     async def test_read_resource_ods_workflow_reference(self):
         """Test reading ODS workflow reference resource."""
-        content = await read_resource("file:///odsbox/ods-workflow-reference")
+        result = await read_resource("file:///odsbox/ods-workflow-reference")
 
-        assert "Workflow" in content.text or "workflow" in content.text.lower()
+        content = result[0].content
+        assert "Workflow" in content or "workflow" in content.lower()
 
     @pytest.mark.asyncio
     async def test_read_resource_ods_entity_hierarchy(self):
         """Test reading ODS entity hierarchy resource."""
-        content = await read_resource("file:///odsbox/ods-entity-hierarchy")
+        result = await read_resource("file:///odsbox/ods-entity-hierarchy")
 
-        assert "Entity" in content.text or "entity" in content.text.lower()
-        assert "AoTest" in content.text
+        content = result[0].content
+        assert "Entity" in content or "entity" in content.lower()
+        assert "AoTest" in content
 
     @pytest.mark.asyncio
     async def test_read_resource_query_execution_patterns(self):
         """Test reading query execution patterns resource."""
-        content = await read_resource("file:///odsbox/query-execution-patterns")
+        result = await read_resource("file:///odsbox/query-execution-patterns")
 
-        assert "Pattern" in content.text or "pattern" in content.text.lower()
+        content = result[0].content
+        assert "Pattern" in content or "pattern" in content.lower()
 
     @pytest.mark.asyncio
     async def test_read_resource_query_operators_reference(self):
         """Test reading query operators reference resource."""
-        content = await read_resource("file:///odsbox/query-operators-reference")
+        result = await read_resource("file:///odsbox/query-operators-reference")
 
-        assert "Operator" in content.text or "operator" in content.text.lower()
-        assert "$eq" in content.text
+        content = result[0].content
+        assert "Operator" in content or "operator" in content.lower()
+        assert "$eq" in content
 
     @pytest.mark.asyncio
     async def test_read_resource_jaquel_syntax_guide(self):
         """Test reading Jaquel syntax guide resource."""
-        content = await read_resource("file:///odsbox/jaquel-syntax-guide")
+        result = await read_resource("file:///odsbox/jaquel-syntax-guide")
 
-        assert "Jaquel" in content.text
-        assert "query" in content.text.lower()
+        content = result[0].content
+        assert "Jaquel" in content
+        assert "query" in content.lower()
 
     @pytest.mark.asyncio
     async def test_read_resource_connection_troubleshooting(self):
         """Test reading connection troubleshooting resource."""
-        content = await read_resource("file:///odsbox/connection-troubleshooting")
+        result = await read_resource("file:///odsbox/connection-troubleshooting")
 
-        assert "Troubleshoot" in content.text or "Issue" in content.text
+        content = result[0].content
+        assert "Troubleshoot" in content or "Issue" in content
 
     @pytest.mark.asyncio
     async def test_read_resource_invalid_uri_returns_error_message(self):
         """Test that invalid URI returns error message in text content."""
-        content = await read_resource("file:///odsbox/nonexistent-resource")
+        result = await read_resource("file:///odsbox/nonexistent-resource")
 
-        assert isinstance(content, TextResourceContents)
-        assert "Unknown resource" in content.text
+        assert isinstance(result, list)
+        assert len(result) > 0
+        assert "Unknown resource" in result[0].content
 
     @pytest.mark.asyncio
     async def test_read_resource_all_resources_accessible(self):
@@ -128,12 +145,13 @@ class TestResourceHandlers:
         resources = await list_resources()
 
         for resource in resources:
-            content = await read_resource(str(resource.uri))
+            result = await read_resource(str(resource.uri))
 
-            assert isinstance(content, TextResourceContents)
-            assert len(content.text) > 0
+            assert isinstance(result, list)
+            assert len(result) > 0
+            assert len(result[0].content) > 0
             # Should not be error message
-            assert "Unknown resource" not in content.text
+            assert "Unknown resource" not in result[0].content
 
     @pytest.mark.asyncio
     async def test_read_resource_content_is_markdown(self):
@@ -141,10 +159,11 @@ class TestResourceHandlers:
         resources = await list_resources()
 
         for resource in resources:
-            content = await read_resource(str(resource.uri))
+            result = await read_resource(str(resource.uri))
 
+            content = result[0].content
             # Markdown should have headers
-            assert "#" in content.text, f"No markdown headers in {resource.name}"
+            assert "#" in content, f"No markdown headers in {resource.name}"
 
     @pytest.mark.asyncio
     async def test_read_resource_content_size_is_reasonable(self):
@@ -152,31 +171,34 @@ class TestResourceHandlers:
         resources = await list_resources()
 
         for resource in resources:
-            content = await read_resource(str(resource.uri))
+            result = await read_resource(str(resource.uri))
 
+            content = result[0].content
             # Each resource should have at least some content (not just error message)
-            assert len(content.text) > 100, f"Resource {resource.name} too small"
+            assert len(content) > 100, f"Resource {resource.name} too small"
 
     @pytest.mark.asyncio
-    async def test_read_resource_text_field_not_none(self):
-        """Test that text field is never None."""
+    async def test_read_resource_content_field_not_none(self):
+        """Test that content field is never None."""
         resources = await list_resources()
 
         for resource in resources:
-            content = await read_resource(str(resource.uri))
+            result = await read_resource(str(resource.uri))
 
-            assert content.text is not None
-            assert isinstance(content.text, str)
+            content_item = result[0]
+            assert content_item.content is not None
+            assert isinstance(content_item.content, str)
 
     @pytest.mark.asyncio
-    async def test_read_resource_type_always_text(self):
-        """Test that mimeType field is always 'text/markdown' for resource content."""
+    async def test_read_resource_mime_type_always_markdown(self):
+        """Test that mime_type field is always 'text/markdown' for resource content."""
         resources = await list_resources()
 
         for resource in resources:
-            content = await read_resource(str(resource.uri))
+            result = await read_resource(str(resource.uri))
 
-            assert content.mimeType == "text/markdown"
+            content_item = result[0]
+            assert content_item.mime_type == "text/markdown"
 
     @pytest.mark.asyncio
     async def test_list_resources_multiple_calls_consistent(self):
@@ -196,22 +218,22 @@ class TestResourceHandlers:
         """Test that reading same resource multiple times returns same content."""
         uri = "file:///odsbox/ods-connection-guide"
 
-        content1 = await read_resource(uri)
-        content2 = await read_resource(uri)
+        result1 = await read_resource(uri)
+        result2 = await read_resource(uri)
 
-        assert content1.text == content2.text
-        assert content1.mimeType == content2.mimeType
+        assert result1[0].content == result2[0].content
+        assert result1[0].mime_type == result2[0].mime_type
 
     @pytest.mark.asyncio
     async def test_read_resource_case_sensitive_uri(self):
         """Test that URI matching is case-sensitive."""
         # Correct URI
-        content_correct = await read_resource("file:///odsbox/ods-connection-guide")
-        assert "Unknown resource" not in content_correct.text
+        result_correct = await read_resource("file:///odsbox/ods-connection-guide")
+        assert "Unknown resource" not in result_correct[0].content
 
         # Different case - should fail
-        content_wrong_case = await read_resource("file:///odsbox/ODS-Connection-Guide")
-        assert "Unknown resource" in content_wrong_case.text
+        result_wrong_case = await read_resource("file:///odsbox/ODS-Connection-Guide")
+        assert "Unknown resource" in result_wrong_case[0].content
 
     @pytest.mark.asyncio
     async def test_list_resources_count_matches_implementation(self):
@@ -229,26 +251,29 @@ class TestResourceHandlers:
     @pytest.mark.asyncio
     async def test_read_resource_ods_connection_guide_has_credentials_info(self):
         """Test that connection guide covers credentials."""
-        content = await read_resource("file:///odsbox/ods-connection-guide")
+        result = await read_resource("file:///odsbox/ods-connection-guide")
 
+        content = result[0].content
         # Should mention credentials/auth
-        lower_text = content.text.lower()
+        lower_text = content.lower()
         assert "credential" in lower_text or "password" in lower_text or "auth" in lower_text
 
     @pytest.mark.asyncio
     async def test_read_resource_query_operators_has_all_operators(self):
         """Test that operators reference includes all operator categories."""
-        content = await read_resource("file:///odsbox/query-operators-reference")
+        result = await read_resource("file:///odsbox/query-operators-reference")
 
+        content = result[0].content
         # Should mention all operator categories
-        assert "Comparison" in content.text
-        assert "Logical" in content.text
-        assert "Aggregate" in content.text
+        assert "Comparison" in content
+        assert "Logical" in content
+        assert "Aggregate" in content
 
     @pytest.mark.asyncio
     async def test_read_resource_jaquel_syntax_has_examples(self):
         """Test that Jaquel syntax guide includes query examples."""
-        content = await read_resource("file:///odsbox/jaquel-syntax-guide")
+        result = await read_resource("file:///odsbox/jaquel-syntax-guide")
 
+        content = result[0].content
         # Should have example code
-        assert "```" in content.text or "example" in content.text.lower()
+        assert "```" in content or "example" in content.lower()
