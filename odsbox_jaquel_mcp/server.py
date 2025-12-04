@@ -744,9 +744,13 @@ async def list_resources() -> list[Resource]:
 
 
 @server.read_resource()
-async def read_resource(uri: str) -> str:
+async def read_resource(uri: str) -> TextContent:
     """Read reference resources about ODS connection and workflows."""
-    return ResourceLibrary.get_resource_content(uri)
+    content = ResourceLibrary.get_resource_content(uri)
+    return TextContent(
+        type="text",
+        text=content,
+    )
 
 
 @server.call_tool()
