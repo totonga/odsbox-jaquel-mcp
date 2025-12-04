@@ -28,6 +28,7 @@ from mcp.types import (
     ToolAnnotations,
     ToolsCapability,
 )
+from pydantic import AnyUrl
 
 from . import __version__
 from .prompts import PromptLibrary
@@ -744,9 +745,9 @@ async def list_resources() -> list[Resource]:
 
 
 @server.read_resource()
-async def read_resource(uri: str):
+async def read_resource(uri: AnyUrl):
     """Read reference resources about ODS connection and workflows."""
-    content = ResourceLibrary.get_resource_content(uri)
+    content = ResourceLibrary.get_resource_content(str(uri))
 
     # MCP expects Iterable[ReadResourceContents] where each item has .content and .mime_type
     class ResourceContent:
