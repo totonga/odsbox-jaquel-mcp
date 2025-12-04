@@ -20,6 +20,8 @@ from mcp.types import (
     Icon,
     PromptMessage,
     PromptsCapability,
+    Resource,
+    ResourcesCapability,
     ServerCapabilities,
     TextContent,
     Tool,
@@ -29,6 +31,7 @@ from mcp.types import (
 
 from . import __version__
 from .prompts import PromptLibrary
+from .resources import ResourceLibrary
 from .tools import (
     ConnectionToolHandler,
     FilterToolHandler,
@@ -729,6 +732,23 @@ async def get_prompt(name: str, arguments: dict | None = None) -> GetPromptResul
     )
 
 
+# ============================================================================
+# MCP RESOURCES
+# ============================================================================
+
+
+@server.list_resources()
+async def list_resources() -> list[Resource]:
+    """List available reference resources for ODS connection and workflows."""
+    return ResourceLibrary.get_all_resources()
+
+
+@server.read_resource()
+async def read_resource(uri: str) -> str:
+    """Read reference resources about ODS connection and workflows."""
+    return ResourceLibrary.get_resource_content(uri)
+
+
 @server.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     """Handle MCP tool calls by delegating to appropriate tool handlers."""
@@ -870,6 +890,7 @@ async def main():
                 capabilities=ServerCapabilities(
                     tools=ToolsCapability(listChanged=True),
                     prompts=PromptsCapability(listChanged=True),
+                    resources=ResourcesCapability(listChanged=True),
                 ),
                 instructions="""
 # ASAM ODS Jaquel MCP Server

@@ -5,11 +5,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from odsbox_jaquel_mcp import (
-    JaquelExamples,
-    JaquelOptimizer,
-    JaquelValidator,
-)
+from odsbox_jaquel_mcp import JaquelExamples, JaquelOptimizer, JaquelValidator
 
 
 def example_validate_query():
@@ -76,7 +72,7 @@ def example_optimize_query():
     # Verbose query with optimization opportunities
     verbose_query = {
         "AoUnit": {"id": {"$eq": 123}, "name": {"$like": "Test*", "$options": "i"}},
-        "$attributes": {"id": 1, "name": {"$eq": "expected"}},
+        "$attributes": {"id": 1, "name": 1},
     }
 
     print("\nVerbose query:")
