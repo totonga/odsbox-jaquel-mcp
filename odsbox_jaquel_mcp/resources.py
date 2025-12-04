@@ -6,11 +6,12 @@ This module provides reference materials about:
 - Entity hierarchy understanding
 - Query execution best practices
 - Connection troubleshooting
+- Dynamic entity schema templates
 """
 
 from __future__ import annotations
 
-from mcp.types import Resource
+from mcp.types import Resource, ResourceTemplate
 from pydantic import AnyUrl
 
 
@@ -66,15 +67,46 @@ class ResourceLibrary:
         ]
 
     @staticmethod
+    def get_all_resource_templates() -> list[ResourceTemplate]:
+        """Return all available resource templates for dynamic content."""
+        return [
+            ResourceTemplate(
+                name="entity_schema",
+                uriTemplate="file:///odsbox/schema/entity/{entity_name}",
+                title="Entity Schema",
+                description="Get detailed schema information for any ODS entity (requires active ODS connection)",
+                mimeType="text/markdown",
+            ),
+        ]
+
+    @staticmethod
     def get_resource_content(uri: str) -> str:
         """Get the content for a specific resource.
 
         Args:
-            uri: Resource URI (e.g., 'file:///odsbox/ods-connection-guide')
+            uri: Resource URI (e.g., 'file:///odsbox/ods-connection-guide' or 'file:///odsbox/schema/AoTest')
 
         Returns:
             Resource content as markdown
         """
+        # Handle dynamic entity schema template
+        if uri.startswith("file:///odsbox/schema/entity/"):
+            from .schemas import SchemaInspector
+
+            entity_name = uri.replace("file:///odsbox/schema/entity/", "")
+            try:
+                return SchemaInspector.format_entity_schema_as_markdown(entity_name)
+            except Exception as e:
+                return f"""# Entity Schema: {entity_name}
+
+**Error retrieving schema**: {str(e)}
+
+Ensure:
+1. You are connected to an ODS server via `connect_ods_server` tool
+2. The entity name is correct (try `list_ods_entities` to see available entities)
+3. The entity exists in the ODS model
+"""
+
         if uri == "file:///odsbox/ods-connection-guide":
             return """# ODS Connection Setup Guide
 
