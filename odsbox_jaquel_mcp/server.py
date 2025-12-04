@@ -24,6 +24,7 @@ from mcp.types import (
     ResourcesCapability,
     ServerCapabilities,
     TextContent,
+    TextResourceContents,
     Tool,
     ToolAnnotations,
     ToolsCapability,
@@ -744,11 +745,12 @@ async def list_resources() -> list[Resource]:
 
 
 @server.read_resource()
-async def read_resource(uri: str) -> TextContent:
+async def read_resource(uri: str) -> TextResourceContents:
     """Read reference resources about ODS connection and workflows."""
     content = ResourceLibrary.get_resource_content(uri)
-    return TextContent(
-        type="text",
+    return TextResourceContents(
+        uri=uri,
+        mimeType="text/markdown",
         text=content,
     )
 
