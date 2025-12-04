@@ -331,6 +331,11 @@ async def list_tools() -> list[Tool]:
                     },
                     "username": {"type": "string", "description": "Username for auth"},
                     "password": {"type": "string", "description": "Password for auth"},
+                    "verify": {
+                        "type": "boolean",
+                        "description": "Verify SSL certificates (default: true)",
+                        "default": True,
+                    },
                 },
                 "required": ["url", "username", "password"],
             },

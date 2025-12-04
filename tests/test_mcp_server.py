@@ -342,7 +342,26 @@ class TestMCPServer:
         assert len(result) == 1
         assert isinstance(result[0], TextContent)
 
-        mock_connect.assert_called_once_with(url="http://test:8087/api", auth=("user", "pass"))
+        mock_connect.assert_called_once_with(
+            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=True
+        )
+
+    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
+    @pytest.mark.asyncio
+    async def test_call_tool_connect_ods_server_verify_false(self, mock_connect):
+        """Test calling connect_ods_server tool."""
+        mock_connect.return_value = {"success": True}
+        arguments = {"url": "http://test:8087/api", "username": "user", "password": "pass", "verify": False}
+
+        result = await call_tool("connect_ods_server", arguments)
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], TextContent)
+
+        mock_connect.assert_called_once_with(
+            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
+        )
 
     @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.disconnect")
     @pytest.mark.asyncio
