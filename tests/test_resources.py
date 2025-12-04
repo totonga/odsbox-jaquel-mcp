@@ -15,7 +15,7 @@ class TestResourceLibrary:
 
         assert isinstance(resources, list)
         assert len(resources) > 0
-        assert len(resources) == 6
+        assert len(resources) == 7
 
         # Check that each resource has required attributes
         for resource in resources:
@@ -34,6 +34,7 @@ class TestResourceLibrary:
             "file:///odsbox/ods-entity-hierarchy",
             "file:///odsbox/query-execution-patterns",
             "file:///odsbox/query-operators-reference",
+            "file:///odsbox/jaquel-syntax-guide",
             "file:///odsbox/connection-troubleshooting",
         }
 
@@ -117,6 +118,18 @@ class TestResourceLibrary:
         assert "$and" in content
         assert "$count" in content
         assert "$rowlimit" in content
+
+    def test_get_resource_content_jaquel_syntax_guide(self):
+        """Test accessing Jaquel syntax guide content."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        assert isinstance(content, str)
+        assert len(content) > 0
+        assert "# Jaquel Syntax Guide" in content
+        assert "Query Structure" in content
+        assert "Query Examples" in content
+        assert "Get All Instances" in content
+        assert "Logical Operators" in content
 
     def test_get_resource_content_connection_troubleshooting(self):
         """Test accessing connection troubleshooting content."""
@@ -293,3 +306,62 @@ class TestResourceLibrary:
 
             # Each resource should have at least 500 characters of content
             assert len(content) > 500, f"Resource {resource.name} has insufficient content ({len(content)} chars)"
+
+    def test_jaquel_syntax_guide_has_basic_structure(self):
+        """Test that Jaquel syntax guide explains basic query structure."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        assert "Basic Query Structure" in content
+        assert "JSON" in content
+
+    def test_jaquel_syntax_guide_has_examples(self):
+        """Test that Jaquel syntax guide includes query examples."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        # Check for various example sections
+        assert "Get All Instances" in content
+        assert "Access by ID" in content
+        assert "Get Children" in content
+        assert "Search by Multiple Conditions" in content
+
+    def test_jaquel_syntax_guide_covers_operators(self):
+        """Test that Jaquel syntax guide covers all operator categories."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        assert "Comparison Operators" in content
+        assert "Logical Operators" in content
+        assert "Units and Aggregates" in content
+        assert "$and" in content
+        assert "$or" in content
+        assert "$not" in content
+
+    def test_jaquel_syntax_guide_explains_joins(self):
+        """Test that Jaquel syntax guide explains joins."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        assert "Joins" in content
+        assert "Outer Join" in content or "outer join" in content.lower()
+
+    def test_jaquel_syntax_guide_covers_result_naming(self):
+        """Test that Jaquel syntax guide covers result naming modes."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        assert "result_naming_mode" in content
+        assert "query" in content.lower()
+        assert "model" in content.lower()
+
+    def test_jaquel_syntax_guide_includes_remarks(self):
+        """Test that Jaquel syntax guide includes important remarks."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        assert "Remarks" in content or "Important" in content
+        assert "Enum" in content or "enum" in content.lower()
+
+    def test_jaquel_syntax_guide_covers_pagination(self):
+        """Test that Jaquel syntax guide covers pagination options."""
+        content = ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+        assert "$rowlimit" in content
+        assert "$rowskip" in content
+        assert "$seqlimit" in content
+        assert "$seqskip" in content
