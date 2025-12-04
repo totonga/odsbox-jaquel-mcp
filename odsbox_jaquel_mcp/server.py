@@ -24,7 +24,6 @@ from mcp.types import (
     ResourcesCapability,
     ServerCapabilities,
     TextContent,
-    TextResourceContents,
     Tool,
     ToolAnnotations,
     ToolsCapability,
@@ -745,14 +744,17 @@ async def list_resources() -> list[Resource]:
 
 
 @server.read_resource()
-async def read_resource(uri: str) -> TextResourceContents:
+async def read_resource(uri: str):
     """Read reference resources about ODS connection and workflows."""
     content = ResourceLibrary.get_resource_content(uri)
-    return TextResourceContents(
-        uri=uri,
-        mimeType="text/markdown",
-        text=content,
-    )
+
+    # MCP expects Iterable[ReadResourceContents] where each item has .content and .mime_type
+    class ResourceContent:
+        def __init__(self, content_text: str, mime_type: str):
+            self.content = content_text
+            self.mime_type = mime_type
+
+    return [ResourceContent(content, "text/markdown")]
 
 
 @server.call_tool()
