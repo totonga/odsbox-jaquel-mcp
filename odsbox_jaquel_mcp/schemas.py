@@ -24,28 +24,6 @@ class SchemaInspector:
         """Get model cache from connection manager."""
         return ODSConnectionManager.get_model_cache()
 
-    @staticmethod
-    def _get_entity(mc: ModelCache, entity_name: str) -> ods.Model.Entity:
-        """
-        Get the entity name.
-
-        :param str entity_name: case insensitive name of an entity.
-        :raises ValueError: If the entity does not exist.
-        """
-        model = mc.model()
-        entity = model.entities.get(entity_name)
-        if entity is not None:
-            return entity
-        name_casefold = entity_name.casefold()
-        for key, entity in model.entities.items():
-            if key.casefold() == name_casefold:
-                return entity
-            if name_casefold == entity.base_name.casefold():
-                # return the first found
-                return entity
-
-        raise ValueError(f"No entity named '{entity_name}' found.")
-
     @classmethod
     def list_ods_entities(cls) -> dict[str, Any]:
         """List all entities in the ODS model."""
@@ -82,16 +60,7 @@ class SchemaInspector:
             }
 
         try:
-            entity: ods.Model.Entity = SchemaInspector._get_entity(model_cache, entity_name)
-            if not entity:
-                # Try to get available entities
-                try:
-                    model = ODSConnectionManager.get_model()
-                    available = [e.name for e in model.entities][:10] if model else []
-                except Exception:
-                    available = []
-
-                return {"error": (f"Entity not found: {entity_name}"), "available_entities": available}
+            entity: ods.Model.Entity = model_cache.entity(entity_name)
 
             # Get attributes
             attributes = {}
