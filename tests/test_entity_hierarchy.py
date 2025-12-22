@@ -26,7 +26,6 @@ class TestGetTestToMeasurementHierarchy:
         assert "Model not loaded" in result["error"]
         assert "Connect to ODS server" in result["hint"]
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_hierarchy_simple_chain(self, mock_coni_class):
         """Test hierarchy with simple AoTest -> AoMeasurement chain."""
@@ -78,7 +77,6 @@ class TestGetTestToMeasurementHierarchy:
         assert "$attributes" in result["hierarchy_chain"][0]["query_example"]
         assert "$options" in result["hierarchy_chain"][0]["query_example"]
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_hierarchy_three_level_chain(self, mock_coni_class):
         """Test hierarchy with AoTest -> AoSubTest -> AoMeasurement chain."""
@@ -167,7 +165,6 @@ class TestGetTestToMeasurementHierarchy:
         assert result["hierarchy_chain"][1]["parent_relation"] == "parent_test"
         assert result["hierarchy_chain"][2]["base_name"] == "AoMeasurement"
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_hierarchy_exception_handling(self, mock_coni_class):
         """Test hierarchy with exception during traversal."""

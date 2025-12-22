@@ -4,13 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-try:
-    from odsbox.model_cache import ModelCache
-    from odsbox.proto import ods
-
-    ODSBOX_AVAILABLE = True
-except ImportError:
-    ODSBOX_AVAILABLE = False
+from odsbox.model_cache import ModelCache
+from odsbox.proto import ods
 
 from .connection import ODSConnectionManager
 from .schemas_entity_descriptions import EntityDescriptions
