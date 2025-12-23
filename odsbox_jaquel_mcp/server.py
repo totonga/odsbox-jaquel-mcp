@@ -181,7 +181,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🎯")],
         ),
         Tool(
-            name="explain_jaquel_query",
+            name="explain_query",
             title="Explain Jaquel Query",
             description="Explain what a Jaquel query does",
             inputSchema={
@@ -768,8 +768,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     # QUERY EXPLANATION & DEBUGGING TOOLS
     # ========================================================================
-    elif name == "explain_jaquel_query":
-        return QueryToolHandler.explain_jaquel_query(arguments)
+    elif name == "explain_query":
+        return QueryToolHandler.explain_query(arguments)
 
     elif name == "debug_query_steps":
         return QueryToolHandler.debug_query_steps(arguments)
@@ -892,7 +892,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 ## 📚 TOOL CATEGORIES
 
 **Validation & Debugging (7 tools)**
-- Check queries: `validate_jaquel_query`, `explain_jaquel_query`, `debug_query_steps`
+- Check queries: `validate_jaquel_query`, `explain_query`, `debug_query_steps`
 - Fix errors: `suggest_error_fixes`, `suggest_optimizations`
 - Check operators: `get_operator_documentation`
 
@@ -953,7 +953,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 
 **"How do I...?"**
 - "...start building a query?" → `list_query_patterns`
-- "...validate query?" → `explain_jaquel_query`
+- "...validate query?" → `explain_query`
 - "...connect to ODS?" → `connect_ods_server`
 - "...connect to ASAM ODS?" → `connect_ods_server`
 - "...find entities?" → `list_ods_entities`

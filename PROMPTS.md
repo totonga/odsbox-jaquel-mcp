@@ -121,7 +121,7 @@ Learn how to optimize queries for better performance and readability:
 - `suggest_optimizations` - Get simplifications
 - `debug_query_steps` - Step-by-step breakdown
 - `suggest_error_fixes` - Fix recommendations
-- `explain_jaquel_query` - Understand behavior
+- `explain_query` - Understand behavior
 
 ---
 

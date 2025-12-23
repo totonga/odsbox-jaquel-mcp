@@ -186,7 +186,7 @@ Once connected, explore what's available:
 
 1. `list_query_patterns` - See available query templates
 2. `get_query_pattern` - Get specific pattern
-3. `explain_jaquel_query` - Understand query syntax
+3. `explain_query` - Understand query syntax
 4. `validate_jaquel_query` - Check query syntax
 6. `execute_ods_query` - Run query and get results
 

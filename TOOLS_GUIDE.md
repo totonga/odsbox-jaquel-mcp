@@ -29,7 +29,7 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 | list_query_patterns | List all patterns | None | List of patterns |
 | generate_query_skeleton | Create query skeleton | Entity name, operation | Query skeleton |
 | build_filter_condition | Build condition | Field, operator, value | Condition dict |
-| explain_jaquel_query | Explain in English | Query dict | Text explanation |
+| explain_query | Explain in English | Query dict | Text explanation |
 | merge_filter_conditions | Combine conditions | Conditions array, operator | Merged condition |
 
 ### Schema & Validation Tools (5 tools)
@@ -300,7 +300,7 @@ condition = build_filter_condition(
 
 ---
 
-### 8. explain_jaquel_query
+### 8. explain_query
 
 **Purpose**: Explain what a query does in plain English.
 
@@ -1212,7 +1212,7 @@ query = json.loads(pattern["template"])
 ### 7. Document Complex Conditions
 
 ```python
-# Use explain_jaquel_query to understand queries
+# Use explain_query to understand queries
 explanation = _explain_query(complex_query)
 print(explanation)  # Share with team for clarity
 ```
@@ -1276,7 +1276,7 @@ merged = merge_filter_conditions(conditions, "$and")
 ### Debugging Tips
 
 1. **Use validate_jaquel_query** to find syntax errors
-2. **Use explain_jaquel_query** to understand complex queries
+2. **Use explain_query** to understand complex queries
 3. **Use get_operator_documentation** to verify operator syntax
 4. **Use suggest_optimizations** to find issues and improvements
 
@@ -1428,7 +1428,7 @@ Assistant uses tools:
 2. get_query_pattern("time_range") → Gets time range template
 3. generate_query_skeleton("AoMeasurement", "get_all") → Creates skeleton
 4. suggest_optimizations() → Cleans up the query
-5. explain_jaquel_query() → Explains the result
+5. explain_query() → Explains the result
 ```
 
 ---

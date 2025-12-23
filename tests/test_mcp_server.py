@@ -40,7 +40,7 @@ class TestMCPServer:
             "list_query_patterns",
             "generate_query_skeleton",
             "build_filter_condition",
-            "explain_jaquel_query",
+            "explain_query",
             "merge_filter_conditions",
             "check_entity_schema",
             "validate_field_exists",
@@ -169,12 +169,12 @@ class TestMCPServer:
         assert "Unknown operator" in response_data["error"]
 
     @pytest.mark.asyncio
-    async def test_call_tool_explain_jaquel_query(self):
-        """Test calling explain_jaquel_query tool."""
+    async def test_call_tool_explain_query(self):
+        """Test calling explain_query tool."""
         query = {"TestEntity": {}}
         arguments = {"query": query}
 
-        result = await call_tool("explain_jaquel_query", arguments)
+        result = await call_tool("explain_query", arguments)
 
         assert isinstance(result, list)
         assert len(result) == 1
