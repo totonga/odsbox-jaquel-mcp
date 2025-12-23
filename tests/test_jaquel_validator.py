@@ -21,6 +21,16 @@ class TestJaquelValidator:
         assert result["valid"] is False
         assert "Query must contain an entity name" in result["errors"][0]
 
+    def test_validate_query_multiple_entities(self):
+        """Test validation of query with multiple non-$ entities."""
+        query = {"Entity1": {}, "Entity2": {}}
+        result = JaquelValidator.validate_query(query)
+
+        assert result["valid"] is False
+        assert "Query is only allowed to contain a single non-$ element" in result["errors"][0]
+        assert "Entity1" in result["errors"][0]
+        assert "Entity2" in result["errors"][0]
+
     def test_validate_query_valid_simple(self):
         """Test validation of simple valid query."""
         query = {"TestEntity": {}}

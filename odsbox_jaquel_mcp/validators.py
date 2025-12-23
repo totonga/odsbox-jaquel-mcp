@@ -71,17 +71,20 @@ class JaquelValidator:
         if not isinstance(query, dict):
             return {"valid": False, "errors": ["Query must be a dictionary"], "warnings": [], "suggestions": []}
 
-        # Find entity name (first non-$ key)
-        entity_name = None
-        for key in query.keys():
-            if not key.startswith("$"):
-                entity_name = key
-                break
+        # Find all non-$ keys (entity names)
+        non_dollar_keys = [key for key in query.keys() if not key.startswith("$")]
 
-        if not entity_name:
+        if not non_dollar_keys:
             msg = "Query must contain an entity name (non-$ key)"
             errors.append(msg)
             return {"valid": False, "errors": errors, "warnings": warnings, "suggestions": suggestions}
+
+        if len(non_dollar_keys) > 1:
+            msg = f"Query is only allowed to contain a single non-$ element which is the entity to look for, but found: {', '.join(non_dollar_keys)}"
+            errors.append(msg)
+            return {"valid": False, "errors": errors, "warnings": warnings, "suggestions": suggestions}
+
+        entity_name = non_dollar_keys[0]
 
         # Validate entity query value
         entity_query = query[entity_name]
