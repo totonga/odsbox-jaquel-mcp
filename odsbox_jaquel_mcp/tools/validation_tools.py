@@ -6,7 +6,7 @@ from typing import Any
 
 from mcp.types import TextContent
 
-from ..validators import JaquelOptimizer, JaquelValidator
+from ..validators import JaquelValidator
 from .base_handler import BaseToolHandler
 
 
@@ -31,21 +31,6 @@ class ValidationToolHandler(BaseToolHandler):
             if not operator or not isinstance(operator, str) or not operator.strip():
                 raise ValueError("operator must be a non-empty string")
             result = JaquelValidator.get_operator_info(operator)
-            return ValidationToolHandler.json_response(result)
-        except Exception as e:
-            return ValidationToolHandler.error_response(str(e), type(e).__name__)
-
-    @staticmethod
-    def suggest_optimizations(arguments: dict[str, Any]) -> list[TextContent]:
-        """Suggest query optimizations."""
-        try:
-            query = arguments.get("query", {})
-            suggestions = JaquelOptimizer.suggest_simplifications(query)
-            result = {
-                "query_summary": str(query),
-                "suggestions": suggestions,
-                "suggestion_count": len(suggestions),
-            }
             return ValidationToolHandler.json_response(result)
         except Exception as e:
             return ValidationToolHandler.error_response(str(e), type(e).__name__)

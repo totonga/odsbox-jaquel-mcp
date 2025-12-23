@@ -155,50 +155,7 @@ doc = JaquelValidator.get_operator_info("$like")
 
 ---
 
-### 4. suggest_optimizations
-
-**Purpose**: Find opportunities to simplify or optimize a query.
-
-**Input**:
-```json
-{
-    "query": {
-        "AoUnit": {"id": {"$eq": 123}},
-        "$attributes": {}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "query_summary": "Query for entity: AoUnit",
-    "suggestions": [
-        "Can simplify: {\"id\": {\"$eq\": 123}} → 123",
-        "$attributes is empty - consider removing it"
-    ]
-}
-```
-
-**Optimization Suggestions**:
-- Simplify verbose $eq to shorthand
-- Use ID shorthand (`EntityName: 123`)
-- Remove empty $attributes
-- Simplify nested paths
-
-**Example**:
-```python
-query = {
-    "AoUnit": {"id": {"$eq": 456}},
-    "$attributes": {}
-}
-result = JaquelOptimizer.suggest_simplifications(query)
-# Suggests: Can use {\"AoUnit\": 456} directly
-```
-
----
-
-### 5. get_query_pattern
+### 4. get_query_pattern
 
 **Purpose**: Get a template for a common query pattern.
 
@@ -236,7 +193,7 @@ print(pattern["template"])
 
 ---
 
-### 6. list_query_patterns
+### 5. list_query_patterns
 
 **Purpose**: List all available query patterns.
 
@@ -267,7 +224,7 @@ patterns = JaquelExamples.list_patterns()
 
 ---
 
-### 7. generate_query_skeleton
+### 6. generate_query_skeleton
 
 **Purpose**: Generate a query skeleton for an entity.
 
@@ -305,7 +262,7 @@ skeleton = JaquelExamples.generate_query_skeleton(
 
 ---
 
-### 8. build_filter_condition
+### 7. build_filter_condition
 
 **Purpose**: Build a filter condition programmatically.
 
@@ -343,7 +300,7 @@ condition = build_filter_condition(
 
 ---
 
-### 9. explain_jaquel_query
+### 8. explain_jaquel_query
 
 **Purpose**: Explain what a query does in plain English.
 
@@ -1046,20 +1003,6 @@ skeleton["$options"]["$rowlimit"] = 5
 
 # Validate
 result = JaquelValidator.validate_query(skeleton)
-```
-
-### Use Case 5: Optimize Existing Query
-
-```python
-# Find opportunities to simplify a query
-verbose_query = {
-    "AoUnit": {"id": {"$eq": 123}},
-    "$attributes": {"id": 1, "name": 1}
-}
-
-suggestions = JaquelOptimizer.suggest_simplifications(verbose_query)
-for suggestion in suggestions:
-    print(suggestion)
 ```
 
 ---

@@ -17,13 +17,12 @@ from .notebook_generator import NotebookGenerator
 from .queries import JaquelExamples, QueryDebugger
 from .schemas import EntityDescriptions, SchemaInspector
 from .submatrix import SubmatrixDataReader
-from .validators import JaquelOptimizer, JaquelValidator
+from .validators import JaquelValidator
 from .visualization_templates import VisualizationTemplateGenerator
 
 __all__ = [
     "ODSConnectionManager",
     "JaquelValidator",
-    "JaquelOptimizer",
     "JaquelExamples",
     "QueryDebugger",
     "EntityDescriptions",

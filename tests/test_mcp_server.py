@@ -94,22 +94,6 @@ class TestMCPServer:
         assert response_data["category"] == "comparison"
 
     @pytest.mark.asyncio
-    async def test_call_tool_suggest_optimizations(self):
-        """Test calling suggest_optimizations tool."""
-        query = {"TestEntity": {}}
-        arguments = {"query": query}
-
-        result = await call_tool("suggest_optimizations", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "query_summary" in response_data
-        assert "suggestions" in response_data
-
-    @pytest.mark.asyncio
     async def test_call_tool_get_query_pattern(self):
         """Test calling get_query_pattern tool."""
         arguments = {"pattern": "get_all_instances"}
