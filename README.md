@@ -170,7 +170,6 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 
 #### Query Building & Validation
 - **validate_jaquel_query** - Check query syntax and structure
-- **build_filter_condition** - Construct filter conditions
 - **explain_query** - Get plain English explanation
 
 #### Pattern & Example Library
@@ -178,10 +177,6 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 - **list_query_patterns** - List available patterns
 - **generate_query_skeleton** - Generate query skeleton for entity
 - **get_operator_documentation** - Learn about operators
-
-#### Query Optimization
-- **suggest_optimizations** - Get optimization suggestions
-- **merge_filter_conditions** - Combine multiple conditions
 
 #### Debugging Tools
 - **debug_query_steps** - Break query into logical steps

@@ -35,7 +35,6 @@ from .prompts import PromptLibrary
 from .resources import ResourceLibrary
 from .tools import (
     ConnectionToolHandler,
-    FilterToolHandler,
     HelpToolHandler,
     MeasurementToolHandler,
     QueryToolHandler,
@@ -165,22 +164,6 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🦴")],
         ),
         Tool(
-            name="build_filter_condition",
-            title="Build Filter Condition",
-            description="Build a filter condition for WHERE clause",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "field": {"type": "string", "description": "Field name to filter on"},
-                    "operator": {"type": "string", "description": "Comparison operator"},
-                    "value": {"description": "Value to compare against"},
-                },
-                "required": ["field", "operator", "value"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🎯")],
-        ),
-        Tool(
             name="explain_query",
             title="Explain Jaquel Query",
             description="Explain what a Jaquel query does",
@@ -196,29 +179,6 @@ async def list_tools() -> list[Tool]:
             },
             annotations=ToolAnnotations(readOnlyHint=True),
             icons=[Icon(src="💡")],
-        ),
-        Tool(
-            name="merge_filter_conditions",
-            title="Merge Filter Conditions",
-            description="Merge multiple filter conditions with AND/OR logic",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "conditions": {
-                        "type": "array",
-                        "description": "list of filter conditions",
-                        "items": {"type": "object"},
-                    },
-                    "operator": {
-                        "type": "string",
-                        "description": "How to combine conditions",
-                        "enum": ["$and", "$or"],
-                    },
-                },
-                "required": ["conditions", "operator"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔗")],
         ),
         Tool(
             name="check_entity_schema",
@@ -757,15 +717,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         return QueryToolHandler.generate_query_skeleton(arguments)
 
     # ========================================================================
-    # FILTER BUILDING TOOLS
-    # ========================================================================
-    elif name == "build_filter_condition":
-        return FilterToolHandler.build_filter_condition(arguments)
-
-    elif name == "merge_filter_conditions":
-        return FilterToolHandler.merge_filter_conditions(arguments)
-
-    # ========================================================================
     # QUERY EXPLANATION & DEBUGGING TOOLS
     # ========================================================================
     elif name == "explain_query":
@@ -899,7 +850,6 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 **Query Building (9 tools)**
 - Skeletons: `generate_query_skeleton`
 - Patterns: `list_query_patterns`, `get_query_pattern`
-- Build filters: `build_filter_condition`, `merge_filter_conditions`
 
 **Schema & Entity Inspection (5 tools)**
 - List entities: `list_ods_entities`, `get_test_to_measurement_hierarchy`
@@ -969,7 +919,6 @@ Use these for guided workflows:
 - `setup_ods_connection` - Learn connection management
 - `validate_query` - Validate queries step-by-step
 - `explore_patterns` - Discover query patterns
-- `build_filters` - Master filter conditions
 - `bulk_data_access` - Learn Bulk API 3-step workflow
 - `analyze_measurements` - Statistical analysis & visualization
 - `optimize_query` - Debug and optimize queries

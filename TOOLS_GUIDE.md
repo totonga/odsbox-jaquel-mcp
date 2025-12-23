@@ -24,13 +24,10 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 |------|---------|-------|--------|
 | validate_jaquel_query | Validate complete query | Query dict | Validation result |
 | get_operator_documentation | Get operator docs | Operator name | Documentation |
-| suggest_optimizations | Find improvements | Query dict | List of suggestions |
 | get_query_pattern | Get pattern template | Pattern name | Pattern object |
 | list_query_patterns | List all patterns | None | List of patterns |
 | generate_query_skeleton | Create query skeleton | Entity name, operation | Query skeleton |
-| build_filter_condition | Build condition | Field, operator, value | Condition dict |
 | explain_query | Explain in English | Query dict | Text explanation |
-| merge_filter_conditions | Combine conditions | Conditions array, operator | Merged condition |
 
 ### Schema & Validation Tools (5 tools)
 | Tool | Purpose | Input | Output |
@@ -262,44 +259,6 @@ skeleton = JaquelExamples.generate_query_skeleton(
 
 ---
 
-### 7. build_filter_condition
-
-**Purpose**: Build a filter condition programmatically.
-
-**Input**:
-```json
-{
-    "field": "measurement_begin",
-    "operator": "$gte",
-    "value": "2023-01-01T00:00:00Z",
-    "case_insensitive": false
-}
-```
-
-**Output**:
-```json
-{
-    "measurement_begin": {
-        "$gte": "2023-01-01T00:00:00Z"
-    }
-}
-```
-
-**Operators Supported**:
-- All comparison operators: $eq, $neq, $lt, $gt, $lte, $gte, $in, $like, $notlike, $between, $null, $notnull
-
-**Example**:
-```python
-# Build a time range condition
-condition = build_filter_condition(
-    field="measurement_begin",
-    operator="$gte",
-    value="2023-01-01T00:00:00Z"
-)
-```
-
----
-
 ### 8. explain_query
 
 **Purpose**: Explain what a query does in plain English.
@@ -337,51 +296,12 @@ Ordering:
 **Example**:
 ```python
 query = {...}
-explanation = _explain_query(query)
+explanation = JaquelExplain.explain_query(query)
 print(explanation)
 ```
 
 ---
 
-### 10. merge_filter_conditions
-
-**Purpose**: Merge multiple filter conditions with AND/OR logic.
-
-**Input**:
-```json
-{
-    "conditions": [
-        {"status": "active"},
-        {"value": {"$gte": 0}},
-        {"value": {"$lte": 100}}
-    ],
-    "operator": "$and"
-}
-```
-
-**Output**:
-```json
-{
-    "$and": [
-        {"status": "active"},
-        {"value": {"$gte": 0}},
-        {"value": {"$lte": 100}}
-    ]
-}
-```
-
-**Operators**: `$and`, `$or`
-
-**Example**:
-```python
-conditions = [
-    {"status": "active"},
-    {"value": {"$gte": 0}}
-]
-merged = merge_filter_conditions(conditions, "$and")
-```
-
----
 
 ### 11. check_entity_schema
 
@@ -963,22 +883,6 @@ else:
     print("Errors:", result["errors"])
 ```
 
-### Use Case 2: Build Complex Filter
-
-```python
-# Build a complex filter step-by-step
-from odsbox_jaquel_mcp import merge_filter_conditions
-
-conditions = [
-    build_filter_condition("status", "$eq", "active"),
-    build_filter_condition("value", "$gte", 100),
-    build_filter_condition("date", "$between", ["2023-01-01", "2023-12-31"])
-]
-
-merged = merge_filter_conditions(conditions, "$and")
-# Use merged in query
-```
-
 ### Use Case 3: Learn Operator Usage
 
 ```python
@@ -1213,7 +1117,7 @@ query = json.loads(pattern["template"])
 
 ```python
 # Use explain_query to understand queries
-explanation = _explain_query(complex_query)
+explanation = JaquelExplain.explain_query(complex_query)
 print(explanation)  # Share with team for clarity
 ```
 
@@ -1236,14 +1140,6 @@ print(info["example"])  # See correct usage
 ]
 
 # Instead of nested conditions
-```
-
-### 10. Merge Related Conditions
-
-```python
-# Use merge_filter_conditions for clean code
-conditions = [cond1, cond2, cond3]
-merged = merge_filter_conditions(conditions, "$and")
 ```
 
 ---

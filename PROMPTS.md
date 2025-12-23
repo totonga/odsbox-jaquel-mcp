@@ -49,20 +49,6 @@ Discover common Jaquel query patterns and templates for:
 
 ---
 
-### 4. 📌 Build Filter Conditions
-**Name:** `build_filters`
-
-Learn how to construct WHERE clause filter conditions for Jaquel queries with:
-- Multiple operators ($eq, $ne, $gt, $lt, $in, $regex, etc.)
-- Comparison logic
-- AND/OR combinations
-
-**Related Tools:**
-- `build_filter_condition` - Create single filter
-- `merge_filter_conditions` - Combine with AND/OR
-
----
-
 ### 5. 📌 Bulk Data Access & Submatrix Reading
 **Name:** `bulk_data_access`
 

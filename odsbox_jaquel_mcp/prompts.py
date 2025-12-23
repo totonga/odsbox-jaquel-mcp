@@ -19,7 +19,6 @@ class PromptLibrary:
             PromptLibrary._query_validation_prompt(),
             PromptLibrary._query_pattern_prompt(),
             PromptLibrary._ods_connection_prompt(),
-            PromptLibrary._filter_building_prompt(),
             PromptLibrary._bulk_api_guide_prompt(),
             PromptLibrary._measurement_analysis_prompt(),
             PromptLibrary._query_optimization_prompt(),
@@ -82,25 +81,6 @@ class PromptLibrary:
                 PromptArgument(
                     name="server_details",
                     description="(Optional) Your ODS server URL, username, and password",
-                    required=False,
-                )
-            ],
-        )
-
-    @staticmethod
-    def _filter_building_prompt() -> Prompt:
-        """Prompt for building filter conditions."""
-        return Prompt(
-            name="build_filters",
-            title="Build Filter Conditions",
-            description=(
-                "Learn how to construct filter conditions for Jaquel queries. "
-                "Includes operators, comparison logic, and combining multiple conditions with AND/OR."
-            ),
-            arguments=[
-                PromptArgument(
-                    name="field_info",
-                    description="(Optional) Field name and value you want to filter on",
                     required=False,
                 )
             ],
@@ -249,31 +229,6 @@ class PromptLibrary:
             )
             if pattern_type:
                 content += f"**Pattern of interest:** {pattern_type}\n"
-            return content
-
-        elif prompt_name == "build_filters":
-            field_info = arguments.get("field_info", "")
-            content = (
-                "# Building Filter Conditions\n\n"
-                "Create WHERE clause filters for your Jaquel queries.\n\n"
-                "## Filter Building Tools:\n"
-                "- `build_filter_condition` - Create a single filter\n"
-                "- `merge_filter_conditions` - Combine filters with AND/OR logic\n"
-                "## Common Operators:\n"
-                "- `$eq` - Equals\n"
-                "- `$ne` - Not equals\n"
-                "- `$gt`, `$gte` - Greater than\n"
-                "- `$lt`, `$lte` - Less than\n"
-                "- `$in` - In list\n"
-                "- `$regex` - Pattern matching\n"
-                "- `$contains` - Contains substring\n\n"
-                "## Workflow:\n"
-                "1. Use `build_filter_condition` for individual filters\n"
-                "2. Combine multiple filters with `merge_filter_conditions`\n"
-                "4. Use in your Jaquel query\n\n"
-            )
-            if field_info:
-                content += f"**Field to filter:** {field_info}\n"
             return content
 
         elif prompt_name == "bulk_data_access":

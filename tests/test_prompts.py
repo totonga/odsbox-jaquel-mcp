@@ -60,12 +60,6 @@ class TestPromptLibrary:
         assert "connect_ods_server" in content
         assert "connection" in content.lower()
 
-    def test_build_filters_prompt(self):
-        """Test the build_filters prompt."""
-        content = PromptLibrary.get_prompt_content("build_filters", {})
-        assert "build_filter_condition" in content
-        assert "$eq" in content
-
     def test_bulk_data_access_prompt(self):
         """Test the bulk_data_access prompt."""
         content = PromptLibrary.get_prompt_content("bulk_data_access", {})

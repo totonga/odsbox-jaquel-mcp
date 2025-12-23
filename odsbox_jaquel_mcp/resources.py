@@ -324,9 +324,9 @@ Use `check_entity_schema` to see all available fields:
 }
 ```
 
-**Use**: 
-1. Build filter with `build_filter_condition`
-3. Execute with `execute_ods_query`
+**Use**:
+1. Validate with `validate_jaquel_query`
+2. Execute with `execute_ods_query`
 
 ## Pattern 3: Bulk Data Access (Timeseries)
 
@@ -378,8 +378,6 @@ Use `check_entity_schema` to see all available fields:
   }
 }
 ```
-
-**Use**: `build_filter_condition` with date operators
 
 ## Performance Tips
 
