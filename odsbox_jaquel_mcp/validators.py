@@ -57,6 +57,41 @@ class JaquelValidator:
     ALL_OPERATORS = COMPARISON_OPERATORS | LOGICAL_OPERATORS | AGGREGATE_FUNCTIONS | SPECIAL_KEYS
 
     @staticmethod
+    def _validate_operator_dict(op_dict: dict[str, Any], path: str, errors: list, issues: list) -> None:
+        """Recursively validate an operator dictionary."""
+        for key, value in op_dict.items():
+            if key.startswith("$"):
+                if key not in JaquelValidator.ALL_OPERATORS:
+                    errors.append(f"Unknown operator: {key} at '{path}'")
+                elif key in JaquelValidator.LOGICAL_OPERATORS:
+                    if key == "$not":
+                        if not isinstance(value, dict):
+                            msg = f"{key} must contain expression at '{path}'"
+                            errors.append(msg)
+                        else:
+                            JaquelValidator._validate_operator_dict(value, f"{path}.{key}", errors, issues)
+                    else:  # $and, $or
+                        if not isinstance(value, list):
+                            msg = f"{key} must contain an array at '{path}'"
+                            errors.append(msg)
+                        else:
+                            for i, item in enumerate(value):
+                                if isinstance(item, dict):
+                                    JaquelValidator._validate_operator_dict(item, f"{path}.{key}[{i}]", errors, issues)
+                elif key in JaquelValidator.COMPARISON_OPERATORS:
+                    if key in ["$null", "$notnull"]:
+                        if value != 1:
+                            msg = f"{key} should have value 1 at '{path}'"
+                            issues.append(msg)
+                    elif key in ["$between", "$in", "$notinset"]:
+                        if not isinstance(value, list):
+                            msg = f"{key} requires a list value at '{path}'"
+                            errors.append(msg)
+            elif isinstance(value, dict):
+                # This is a field condition like {"field": {"$eq": "value"}}
+                JaquelValidator._validate_operator_dict(value, f"{path}.{key}", errors, issues)
+
+    @staticmethod
     def validate_query(query: dict[str, Any]) -> dict[str, Any]:
         """Validate a Jaquel query structure.
 
@@ -145,47 +180,13 @@ class JaquelValidator:
         Returns:
             dict with 'valid', 'errors', 'issues'.
         """
-        errors = []
-        issues = []
 
         if not isinstance(condition, dict):
             return {"valid": False, "errors": ["Condition must be a dictionary"], "issues": []}
 
-        def validate_operator_dict(op_dict: dict[str, Any], path: str = "") -> None:
-            """Recursively validate an operator dictionary."""
-            for key, value in op_dict.items():
-                if key.startswith("$"):
-                    if key not in JaquelValidator.ALL_OPERATORS:
-                        errors.append(f"Unknown operator: {key}{path}")
-                    elif key in JaquelValidator.LOGICAL_OPERATORS:
-                        if key == "$not":
-                            if not isinstance(value, dict):
-                                msg = f"{key} must contain expression{path}"
-                                errors.append(msg)
-                            else:
-                                validate_operator_dict(value, f"{path}.{key}")
-                        else:  # $and, $or
-                            if not isinstance(value, list):
-                                msg = f"{key} must contain an array{path}"
-                                errors.append(msg)
-                            else:
-                                for i, item in enumerate(value):
-                                    if isinstance(item, dict):
-                                        validate_operator_dict(item, f"{path}.{key}[{i}]")
-                    elif key in JaquelValidator.COMPARISON_OPERATORS:
-                        if key in ["$null", "$notnull"]:
-                            if value != 1:
-                                msg = f"{key} should have value 1{path}"
-                                issues.append(msg)
-                        elif key in ["$between", "$in", "$notinset"]:
-                            if not isinstance(value, list):
-                                msg = f"{key} requires a list value{path}"
-                                errors.append(msg)
-                elif isinstance(value, dict):
-                    # This is a field condition like {"field": {"$eq": "value"}}
-                    validate_operator_dict(value, f" for field '{key}'")
-
-        validate_operator_dict(condition)
+        errors: list[str] = []
+        issues: list[str] = []
+        JaquelValidator._validate_operator_dict(condition, "", errors, issues)
 
         return {"valid": len(errors) == 0, "errors": errors, "issues": issues}
 

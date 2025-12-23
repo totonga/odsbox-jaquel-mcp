@@ -159,7 +159,7 @@ class TestJaquelValidator:
         result = JaquelValidator.validate_filter_condition(condition)
 
         assert result["valid"] is False
-        assert "$and must contain an array" in result["errors"]
+        assert "$and must contain an array at ''" in result["errors"]
 
     def test_validate_filter_condition_invalid_not_type(self):
         """Test validation of $not with non-dict value."""
@@ -167,7 +167,7 @@ class TestJaquelValidator:
         result = JaquelValidator.validate_filter_condition(condition)
 
         assert result["valid"] is False
-        assert "$not must contain expression" in result["errors"]
+        assert "$not must contain expression at ''" in result["errors"]
 
     def test_get_operator_info_known_operator(self):
         """Test getting info for known operator."""
