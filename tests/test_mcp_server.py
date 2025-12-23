@@ -247,38 +247,6 @@ class TestMCPServer:
 
         mock_validate.assert_called_once_with("TestEntity", "name")
 
-    @patch("odsbox_jaquel_mcp.tools.query_tools.QueryDebugger.debug_query_step_by_step")
-    @pytest.mark.asyncio
-    async def test_call_tool_debug_query_steps(self, mock_debug):
-        """Test calling debug_query_steps tool."""
-        mock_debug.return_value = {"steps": []}
-        arguments = {"query": {"TestEntity": {}}}
-
-        result = await call_tool("debug_query_steps", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        mock_debug.assert_called_once_with({"TestEntity": {}})
-
-    @patch("odsbox_jaquel_mcp.tools.query_tools.QueryDebugger.suggest_fixes_for_issue")
-    @pytest.mark.asyncio
-    async def test_call_tool_suggest_error_fixes(self, mock_suggest):
-        """Test calling suggest_error_fixes tool."""
-        mock_suggest.return_value = ["Fix suggestion"]
-        arguments = {"issue": "Test issue", "query": {"TestEntity": {}}}
-
-        result = await call_tool("suggest_error_fixes", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert response_data["issue"] == "Test issue"
-        assert response_data["suggestions"] == ["Fix suggestion"]
-
     @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
     @pytest.mark.asyncio
     async def test_call_tool_connect_ods_server(self, mock_connect):

@@ -10,7 +10,7 @@ from odsbox.jaquel import Jaquel
 from odsbox.proto import ods
 
 from ..connection import ODSConnectionManager
-from ..queries import JaquelExamples, QueryDebugger
+from ..queries import JaquelExamples
 from .base_handler import BaseToolHandler
 
 
@@ -59,28 +59,6 @@ class QueryToolHandler(BaseToolHandler):
             query = arguments.get("query", {})
             explanation = QueryToolHandler._explain_query(query)
             return QueryToolHandler.text_response(explanation)
-        except Exception as e:
-            return QueryToolHandler.error_response(str(e), type(e).__name__)
-
-    @staticmethod
-    def debug_query_steps(arguments: dict[str, Any]) -> list[TextContent]:
-        """Break down a query into steps for debugging."""
-        try:
-            query = arguments.get("query", {})
-            result = QueryDebugger.debug_query_step_by_step(query)
-            return QueryToolHandler.json_response(result)
-        except Exception as e:
-            return QueryToolHandler.error_response(str(e), type(e).__name__)
-
-    @staticmethod
-    def suggest_error_fixes(arguments: dict[str, Any]) -> list[TextContent]:
-        """Suggest fixes for query errors."""
-        try:
-            issue = arguments.get("issue", "Unknown issue")
-            query = arguments.get("query", {})
-            suggestions = QueryDebugger.suggest_fixes_for_issue(issue, query)
-            result = {"issue": issue, "suggestions": suggestions}
-            return QueryToolHandler.json_response(result)
         except Exception as e:
             return QueryToolHandler.error_response(str(e), type(e).__name__)
 
