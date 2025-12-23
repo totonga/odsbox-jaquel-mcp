@@ -37,8 +37,7 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
 | check_entity_schema | Get entity fields | Entity name | Field list |
-| validate_field_exists | Check field exists | Entity name, field name | Validation result |
-| validate_filter_against_schema | Validate filter vs schema | Entity name, filter | Validation result |
+| validate_field_exists | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
 | debug_query_steps | Break query into steps | Query dict | Debug steps |
 | suggest_error_fixes | Get error suggestions | Issue, query | Fix suggestions |
 
@@ -553,55 +552,6 @@ if result["exists"]:
     print(f"Field exists: {result['field_info']['type']}")
 else:
     print("Field does not exist")
-```
-
----
-
-### 13. validate_filter_against_schema
-
-**Purpose**: Validate a filter condition against the actual entity schema.
-
-**Input**:
-```json
-{
-    "entity_name": "AoMeasurement",
-    "filter_condition": {
-        "measurement_begin": {"$gte": "2023-01-01"}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "entity_name": "AoMeasurement",
-    "filter_condition": {
-        "measurement_begin": {"$gte": "2023-01-01"}
-    },
-    "valid": true,
-    "field_validations": [
-        {
-            "field": "measurement_begin",
-            "exists": true,
-            "type": "datetime",
-            "operator_valid": true
-        }
-    ],
-    "warnings": [],
-    "errors": []
-}
-```
-
-**Requirements**: Active ODS server connection.
-
-**Example**:
-```python
-filter_cond = {"measurement_begin": {"$gte": "2023-01-01"}}
-result = validate_filter_against_schema("AoMeasurement", filter_cond)
-if result["valid"]:
-    print("Filter is valid against schema")
-else:
-    print("Validation errors:", result["errors"])
 ```
 
 ---

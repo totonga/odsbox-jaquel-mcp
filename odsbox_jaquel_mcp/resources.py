@@ -188,7 +188,6 @@ Once connected, explore what's available:
 2. `get_query_pattern` - Get specific pattern
 3. `explain_jaquel_query` - Understand query syntax
 4. `validate_jaquel_query` - Check query syntax
-5. `validate_filter_against_schema` - Test filter with real schema (requires connection)
 6. `execute_ods_query` - Run query and get results
 
 **Output**: Query results containing measurements and metadata
@@ -327,7 +326,6 @@ Use `check_entity_schema` to see all available fields:
 
 **Use**: 
 1. Build filter with `build_filter_condition`
-2. Validate with `validate_filter_against_schema`
 3. Execute with `execute_ods_query`
 
 ## Pattern 3: Bulk Data Access (Timeseries)
@@ -476,22 +474,6 @@ If no response, connection is dead
 ```
 list_ods_entities
 Check if your entity is in the list
-```
-
-### Issue: Invalid Filter
-
-**Cause**: Filter field doesn't exist or wrong syntax
-
-**Solutions**:
-1. Check entity schema: `check_entity_schema EntityName`
-2. Validate field exists: `validate_field_exists EntityName field_name`
-3. Validate filter: `validate_filter_against_schema EntityName {filter}`
-4. Check operator: `get_operator_documentation operator`
-
-**Test**:
-```
-validate_filter_against_schema
-Check error message for details
 ```
 
 ## Data Access Issues
@@ -812,14 +794,6 @@ Use special keys to control query behavior and output.
   "value": {"$avg": true}
 }
 ```
-
-## Using Operators with Tools
-
-- **build_filter_condition**: Create complex filters using comparison & logical operators
-- **validate_filter_against_schema**: Verify operators are valid for entity
-- **execute_ods_query**: Run query with all operators
-- **get_operator_documentation**: Get detailed docs for any operator
-- **suggest_optimizations**: Get performance tips for your operators
 
 ## Performance Tips
 

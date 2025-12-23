@@ -27,7 +27,7 @@ class SchemaToolHandler(BaseToolHandler):
 
     @staticmethod
     def validate_field_exists(arguments: dict[str, Any]) -> list[TextContent]:
-        """Check if a field exists in entity schema."""
+        """Check if a field (attribute or relationship) exists in entity schema."""
         try:
             entity_name = arguments.get("entity_name")
             if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
@@ -36,21 +36,6 @@ class SchemaToolHandler(BaseToolHandler):
             if not field_name or not isinstance(field_name, str) or not field_name.strip():
                 raise ValueError("field_name must be a non-empty string")
             result = SchemaInspector.validate_field_exists(entity_name, field_name)
-            return SchemaToolHandler.json_response(result)
-        except Exception as e:
-            return SchemaToolHandler.error_response(str(e), type(e).__name__)
-
-    @staticmethod
-    def validate_filter_against_schema(arguments: dict[str, Any]) -> list[TextContent]:
-        """Validate filter against actual entity schema."""
-        try:
-            entity_name = arguments.get("entity_name")
-            if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
-                raise ValueError("entity_name must be a non-empty string")
-            filter_condition = arguments.get("filter_condition")
-            if not filter_condition or not isinstance(filter_condition, dict):
-                raise ValueError("filter_condition must be a non-empty dict")
-            result = SchemaInspector.validate_filter_against_schema(entity_name, filter_condition)
             return SchemaToolHandler.json_response(result)
         except Exception as e:
             return SchemaToolHandler.error_response(str(e), type(e).__name__)

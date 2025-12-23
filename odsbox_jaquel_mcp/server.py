@@ -270,24 +270,6 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🔍")],
         ),
         Tool(
-            name="validate_filter_against_schema",
-            title="Validate Filter Against Schema",
-            description="Validate filter against actual entity schema",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "entity_name": {"type": "string", "description": "Entity name"},
-                    "filter_condition": {
-                        "type": "object",
-                        "description": "Filter to validate",
-                    },
-                },
-                "required": ["entity_name", "filter_condition"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="✅")],
-        ),
-        Tool(
             name="debug_query_steps",
             title="Debug Query Steps",
             description="Break down a query into steps for debugging",
@@ -824,9 +806,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     elif name == "validate_field_exists":
         return SchemaToolHandler.validate_field_exists(arguments)
 
-    elif name == "validate_filter_against_schema":
-        return SchemaToolHandler.validate_filter_against_schema(arguments)
-
     # ========================================================================
     # CONNECTION MANAGEMENT TOOLS
     # ========================================================================
@@ -945,7 +924,6 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 **Schema & Entity Inspection (5 tools)**
 - List entities: `list_ods_entities`, `get_test_to_measurement_hierarchy`
 - Check fields: `check_entity_schema`, `validate_field_exists`
-- Validate against schema: `validate_filter_against_schema`
 
 **ODS Connection (3 tools)**
 - Manage: `connect_ods_server`, `disconnect_ods_server`, `get_ods_connection_info`
@@ -969,9 +947,8 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 2. `list_ods_entities` - See available entities
 3. `get_test_to_measurement_hierarchy` - Explore test to measurement structure
 4. `check_entity_schema` - Inspect entity fields
-5. `validate_filter_against_schema` - Test filter with real schema
-6. `execute_ods_query` - Run your query
-7. Analyze results with measurement tools
+5. `execute_ods_query` - Run your query
+6. Analyze results with measurement tools
 
 **Workflow 2: Read Timeseries Data Efficiently**
 1. `get_submatrix_measurement_quantities` - See available data

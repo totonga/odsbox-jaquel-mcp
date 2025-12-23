@@ -190,8 +190,6 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 
 #### Schema Inspection (Requires Connection)
 - **check_entity_schema** - Get all fields for entity
-- **validate_field_exists** - Check if field exists
-- **validate_filter_against_schema** - Validate against schema
 - **list_ods_entities** - List all entities with relationships
 - **get_test_to_measurement_hierarchy** - Get ASAM ODS test hierarchy structure
 

@@ -29,7 +29,6 @@ Learn how to validate a Jaquel query for syntax errors and best practices. Provi
 - `validate_jaquel_query` - Validate entire queries
 - `validate_filter_condition` - Validate individual filters
 - `validate_field_exists` - Check if fields exist
-- `validate_filter_against_schema` - Validate against entity schema
 
 ---
 
@@ -63,7 +62,6 @@ Learn how to construct WHERE clause filter conditions for Jaquel queries with:
 - `build_filter_condition` - Create single filter
 - `merge_filter_conditions` - Combine with AND/OR
 - `validate_filter_condition` - Check syntax
-- `validate_filter_against_schema` - Verify against schema
 
 ---
 

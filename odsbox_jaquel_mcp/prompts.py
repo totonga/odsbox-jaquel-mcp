@@ -261,7 +261,6 @@ class PromptLibrary:
                 "- `build_filter_condition` - Create a single filter\n"
                 "- `merge_filter_conditions` - Combine filters with AND/OR logic\n"
                 "- `validate_filter_condition` - Check filter syntax\n"
-                "- `validate_filter_against_schema` - Verify against entity schema\n\n"
                 "## Common Operators:\n"
                 "- `$eq` - Equals\n"
                 "- `$ne` - Not equals\n"
@@ -273,7 +272,6 @@ class PromptLibrary:
                 "## Workflow:\n"
                 "1. Use `build_filter_condition` for individual filters\n"
                 "2. Combine multiple filters with `merge_filter_conditions`\n"
-                "3. Validate with `validate_filter_against_schema`\n"
                 "4. Use in your Jaquel query\n\n"
             )
             if field_info:

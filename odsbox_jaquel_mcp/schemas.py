@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from difflib import get_close_matches
 from typing import Any
 
 from odsbox.model_cache import ModelCache
@@ -9,6 +10,15 @@ from odsbox.proto import ods
 
 from .connection import ODSConnectionManager
 from .schemas_entity_descriptions import EntityDescriptions
+
+
+def __get_suggestion(available: list, str_val: str) -> list[str]:
+    suggestions = get_close_matches(
+        str_val.lower(),
+        {f.lower(): f for f in available},
+        cutoff=0.3,
+    )
+    return suggestions
 
 
 class SchemaInspector:
@@ -52,7 +62,6 @@ class SchemaInspector:
     def get_entity_schema(cls, entity_name: str) -> dict[str, Any]:
         """Get schema for an entity from model."""
         model_cache: ModelCache = cls._get_model_cache()
-
         if not model_cache:
             return {
                 "error": "Model not loaded",
@@ -163,66 +172,39 @@ Use `list_ods_entities` tool to see all available entities.
     @classmethod
     def validate_field_exists(cls, entity_name: str, field_name: str) -> dict[str, Any]:
         """Check if field exists in entity."""
-        schema = cls.get_entity_schema(entity_name)
+        model_cache: ModelCache = cls._get_model_cache()
+        if not model_cache:
+            return {
+                "error": "Model not loaded",
+                "hint": ("Connect to ODS server using 'connect_ods_server' tool first"),
+            }
 
-        if "error" in schema:
-            return schema
+        try:
+            entity: ods.Model.Entity = model_cache.entity(entity_name)
+            schema = cls.get_entity_schema(entity.name)
+            if "error" in schema:
+                return schema
 
-        # Check attributes
-        if field_name in schema["attributes"]:
-            return {"exists": True, "type": "attribute", "field_info": schema["attributes"][field_name]}
+            attribute = model_cache.attribute_no_throw(entity, field_name)
+            # Check attributes
+            if attribute is not None and attribute.name in schema["attributes"]:
+                return {"exists": True, "type": "attribute", "field_info": schema["attributes"][attribute.name]}
 
-        # Check relationships
-        if field_name in schema["relationships"]:
-            return {"exists": True, "type": "relationship", "field_info": schema["relationships"][field_name]}
+            relation = model_cache.relation_no_throw(entity, field_name)
+            if relation is not None and relation.name in schema["relationships"]:
+                return {"exists": True, "type": "relationship", "field_info": schema["relationships"][relation.name]}
+            # Field doesn't exist
+            available = list(schema["attributes"].keys()) + list(schema["relationships"].keys())
 
-        # Field doesn't exist
-        available = list(schema["attributes"].keys()) + list(schema["relationships"].keys())
-        return {
-            "exists": False,
-            "entity": entity_name,
-            "field": field_name,
-            "available_fields": available,
-            "suggestions": [f for f in available if field_name.lower() in f.lower()][:5],
-        }
-
-    @classmethod
-    def validate_filter_against_schema(cls, entity_name: str, filter_condition: dict[str, Any]) -> dict[str, Any]:
-        """Validate filter against actual schema."""
-        from .validators import JaquelValidator
-
-        schema = cls.get_entity_schema(entity_name)
-
-        if "error" in schema:
-            return schema
-
-        issues = []
-        suggestions = []
-
-        for field, value in filter_condition.items():
-            # Check if field exists
-            field_check = cls.validate_field_exists(entity_name, field)
-
-            if not field_check.get("exists"):
-                issues.append(f"Field '{field}' not found in " f"{entity_name}")
-                if field_check.get("suggestions"):
-                    suggestions.extend(field_check["suggestions"])
-                continue
-
-            # Check data type compatibility
-            if isinstance(value, dict):
-                for op, _op_value in value.items():
-                    if op.startswith("$"):
-                        if op not in (JaquelValidator.ALL_OPERATORS):
-                            issues.append(f"Unknown operator: {op}")
-
-        return {
-            "entity": entity_name,
-            "filter": filter_condition,
-            "valid": len(issues) == 0,
-            "issues": issues,
-            "suggestions": suggestions,
-        }
+            return {
+                "exists": False,
+                "entity": entity.name,
+                "field": field_name,
+                "available_fields": available,
+                "suggestions": __get_suggestion(available, field_name)[:5],
+            }
+        except Exception as e:
+            return {"error": str(e), "entity": entity_name}
 
     @classmethod
     def get_test_to_measurement_hierarchy(cls) -> dict[str, Any]:
@@ -253,7 +235,7 @@ Use `list_ods_entities` tool to see all available entities.
             while current_entity and current_entity.name not in visited:
                 visited.add(current_entity.name)
 
-                condition = {"name": {"$like": "*"}}
+                condition: dict[str, Any] = {"name": {"$like": "*"}}
                 if current_children_relation:
                     condition[current_children_relation.inverse_name] = 4711
                 query_example = {

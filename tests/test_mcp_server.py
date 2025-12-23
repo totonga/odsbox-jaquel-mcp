@@ -45,7 +45,6 @@ class TestMCPServer:
             "merge_filter_conditions",
             "check_entity_schema",
             "validate_field_exists",
-            "validate_filter_against_schema",
             "debug_query_steps",
             "suggest_error_fixes",
             "connect_ods_server",
@@ -281,21 +280,6 @@ class TestMCPServer:
         assert isinstance(result[0], TextContent)
 
         mock_validate.assert_called_once_with("TestEntity", "name")
-
-    @patch("odsbox_jaquel_mcp.tools.schema_tools.SchemaInspector.validate_filter_against_schema")
-    @pytest.mark.asyncio
-    async def test_call_tool_validate_filter_against_schema(self, mock_validate):
-        """Test calling validate_filter_against_schema tool."""
-        mock_validate.return_value = {"valid": True}
-        arguments = {"entity_name": "TestEntity", "filter_condition": {"name": "test"}}
-
-        result = await call_tool("validate_filter_against_schema", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        mock_validate.assert_called_once_with("TestEntity", {"name": "test"})
 
     @patch("odsbox_jaquel_mcp.tools.query_tools.QueryDebugger.debug_query_step_by_step")
     @pytest.mark.asyncio
