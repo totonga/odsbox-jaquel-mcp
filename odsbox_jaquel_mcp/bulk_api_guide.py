@@ -72,7 +72,7 @@ BULK API vs JAQUEL QUERIES
 │ • Searching for measurement definitions                     │
 │ • Checking what data exists                                 │
 │                                                             │
-│ TOOLS: execute_ods_query, validate_jaquel_query             │
+│ TOOLS: execute_ods_query, validate_query             │
 └─────────────────────────────────────────────────────────────┘
 
 KEY DIFFERENCE:

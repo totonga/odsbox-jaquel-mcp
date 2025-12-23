@@ -33,7 +33,7 @@ class TestMCPServer:
         tool_names = [tool.name for tool in tools]
 
         expected_tools = [
-            "validate_jaquel_query",
+            "validate_query",
             "get_operator_documentation",
             "suggest_optimizations",
             "get_query_pattern",
@@ -42,8 +42,6 @@ class TestMCPServer:
             "explain_query",
             "check_entity_schema",
             "validate_field_exists",
-            "debug_query_steps",
-            "suggest_error_fixes",
             "connect_ods_server",
             "disconnect_ods_server",
             "get_ods_connection_info",
@@ -58,12 +56,12 @@ class TestMCPServer:
             assert expected_tool in tool_names
 
     @pytest.mark.asyncio
-    async def test_call_tool_validate_jaquel_query(self):
-        """Test calling validate_jaquel_query tool."""
+    async def test_call_tool_validate_query(self):
+        """Test calling validate_query tool."""
         query = {"TestEntity": {}}
         arguments = {"query": query}
 
-        result = await call_tool("validate_jaquel_query", arguments)
+        result = await call_tool("validate_query", arguments)
 
         assert isinstance(result, list)
         assert len(result) == 1

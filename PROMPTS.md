@@ -26,7 +26,7 @@ Learn how to establish a connection to an ASAM ODS server for live model inspect
 Learn how to validate a Jaquel query for syntax errors and best practices. Provides detailed feedback on query structure and suggestions for improvement.
 
 **Related Tools:**
-- `validate_jaquel_query` - Validate entire queries
+- `validate_query` - Validate entire queries
 - `validate_field_exists` - Check if fields exist
 
 ---
@@ -92,22 +92,6 @@ Learn how to analyze and compare measurements across quantities with:
 - `get_unique_tests` - Find test names
 - `get_unique_quantities` - List quantities
 - `build_index` - Create searchable index
-
----
-
-### 7. 📌 Optimize & Debug Jaquel Queries
-**Name:** `optimize_query`
-
-Learn how to optimize queries for better performance and readability:
-- Query simplification suggestions
-- Step-by-step debugging
-- Error fix recommendations
-
-**Related Tools:**
-- `suggest_optimizations` - Get simplifications
-- `debug_query_steps` - Step-by-step breakdown
-- `suggest_error_fixes` - Fix recommendations
-- `explain_query` - Understand behavior
 
 ---
 

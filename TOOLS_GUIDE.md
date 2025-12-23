@@ -22,7 +22,7 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 ### Jaquel Query Tools (10 tools)
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| validate_jaquel_query | Validate complete query | Query dict | Validation result |
+| validate_query | Validate complete query | Query dict | Validation result |
 | get_operator_documentation | Get operator docs | Operator name | Documentation |
 | get_query_pattern | Get pattern template | Pattern name | Pattern object |
 | list_query_patterns | List all patterns | None | List of patterns |
@@ -34,8 +34,6 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 |------|---------|-------|--------|
 | check_entity_schema | Get entity fields | Entity name | Field list |
 | validate_field_exists | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
-| debug_query_steps | Break query into steps | Query dict | Debug steps |
-| suggest_error_fixes | Get error suggestions | Issue, query | Fix suggestions |
 
 ### ODS Connection & Data Access Tools (9 tools)
 | Tool | Purpose | Input | Output |
@@ -67,7 +65,7 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 
 ## Tool Reference
 
-### 1. validate_jaquel_query
+### 1. validate_query
 
 **Purpose**: Validate a complete Jaquel query structure.
 
@@ -385,114 +383,6 @@ if result["exists"]:
     print(f"Field exists: {result['field_info']['type']}")
 else:
     print("Field does not exist")
-```
-
----
-
-### 14. debug_query_steps
-
-**Purpose**: Break down a Jaquel query into logical steps for debugging.
-
-**Input**:
-```json
-{
-    "query": {
-        "AoMeasurement": {"name": "Test*"},
-        "$attributes": {"id": 1, "name": 1},
-        "$orderby": {"name": 1}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "query_summary": "Query for AoMeasurement entities",
-    "steps": [
-        {
-            "step": 1,
-            "operation": "filter",
-            "description": "Filter AoMeasurement where name matches 'Test*'",
-            "jaquel_fragment": {"AoMeasurement": {"name": "Test*"}}
-        },
-        {
-            "step": 2,
-            "operation": "select_attributes",
-            "description": "Select id and name attributes",
-            "jaquel_fragment": {"$attributes": {"id": 1, "name": 1}}
-        },
-        {
-            "step": 3,
-            "operation": "order_by",
-            "description": "Order results by name ascending",
-            "jaquel_fragment": {"$orderby": {"name": 1}}
-        }
-    ],
-    "estimated_complexity": "simple"
-}
-```
-
-**Example**:
-```python
-steps = debug_query_steps(query)
-for step in steps["steps"]:
-    print(f"Step {step['step']}: {step['description']}")
-```
-
----
-
-### 15. suggest_error_fixes
-
-**Purpose**: Get suggestions to fix common query errors.
-
-**Input**:
-```json
-{
-    "issue": "invalid operator",
-    "query": {
-        "AoMeasurement": {"name": {"$invalid": "test"}}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "issue": "invalid operator",
-    "query": {
-        "AoMeasurement": {"name": {"$invalid": "test"}}
-    },
-    "suggestions": [
-        {
-            "fix_type": "operator_correction",
-            "description": "Replace $invalid with a valid operator",
-            "suggested_fix": {
-                "AoMeasurement": {"name": {"$eq": "test"}}
-            },
-            "confidence": "high"
-        },
-        {
-            "fix_type": "operator_alternatives",
-            "description": "Use $like for pattern matching instead",
-            "suggested_fix": {
-                "AoMeasurement": {"name": {"$like": "test*"}}
-            },
-            "confidence": "medium"
-        }
-    ],
-    "common_fixes": [
-        "$eq for exact match",
-        "$like for pattern matching",
-        "$in for multiple values"
-    ]
-}
-```
-
-**Example**:
-```python
-suggestions = suggest_error_fixes("invalid operator", query)
-for suggestion in suggestions["suggestions"]:
-    print(f"Fix: {suggestion['description']}")
 ```
 
 ---
@@ -1171,7 +1061,7 @@ print(info["example"])  # See correct usage
 
 ### Debugging Tips
 
-1. **Use validate_jaquel_query** to find syntax errors
+1. **Use validate_query** to find syntax errors
 2. **Use explain_query** to understand complex queries
 3. **Use get_operator_documentation** to verify operator syntax
 4. **Use suggest_optimizations** to find issues and improvements

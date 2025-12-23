@@ -21,7 +21,6 @@ class PromptLibrary:
             PromptLibrary._ods_connection_prompt(),
             PromptLibrary._bulk_api_guide_prompt(),
             PromptLibrary._measurement_analysis_prompt(),
-            PromptLibrary._query_optimization_prompt(),
         ]
 
     @staticmethod
@@ -132,26 +131,6 @@ class PromptLibrary:
         )
 
     @staticmethod
-    def _query_optimization_prompt() -> Prompt:
-        """Prompt for query optimization and debugging."""
-        return Prompt(
-            name="optimize_query",
-            title="Optimize & Debug Jaquel Queries",
-            description=(
-                "Learn how to optimize Jaquel queries for better performance and readability. "
-                "Includes query simplification suggestions, step-by-step debugging, "
-                "and error fix recommendations."
-            ),
-            arguments=[
-                PromptArgument(
-                    name="query_issue",
-                    description="(Optional) A query you want to optimize or debug",
-                    required=False,
-                )
-            ],
-        )
-
-    @staticmethod
     def get_prompt_content(prompt_name: str, arguments: dict | None = None) -> str:
         """Generate content for a specific prompt.
 
@@ -193,13 +172,13 @@ class PromptLibrary:
             query_example = arguments.get("query_example", "")
             content = (
                 "# Validating Jaquel Queries\n\n"
-                "Use the `validate_jaquel_query` tool to check your Jaquel queries for:\n"
+                "Use the `validate_query` tool to check your Jaquel queries for:\n"
                 "- Syntax errors and structural issues\n"
                 "- Missing required fields\n"
                 "- Invalid operators or comparisons\n"
                 "- Best practice violations\n\n"
                 "## How to use:\n"
-                "1. Call `validate_jaquel_query` with your query object\n"
+                "1. Call `validate_query` with your query object\n"
                 "2. Review the validation report\n"
                 "3. Use suggestions to fix any issues\n\n"
             )
@@ -287,32 +266,6 @@ class PromptLibrary:
             )
             if analysis_type:
                 content += f"**Analysis type:** {analysis_type}\n"
-            return content
-
-        elif prompt_name == "optimize_query":
-            query_issue = arguments.get("query_issue", "")
-            content = (
-                "# Query Optimization & Debugging\n\n"
-                "Improve query performance and fix issues.\n\n"
-                "## Optimization Tools:\n"
-                "- `suggest_optimizations` - Get simplification suggestions\n"
-                "- `debug_query_steps` - Break down query execution\n"
-                "- `suggest_error_fixes` - Get fix recommendations\n"
-                "- `explain_query` - Understand what a query does\n\n"
-                "## Common Issues:\n"
-                "- Complex nested structures that can be simplified\n"
-                "- Redundant filters\n"
-                "- Inefficient field selections\n"
-                "- Missing or invalid operators\n\n"
-                "## Debugging Process:\n"
-                "1. Use `explain_query` to understand current behavior\n"
-                "2. Call `debug_query_steps` for step-by-step breakdown\n"
-                "3. Use `suggest_optimizations` for improvements\n"
-                "4. If errors occur, use `suggest_error_fixes`\n"
-                "5. Validate with `validate_jaquel_query`\n\n"
-            )
-            if query_issue:
-                content += f"**Query issue:** {query_issue}\n"
             return content
 
         else:

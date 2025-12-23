@@ -14,7 +14,7 @@ class ValidationToolHandler(BaseToolHandler):
     """Handles query validation tools."""
 
     @staticmethod
-    def validate_jaquel_query(arguments: dict[str, Any]) -> list[TextContent]:
+    def validate_query(arguments: dict[str, Any]) -> list[TextContent]:
         """Validate a Jaquel query structure."""
         try:
             query = arguments.get("query", {})

@@ -187,7 +187,7 @@ Once connected, explore what's available:
 1. `list_query_patterns` - See available query templates
 2. `get_query_pattern` - Get specific pattern
 3. `explain_query` - Understand query syntax
-4. `validate_jaquel_query` - Check query syntax
+4. `validate_query` - Check query syntax
 6. `execute_ods_query` - Run query and get results
 
 **Output**: Query results containing measurements and metadata
@@ -325,7 +325,7 @@ Use `check_entity_schema` to see all available fields:
 ```
 
 **Use**:
-1. Validate with `validate_jaquel_query`
+1. Validate with `validate_query`
 2. Execute with `execute_ods_query`
 
 ## Pattern 3: Bulk Data Access (Timeseries)
@@ -359,7 +359,7 @@ Use `check_entity_schema` to see all available fields:
 ```
 
 **Use**: 
-1. Validate structure: `validate_jaquel_query`
+1. Validate structure: `validate_query`
 2. Optimize: `suggest_optimizations`
 3. Execute: `execute_ods_query`
 
@@ -512,8 +512,6 @@ get_ods_connection_info
 ## Getting Help
 
 - Use `get_bulk_api_help` for data access questions
-- Use `debug_query_steps` to analyze query structure
-- Use `suggest_error_fixes` for validation errors
 - Review TOOLS_GUIDE.md for detailed tool documentation
 """
 

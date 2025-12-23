@@ -169,7 +169,7 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 ### Core Validation Tools
 
 #### Query Building & Validation
-- **validate_jaquel_query** - Check query syntax and structure
+- **validate_query** - Check query syntax and structure
 - **explain_query** - Get plain English explanation
 
 #### Pattern & Example Library
@@ -177,10 +177,6 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 - **list_query_patterns** - List available patterns
 - **generate_query_skeleton** - Generate query skeleton for entity
 - **get_operator_documentation** - Learn about operators
-
-#### Debugging Tools
-- **debug_query_steps** - Break query into logical steps
-- **suggest_error_fixes** - Get suggestions for errors
 
 #### Schema Inspection (Requires Connection)
 - **check_entity_schema** - Get all fields for entity

@@ -60,7 +60,7 @@ async def list_tools() -> list[Tool]:
     """List all available MCP tools."""
     return [
         Tool(
-            name="validate_jaquel_query",
+            name="validate_query",
             title="Validate Jaquel Query",
             description="Validate a Jaquel query structure for syntax errors and best practices",
             inputSchema={
@@ -211,41 +211,6 @@ async def list_tools() -> list[Tool]:
             },
             annotations=ToolAnnotations(readOnlyHint=True),
             icons=[Icon(src="🔍")],
-        ),
-        Tool(
-            name="debug_query_steps",
-            title="Debug Query Steps",
-            description="Break down a query into steps for debugging",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "object",
-                        "description": "Query to break down",
-                    }
-                },
-                "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🐛")],
-        ),
-        Tool(
-            name="suggest_error_fixes",
-            title="Suggest Error Fixes",
-            description="Get suggestions to fix query errors",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "issue": {"type": "string", "description": "Description of issue"},
-                    "query": {
-                        "type": "object",
-                        "description": "The problematic query",
-                    },
-                },
-                "required": ["issue"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔧")],
         ),
         Tool(
             name="connect_ods_server",
@@ -695,8 +660,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     # VALIDATION TOOLS
     # ========================================================================
-    if name == "validate_jaquel_query":
-        return ValidationToolHandler.validate_jaquel_query(arguments)
+    if name == "validate_query":
+        return ValidationToolHandler.validate_query(arguments)
 
     elif name == "get_operator_documentation":
         return ValidationToolHandler.get_operator_documentation(arguments)
@@ -721,12 +686,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     elif name == "explain_query":
         return QueryToolHandler.explain_query(arguments)
-
-    elif name == "debug_query_steps":
-        return QueryToolHandler.debug_query_steps(arguments)
-
-    elif name == "suggest_error_fixes":
-        return QueryToolHandler.suggest_error_fixes(arguments)
 
     # ========================================================================
     # SCHEMA VALIDATION TOOLS
@@ -835,16 +794,10 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 - `generate_measurement_comparison_notebook` for Jupyter notebooks
 - `generate_plotting_code` for matplotlib visualizations
 
-**Path 3: Query Validation & Optimization**
-- Use `validate_jaquel_query` to check query syntax
-- `suggest_optimizations` for performance improvements
-- `debug_query_steps` to troubleshoot issues
-
 ## 📚 TOOL CATEGORIES
 
 **Validation & Debugging (7 tools)**
-- Check queries: `validate_jaquel_query`, `explain_query`, `debug_query_steps`
-- Fix errors: `suggest_error_fixes`, `suggest_optimizations`
+- Check queries: `validate_query`, `explain_query`
 - Check operators: `get_operator_documentation`
 
 **Query Building (9 tools)**
@@ -921,7 +874,6 @@ Use these for guided workflows:
 - `explore_patterns` - Discover query patterns
 - `bulk_data_access` - Learn Bulk API 3-step workflow
 - `analyze_measurements` - Statistical analysis & visualization
-- `optimize_query` - Debug and optimize queries
 
 ## 🔗 DOCUMENTATION & EXAMPLES
 
