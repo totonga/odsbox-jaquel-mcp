@@ -170,7 +170,6 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 
 #### Query Building & Validation
 - **validate_jaquel_query** - Check query syntax and structure
-- **validate_filter_condition** - Validate filter conditions
 - **build_filter_condition** - Construct filter conditions
 - **explain_jaquel_query** - Get plain English explanation
 

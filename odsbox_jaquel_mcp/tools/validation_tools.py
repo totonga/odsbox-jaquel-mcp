@@ -24,16 +24,6 @@ class ValidationToolHandler(BaseToolHandler):
             return ValidationToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def validate_filter_condition(arguments: dict[str, Any]) -> list[TextContent]:
-        """Validate a WHERE clause filter condition."""
-        try:
-            condition = arguments.get("condition", {})
-            result = JaquelValidator.validate_filter_condition(condition)
-            return ValidationToolHandler.json_response(result)
-        except Exception as e:
-            return ValidationToolHandler.error_response(str(e), type(e).__name__)
-
-    @staticmethod
     def get_operator_documentation(arguments: dict[str, Any]) -> list[TextContent]:
         """Get documentation for a Jaquel operator."""
         try:

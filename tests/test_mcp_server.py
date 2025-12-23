@@ -34,7 +34,6 @@ class TestMCPServer:
 
         expected_tools = [
             "validate_jaquel_query",
-            "validate_filter_condition",
             "get_operator_documentation",
             "suggest_optimizations",
             "get_query_pattern",
@@ -78,23 +77,6 @@ class TestMCPServer:
         assert "errors" in response_data
         assert "warnings" in response_data
         assert "suggestions" in response_data
-
-    @pytest.mark.asyncio
-    async def test_call_tool_validate_filter_condition(self):
-        """Test calling validate_filter_condition tool."""
-        condition = {"name": {"$eq": "test"}}
-        arguments = {"condition": condition}
-
-        result = await call_tool("validate_filter_condition", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "valid" in response_data
-        assert "errors" in response_data
-        assert "issues" in response_data
 
     @pytest.mark.asyncio
     async def test_call_tool_get_operator_documentation(self):

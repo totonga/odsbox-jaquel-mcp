@@ -130,6 +130,9 @@ class JaquelValidator:
             msg = f"Entity '{entity_name}' query value must be " "dict, int, or string"
             errors.append(msg)
 
+        if isinstance(entity_query, dict):
+            JaquelValidator._validate_operator_dict(entity_query, entity_name, errors, issues=warnings)
+
         # Validate special keys
         for key in query.keys():
             if key.startswith("$"):
@@ -172,23 +175,6 @@ class JaquelValidator:
                         errors.append(msg)
 
         return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings, "suggestions": suggestions}
-
-    @staticmethod
-    def validate_filter_condition(condition: dict[str, Any], field_name: str = "condition") -> dict[str, Any]:
-        """Validate a filter condition (WHERE clause).
-
-        Returns:
-            dict with 'valid', 'errors', 'issues'.
-        """
-
-        if not isinstance(condition, dict):
-            return {"valid": False, "errors": ["Condition must be a dictionary"], "issues": []}
-
-        errors: list[str] = []
-        issues: list[str] = []
-        JaquelValidator._validate_operator_dict(condition, "", errors, issues)
-
-        return {"valid": len(errors) == 0, "errors": errors, "issues": issues}
 
     @staticmethod
     def get_operator_info(operator: str) -> dict[str, Any]:

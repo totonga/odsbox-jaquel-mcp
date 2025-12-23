@@ -221,8 +221,7 @@ class PromptLibrary:
                 "## How to use:\n"
                 "1. Call `validate_jaquel_query` with your query object\n"
                 "2. Review the validation report\n"
-                "3. Use suggestions to fix any issues\n"
-                "4. You can also validate individual filter conditions with `validate_filter_condition`\n\n"
+                "3. Use suggestions to fix any issues\n\n"
             )
             if query_example:
                 content += f"**Your query:**\n```json\n{query_example}\n```\n"
@@ -260,7 +259,6 @@ class PromptLibrary:
                 "## Filter Building Tools:\n"
                 "- `build_filter_condition` - Create a single filter\n"
                 "- `merge_filter_conditions` - Combine filters with AND/OR logic\n"
-                "- `validate_filter_condition` - Check filter syntax\n"
                 "## Common Operators:\n"
                 "- `$eq` - Equals\n"
                 "- `$ne` - Not equals\n"

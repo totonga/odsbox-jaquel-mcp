@@ -23,7 +23,6 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
 | validate_jaquel_query | Validate complete query | Query dict | Validation result |
-| validate_filter_condition | Validate WHERE clause | Condition dict | Validation result |
 | get_operator_documentation | Get operator docs | Operator name | Documentation |
 | suggest_optimizations | Find improvements | Query dict | List of suggestions |
 | get_query_pattern | Get pattern template | Pattern name | Pattern object |
@@ -112,49 +111,6 @@ query = {
 }
 result = JaquelValidator.validate_query(query)
 # Returns: {"valid": true, "errors": [], ...}
-```
-
----
-
-### 2. validate_filter_condition
-
-**Purpose**: Validate a WHERE clause filter condition.
-
-**Input**:
-```json
-{
-    "condition": {
-        "field": {"$operator": value}
-    },
-    "field_name": "optional_field_name"
-}
-```
-
-**Output**:
-```json
-{
-    "valid": true,
-    "errors": [],
-    "issues": []
-}
-```
-
-**Checks**:
-- ✓ Condition is a dictionary
-- ✓ Operators are recognized ($eq, $like, $between, etc.)
-- ✓ Logical operators ($and, $or, $not) have correct structure
-- ✓ $null/$notnull have value 1
-- ✓ $between/$in require list values
-
-**Example**:
-```python
-condition = {
-    "measurement_begin": {
-        "$between": ["2023-01-01", "2023-12-31"]
-    }
-}
-result = JaquelValidator.validate_filter_condition(condition)
-# Returns: {"valid": true, "errors": [], "issues": []}
 ```
 
 ---

@@ -78,23 +78,6 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="✅")],
         ),
         Tool(
-            name="validate_filter_condition",
-            title="Validate Filter Condition",
-            description="Validate a WHERE clause filter condition in a Jaquel query",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "condition": {
-                        "type": "object",
-                        "description": "The filter condition to validate",
-                    }
-                },
-                "required": ["condition"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="✅")],
-        ),
-        Tool(
             name="get_operator_documentation",
             title="Get Operator Documentation",
             description="Get documentation and examples for a Jaquel operator",
@@ -754,9 +737,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     if name == "validate_jaquel_query":
         return ValidationToolHandler.validate_jaquel_query(arguments)
-
-    elif name == "validate_filter_condition":
-        return ValidationToolHandler.validate_filter_condition(arguments)
 
     elif name == "get_operator_documentation":
         return ValidationToolHandler.get_operator_documentation(arguments)
