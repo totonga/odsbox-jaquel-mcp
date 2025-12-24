@@ -103,3 +103,4 @@ markers = [
     "integration: marks tests as integration tests (requires live ODS server)",
     "unit: marks tests as unit tests",
 ]
+asyncio_mode = "auto"

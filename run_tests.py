@@ -14,7 +14,7 @@ from pathlib import Path
 
 def run_tests(integration=False, all_tests=False):
     """Run the test suite.
-    
+
     Args:
         integration: Run only integration tests
         all_tests: Run all tests including integration
@@ -51,4 +51,3 @@ if __name__ == "__main__":
     all_tests = "-all" in sys.argv
 
     sys.exit(run_tests(integration=integration, all_tests=all_tests))
-

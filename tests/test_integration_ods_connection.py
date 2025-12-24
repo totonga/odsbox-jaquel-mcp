@@ -30,7 +30,7 @@ class TestODSIntegration:
 
     def test_connect_to_ods_server(self, integration_credentials):
         """Test connecting to live ODS server.
-        
+
         This test verifies:
         - Connection can be established with valid credentials
         - Connection status is properly tracked
@@ -49,7 +49,7 @@ class TestODSIntegration:
 
     def test_list_entities(self, integration_credentials):
         """Test retrieving available entities from ODS server.
-        
+
         This test verifies:
         - Entity list can be retrieved after connection
         - Common ODS entities are present (Measurement, Unit, Test, etc.)
@@ -76,7 +76,7 @@ class TestODSIntegration:
 
     def test_get_model_cache(self, integration_credentials):
         """Test that model cache is properly initialized.
-        
+
         This test verifies:
         - Model cache is created after connection
         - Model cache contains expected content
@@ -91,7 +91,7 @@ class TestODSIntegration:
 
     def test_query_measurements(self, integration_credentials):
         """Test executing a query for measurements.
-        
+
         This test verifies:
         - Queries can be executed after connection
         - Query results are returned properly
@@ -113,7 +113,7 @@ class TestODSIntegration:
 
     def test_disconnect_from_ods_server(self, integration_credentials):
         """Test disconnecting from ODS server.
-        
+
         This test verifies:
         - Connection can be closed properly
         - Connection state is updated
@@ -133,7 +133,7 @@ class TestODSIntegration:
 
     def test_connection_reuse(self, integration_credentials):
         """Test that singleton connection can be reused across operations.
-        
+
         This test verifies:
         - Connection is reused across multiple operations
         - Singleton pattern works correctly
