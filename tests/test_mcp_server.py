@@ -35,7 +35,6 @@ class TestMCPServer:
         expected_tools = [
             "validate_query",
             "get_operator_documentation",
-            "suggest_optimizations",
             "get_query_pattern",
             "list_query_patterns",
             "generate_query_skeleton",

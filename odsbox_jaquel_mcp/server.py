@@ -94,23 +94,6 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📚")],
         ),
         Tool(
-            name="suggest_optimizations",
-            title="Suggest Query Optimizations",
-            description="Suggest optimizations and simplifications for a Jaquel query",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "object",
-                        "description": "The Jaquel query to optimize",
-                    }
-                },
-                "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="⚡")],
-        ),
-        Tool(
             name="get_query_pattern",
             title="Get Query Pattern Template",
             description="Get a template for a common Jaquel query pattern",
@@ -665,9 +648,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
     elif name == "get_operator_documentation":
         return ValidationToolHandler.get_operator_documentation(arguments)
-
-    elif name == "suggest_optimizations":
-        return ValidationToolHandler.suggest_optimizations(arguments)
 
     # ========================================================================
     # QUERY PATTERN TOOLS

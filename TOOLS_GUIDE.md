@@ -22,45 +22,45 @@ The MCP Server provides tools for working with ASAM ODS servers using queries an
 ### ODS Connection & Data Access Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| connect_ods_server | Connect to ODS server | URL, credentials | Connection status |
-| disconnect_ods_server | Disconnect from server | None | Status |
-| get_ods_connection_info | Get connection details | None | Connection info |
+| [connect_ods_server](#connect_ods_server) | Connect to ODS server | URL, credentials | Connection status |
+| [disconnect_ods_server](#disconnect_ods_server) | Disconnect from server | None | Status |
+| [get_ods_connection_info](#get_ods_connection_info) | Get connection details | None | Connection info |
 
 ### Schema Inspection Tools
-| list_ods_entities | List all entities | None | Entity list |
-| get_test_to_measurement_hierarchy | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
-| check_entity_schema | Get entity fields | Entity name | Field list |
-| validate_field_exists | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
+| [list_ods_entities](#list_ods_entities) | List all entities | None | Entity list |
+| [get_test_to_measurement_hierarchy](#get_test_to_measurement_hierarchy) | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
+| [check_entity_schema](#check_entity_schema) | Get entity fields | Entity name | Field list |
+| [validate_field_exists](#validate_field_exists) | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
 
 ### Jaquel Query Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| validate_query | Validate complete query | Query dict | Validation result |
-| explain_query | Explain in English | Query dict | Text explanation |
-| execute_query | Execute Jaquel query | Query dict | Query results |
-| get_operator_documentation | Get operator docs | Operator name | Documentation |
-| get_query_pattern | Get pattern template | Pattern name | Pattern object |
-| list_query_patterns | List all patterns | None | List of patterns |
-| generate_query_skeleton | Create query skeleton | Entity name, operation | Query skeleton |
+| [validate_query](#validate_query) | Validate complete query | Query dict | Validation result |
+| [explain_query](#explain_query) | Explain in English | Query dict | Text explanation |
+| [execute_query](#execute_query) | Execute Jaquel query | Query dict | Query results |
+| [get_operator_documentation](#get_operator_documentation) | Get operator docs | Operator name | Documentation |
+| [get_query_pattern](#get_query_pattern) | Get pattern template | Pattern name | Pattern object |
+| [list_query_patterns](#list_query_patterns) | List all patterns | None | List of patterns |
+| [generate_query_skeleton](#generate_query_skeleton) | Create query skeleton | Entity name, operation | Query skeleton |
 
 ### Timeseries/Submatrix Data Access Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| get_submatrix_measurement_quantities | List measurement quantities | Submatrix ID | Quantity list |
-| read_submatrix_data | Read timeseries data | Submatrix ID, patterns | DataFrame data |
-| generate_submatrix_fetcher_script | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
+| [get_submatrix_measurement_quantities](#get_submatrix_measurement_quantities) | List measurement quantities | Submatrix ID | Quantity list |
+| [read_submatrix_data](#read_submatrix_data) | Read timeseries data | Submatrix ID, patterns | DataFrame data |
+| [generate_submatrix_fetcher_script](#generate_submatrix_fetcher_script) | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
 
 ### Notebook & Visualization Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| generate_measurement_comparison_notebook | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
-| generate_plotting_code | Generate matplotlib code | Quantities, count, plot type | Python code string |
+| [generate_measurement_comparison_notebook](#generate_measurement_comparison_notebook) | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
+| [generate_plotting_code](#generate_plotting_code) | Generate matplotlib code | Quantities, count, plot type | Python code string |
 
 ### Measurement Analysis & Query Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| compare_measurements | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
-| query_measurement_hierarchy | Explore measurement structure | Query result, operation | Hierarchy info |
+| [compare_measurements](#compare_measurements) | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
+| [query_measurement_hierarchy](#query_measurement_hierarchy) | Explore measurement structure | Query result, operation | Hierarchy info |
 
 
 ---
@@ -1066,7 +1066,6 @@ print(info["example"])  # See correct usage
 1. **Use validate_query** to find syntax errors
 2. **Use explain_query** to understand complex queries
 3. **Use get_operator_documentation** to verify operator syntax
-4. **Use suggest_optimizations** to find issues and improvements
 
 ---
 
@@ -1215,8 +1214,7 @@ Assistant uses tools:
 1. list_query_patterns() → Shows available patterns
 2. get_query_pattern("time_range") → Gets time range template
 3. generate_query_skeleton("AoMeasurement", "get_all") → Creates skeleton
-4. suggest_optimizations() → Cleans up the query
-5. explain_query() → Explains the result
+4. explain_query() → Explains the result
 ```
 
 ---
@@ -1433,7 +1431,7 @@ Assistant uses tools:
 
 ---
 
-## AI Guidance Tools (NEW)
+## AI Guidance Tools
 
 ### get_bulk_api_help
 
@@ -1480,13 +1478,12 @@ Assistant uses tools:
    - Forgetting to connect first
    - Using wrong column names
    - Not using pattern matching for flexibility
-   - Attempting pagination on bulk data
 
 5. **decision_tree** - How to choose the right approach
    - "I know measurement IDs" → Use bulk API
-   - "I need to search" → Use Jaquel first
+   - "I need to search" → Use Jaquel query first
    - "I want timeseries data" → Bulk API after discovery
-   - "I need to filter" → Combine Jaquel + bulk
+   - "I need to filter" → Combine Jaquel query + bulk
 
 6. **quick_start** - 5-minute getting started guide
    - Import statements
@@ -1598,16 +1595,6 @@ result = get_bulk_api_help(topic="error_handling")
    - Call: `get_bulk_api_help(topic="performance_tips")`
    - Then: Apply optimization
 
-**Documentation Links**:
-
-For comprehensive documentation on bulk API usage, see:
-- [`00_START_HERE.md`](00_START_HERE.md) - Main entry point
-- [`BULK_API_README.md`](BULK_API_README.md) - Complete navigation guide
-- [`BULK_API_USAGE_GUIDE.md`](BULK_API_USAGE_GUIDE.md) - In-depth usage guide
-- [`BULK_API_QUICK_REF.md`](BULK_API_QUICK_REF.md) - Quick reference card
-- [`BULK_API_EXAMPLES.md`](BULK_API_EXAMPLES.md) - 8+ complete workflows
-- [`BULK_API_AI_PROMPT.md`](BULK_API_AI_PROMPT.md) - AI system prompt
-
 ---
 
 ## Additional Resources
@@ -1616,9 +1603,7 @@ For comprehensive documentation on bulk API usage, see:
 - [Jaquel Examples](https://peak-solution.github.io/odsbox/jaquel_examples.html)
 - [ODSBox GitHub](https://github.com/peak-solution/odsbox)
 - [ASAM ODS Standard](https://www.asam.net/)
-- [Bulk API Guides](BULK_API_README.md) - Learn efficient timeseries data loading
 
 ---
 
-**Last Updated**: October 2025
-**Version**: 1.1.0 (Added bulk API guidance tools)
+**Last Updated**: December 2025

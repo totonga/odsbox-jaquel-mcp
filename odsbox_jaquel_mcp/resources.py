@@ -360,8 +360,7 @@ Use `check_entity_schema` to see all available fields:
 
 **Use**: 
 1. Validate structure: `validate_query`
-2. Optimize: `suggest_optimizations`
-3. Execute: `execute_query`
+2. Execute: `execute_query`
 
 ## Pattern 5: Time Range Query
 

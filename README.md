@@ -263,7 +263,6 @@ Solution: Check URL, server availability, firewall
 
 ### Issue: Queries timeout
 - Increase request_timeout in connect
-- Optimize query with suggest_optimizations
 - Reduce $rowlimit
 - Check ODS server performance
 
