@@ -54,7 +54,7 @@ class ConnectionToolHandler(BaseToolHandler):
             return ConnectionToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def execute_ods_query(arguments: dict[str, Any]) -> list[TextContent]:
+    def execute_query(arguments: dict[str, Any]) -> list[TextContent]:
         """Execute a Jaquel query on connected ODS server."""
         try:
             query = arguments.get("query", {})

@@ -154,7 +154,7 @@ class PromptLibrary:
                 "3. Use `get_test_to_measurement_hierarchy` to explore hierarchy entity relations\n"
                 "4. List entities with `list_ods_entities` to explore the entity relationship model\n"
                 "5. Generate query templates with `generate_query_skeleton` for specific entity\n"
-                "6. Execute queries directly with `execute_ods_query`\n\n"
+                "6. Execute queries directly with `execute_query`\n\n"
                 "## Available ODS Connection Tools:\n"
                 "- `connect_ods_server` - Establish connection\n"
                 "- `disconnect_ods_server` - Close connection\n"
@@ -162,7 +162,7 @@ class PromptLibrary:
                 "- `get_test_to_measurement_hierarchy` - Explore test-measurement relationships\n"
                 "- `list_ods_entities` - List available entities in the data model\n"
                 "- `generate_query_skeleton` - Create query templates for entity\n"
-                "- `execute_ods_query` - Run queries on live server\n\n"
+                "- `execute_query` - Run queries on live server\n\n"
             )
             if server_details:
                 content += f"**Your server details:** {server_details}\n"

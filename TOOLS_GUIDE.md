@@ -17,44 +17,46 @@ This document provides a comprehensive guide to all tools available in the ASAM 
 
 ## Overview
 
-The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries and bulk data access:
+The MCP Server provides tools for working with ASAM ODS servers using queries and bulk/timeseries data access:
 
-### Jaquel Query Tools (10 tools)
-| Tool | Purpose | Input | Output |
-|------|---------|-------|--------|
-| validate_query | Validate complete query | Query dict | Validation result |
-| get_operator_documentation | Get operator docs | Operator name | Documentation |
-| get_query_pattern | Get pattern template | Pattern name | Pattern object |
-| list_query_patterns | List all patterns | None | List of patterns |
-| generate_query_skeleton | Create query skeleton | Entity name, operation | Query skeleton |
-| explain_query | Explain in English | Query dict | Text explanation |
-
-### Schema & Validation Tools (5 tools)
-| Tool | Purpose | Input | Output |
-|------|---------|-------|--------|
-| check_entity_schema | Get entity fields | Entity name | Field list |
-| validate_field_exists | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
-
-### ODS Connection & Data Access Tools (9 tools)
+### ODS Connection & Data Access Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
 | connect_ods_server | Connect to ODS server | URL, credentials | Connection status |
 | disconnect_ods_server | Disconnect from server | None | Status |
 | get_ods_connection_info | Get connection details | None | Connection info |
+
+### Schema Inspection Tools
 | list_ods_entities | List all entities | None | Entity list |
 | get_test_to_measurement_hierarchy | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
-| execute_ods_query | Execute Jaquel query | Query dict | Query results |
+| check_entity_schema | Get entity fields | Entity name | Field list |
+| validate_field_exists | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
+
+### Jaquel Query Tools
+| Tool | Purpose | Input | Output |
+|------|---------|-------|--------|
+| validate_query | Validate complete query | Query dict | Validation result |
+| explain_query | Explain in English | Query dict | Text explanation |
+| execute_query | Execute Jaquel query | Query dict | Query results |
+| get_operator_documentation | Get operator docs | Operator name | Documentation |
+| get_query_pattern | Get pattern template | Pattern name | Pattern object |
+| list_query_patterns | List all patterns | None | List of patterns |
+| generate_query_skeleton | Create query skeleton | Entity name, operation | Query skeleton |
+
+### Timeseries/Submatrix Data Access Tools
+| Tool | Purpose | Input | Output |
+|------|---------|-------|--------|
 | get_submatrix_measurement_quantities | List measurement quantities | Submatrix ID | Quantity list |
 | read_submatrix_data | Read timeseries data | Submatrix ID, patterns | DataFrame data |
 | generate_submatrix_fetcher_script | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
 
-### Notebook & Visualization Tools (2 tools)
+### Notebook & Visualization Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
 | generate_measurement_comparison_notebook | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
 | generate_plotting_code | Generate matplotlib code | Quantities, count, plot type | Python code string |
 
-### Measurement Analysis & Query Tools (2 tools)
+### Measurement Analysis & Query Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
 | compare_measurements | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
@@ -65,7 +67,7 @@ The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries an
 
 ## Tool Reference
 
-### 1. validate_query
+### validate_query
 
 **Purpose**: Validate a complete Jaquel query structure.
 
@@ -110,7 +112,7 @@ result = JaquelValidator.validate_query(query)
 
 ---
 
-### 3. get_operator_documentation
+### get_operator_documentation
 
 **Purpose**: Get detailed documentation for a Jaquel operator.
 
@@ -150,7 +152,7 @@ doc = JaquelValidator.get_operator_info("$like")
 
 ---
 
-### 4. get_query_pattern
+### get_query_pattern
 
 **Purpose**: Get a template for a common query pattern.
 
@@ -188,7 +190,7 @@ print(pattern["template"])
 
 ---
 
-### 5. list_query_patterns
+### list_query_patterns
 
 **Purpose**: List all available query patterns.
 
@@ -219,7 +221,7 @@ patterns = JaquelExamples.list_patterns()
 
 ---
 
-### 6. generate_query_skeleton
+### generate_query_skeleton
 
 **Purpose**: Generate a query skeleton for an entity.
 
@@ -257,7 +259,7 @@ skeleton = JaquelExamples.generate_query_skeleton(
 
 ---
 
-### 8. explain_query
+### explain_query
 
 **Purpose**: Explain what a query does in plain English.
 
@@ -301,7 +303,7 @@ print(explanation)
 ---
 
 
-### 11. check_entity_schema
+### check_entity_schema
 
 **Purpose**: Get available fields for an entity from the ODS model schema.
 
@@ -349,7 +351,7 @@ for field in schema['fields']:
 
 ---
 
-### 12. validate_field_exists
+### validate_field_exists
 
 **Purpose**: Check if a field exists in an entity's schema.
 
@@ -387,7 +389,7 @@ else:
 
 ---
 
-### 16. connect_ods_server
+### connect_ods_server
 
 **Purpose**: Establish connection to ASAM ODS server for live model inspection and data access.
 
@@ -417,7 +419,7 @@ else:
 
 ---
 
-### 17. disconnect_ods_server
+### disconnect_ods_server
 
 **Purpose**: Close connection to ODS server.
 
@@ -436,7 +438,7 @@ else:
 
 ---
 
-### 18. get_ods_connection_info
+### get_ods_connection_info
 
 **Purpose**: Get current ODS connection information.
 
@@ -457,7 +459,7 @@ else:
 
 ---
 
-### 19. list_ods_entities
+### list_ods_entities
 
 **Purpose**: Return a list of existing entities from the ODS server ModelCache with their relationships.
 
@@ -497,7 +499,7 @@ else:
 
 ---
 
-### 20. get_test_to_measurement_hierarchy
+### get_test_to_measurement_hierarchy
 
 **Purpose**: Get the hierarchical entity chain from AoTest to AoMeasurement via the 'children' relation.
 
@@ -564,7 +566,7 @@ query = {
 
 ---
 
-### 21. execute_ods_query
+### execute_query
 
 **Purpose**: Execute a Jaquel query directly on connected ODS server.
 
@@ -591,7 +593,7 @@ query = {
 
 ---
 
-### 22. get_submatrix_measurement_quantities
+### get_submatrix_measurement_quantities
 
 **Purpose**: Get available measurement quantities for a submatrix.
 
@@ -632,7 +634,7 @@ query = {
 
 ---
 
-### 22. read_submatrix_data
+### read_submatrix_data
 
 **Purpose**: Read timeseries data from a submatrix using bulk data access.
 
@@ -665,7 +667,7 @@ query = {
 
 ---
 
-### 23. generate_submatrix_fetcher_script
+### generate_submatrix_fetcher_script
 
 **Purpose**: Generate Python script examples for fetching submatrix data with proper error handling and data processing.
 
@@ -754,7 +756,7 @@ if __name__ == "__main__":
 
 ## Common Use Cases
 
-### Use Case 1: Validate User Query
+### Validate User Query
 
 ```python
 # User provides a query, validate it
@@ -773,7 +775,7 @@ else:
     print("Errors:", result["errors"])
 ```
 
-### Use Case 3: Learn Operator Usage
+### Learn Operator Usage
 
 ```python
 # User wants to know how to use an operator
@@ -782,7 +784,7 @@ print(f"Description: {doc['description']}")
 print(f"Example: {doc['example']}")
 ```
 
-### Use Case 4: Generate Query from Scratch
+### Generate Query from Scratch
 
 ```python
 # Generate template, then customize it
@@ -803,7 +805,7 @@ result = JaquelValidator.validate_query(skeleton)
 
 ## Query Examples
 
-### Example 1: Simple ID Lookup
+### Simple ID Lookup
 
 ```json
 {
@@ -811,7 +813,7 @@ result = JaquelValidator.validate_query(skeleton)
 }
 ```
 
-### Example 2: Name Search
+### Name Search
 
 ```json
 {
@@ -823,7 +825,7 @@ result = JaquelValidator.validate_query(skeleton)
 }
 ```
 
-### Example 3: Time Range Query
+### Time Range Query
 
 ```json
 {
@@ -836,7 +838,7 @@ result = JaquelValidator.validate_query(skeleton)
 }
 ```
 
-### Example 4: Multiple Conditions
+### Multiple Conditions
 
 ```json
 {
@@ -852,7 +854,7 @@ result = JaquelValidator.validate_query(skeleton)
 }
 ```
 
-### Example 5: Inner Join
+### Inner Join
 
 ```json
 {
@@ -866,7 +868,7 @@ result = JaquelValidator.validate_query(skeleton)
 }
 ```
 
-### Example 6: Outer Join
+### Outer Join
 
 ```json
 {
@@ -879,7 +881,7 @@ result = JaquelValidator.validate_query(skeleton)
 }
 ```
 
-### Example 7: Aggregates
+### Aggregates
 
 ```json
 {
@@ -946,7 +948,7 @@ result = JaquelValidator.validate_query(skeleton)
 
 ## Tips & Best Practices
 
-### 1. Always Validate Before Using
+### Always Validate Before Using
 
 ```python
 result = JaquelValidator.validate_query(query)
@@ -954,7 +956,7 @@ if not result["valid"]:
     raise ValueError(result["errors"])
 ```
 
-### 2. Use Patterns as Starting Points
+### Use Patterns as Starting Points
 
 ```python
 # Start with a pattern, then customize
@@ -963,7 +965,7 @@ query = json.loads(pattern["template"])
 # Modify as needed
 ```
 
-### 3. Use Case-Insensitive for User Searches
+### Use Case-Insensitive for User Searches
 
 ```python
 # Bad: Case-sensitive, might miss data
@@ -973,7 +975,7 @@ query = json.loads(pattern["template"])
 {"name": {"$like": "Test*", "$options": "i"}}
 ```
 
-### 4. Set Row Limits for Large Queries
+### Set Row Limits for Large Queries
 
 ```python
 # Good: Prevents large result sets
@@ -983,7 +985,7 @@ query = json.loads(pattern["template"])
 "$options": {"$rowlimit": 1000, "$rowskip": 0}
 ```
 
-### 5. Use Inner Joins for Required Data
+### Use Inner Joins for Required Data
 
 ```python
 # Inner join - related data must exist
@@ -993,7 +995,7 @@ query = json.loads(pattern["template"])
 "unit:OUTER.name": 1
 ```
 
-### 6. Simplify Verbose Queries
+### Simplify Verbose Queries
 
 ```python
 # Verbose
@@ -1003,7 +1005,7 @@ query = json.loads(pattern["template"])
 {"AoUnit": 123}
 ```
 
-### 7. Document Complex Conditions
+### Document Complex Conditions
 
 ```python
 # Use explain_query to understand queries
@@ -1011,7 +1013,7 @@ explanation = JaquelExplain.explain_query(complex_query)
 print(explanation)  # Share with team for clarity
 ```
 
-### 8. Test Operators Before Using
+### Test Operators Before Using
 
 ```python
 # Verify operator syntax
@@ -1019,7 +1021,7 @@ info = JaquelValidator.get_operator_info("$like")
 print(info["example"])  # See correct usage
 ```
 
-### 9. Use Explicit $and for Complex Logic
+### Use Explicit $and for Complex Logic
 
 ```python
 # Better for readability
@@ -1070,7 +1072,7 @@ print(info["example"])  # See correct usage
 
 ## Notebook & Visualization Tools (NEW)
 
-### 24. generate_measurement_comparison_notebook
+### generate_measurement_comparison_notebook
 
 **Purpose**: Generate a complete Jupyter notebook for comparing measurements with automatic data retrieval, preparation, and visualization.
 
@@ -1128,7 +1130,7 @@ print(info["example"])  # See correct usage
 
 ---
 
-### 25. generate_plotting_code
+### generate_plotting_code
 
 **Purpose**: Generate standalone matplotlib plotting code for measurement visualization.
 
@@ -1221,7 +1223,7 @@ Assistant uses tools:
 
 ## Measurement Analysis & Query Tools (NEW)
 
-### 26. compare_measurements
+### compare_measurements
 
 **Purpose**: Compare measurements across quantities with statistical analysis.
 
@@ -1306,7 +1308,7 @@ Assistant uses tools:
 
 ---
 
-### 27. query_measurement_hierarchy
+### query_measurement_hierarchy
 
 **Purpose**: Query and explore ODS measurement hierarchy and structure.
 
@@ -1433,7 +1435,7 @@ Assistant uses tools:
 
 ## AI Guidance Tools (NEW)
 
-### 28. get_bulk_api_help
+### get_bulk_api_help
 
 **Purpose**: Get contextual help on bulk API usage for loading timeseries data efficiently. This tool provides step-by-step guidance for AI models learning to use the bulk data access system.
 
@@ -1449,7 +1451,7 @@ Assistant uses tools:
 ```json
 {
     "topic": "the_3_step_rule",
-    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with connect_ods_server\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with execute_ods_query\n   - Get quantities with get_submatrix_measurement_quantities\n   - Explore hierarchy with query_measurement_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use read_submatrix_data for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
+    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with connect_ods_server\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with execute_query\n   - Get quantities with get_submatrix_measurement_quantities\n   - Explore hierarchy with query_measurement_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use read_submatrix_data for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
     "examples_count": 3,
     "related_tools": ["connect_ods_server", "get_submatrix_measurement_quantities", "read_submatrix_data"]
 }

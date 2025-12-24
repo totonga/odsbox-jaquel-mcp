@@ -46,7 +46,7 @@ class TestMCPServer:
             "disconnect_ods_server",
             "get_ods_connection_info",
             "list_ods_entities",
-            "execute_ods_query",
+            "execute_query",
             "get_submatrix_measurement_quantities",
             "read_submatrix_data",
             "generate_submatrix_fetcher_script",
@@ -281,12 +281,12 @@ class TestMCPServer:
 
     @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.query")
     @pytest.mark.asyncio
-    async def test_call_tool_execute_ods_query(self, mock_query):
-        """Test calling execute_ods_query tool."""
+    async def test_call_tool_execute_query(self, mock_query):
+        """Test calling execute_query tool."""
         mock_query.return_value = {"success": True, "result": "data"}
         arguments = {"query": {"TestEntity": {}}}
 
-        result = await call_tool("execute_ods_query", arguments)
+        result = await call_tool("execute_query", arguments)
 
         assert isinstance(result, list)
         assert len(result) == 1

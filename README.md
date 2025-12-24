@@ -17,9 +17,9 @@
 ## Overview
 
 - 🔌 Built-in ODS connection management
-- 🧰 29+ MCP tools: schema inspection, query validation, optimization, debugging, and direct ODS query execution
+- 🧰 MCP tools: schema inspection, query validation, direct ODS query execution and measurement data analysis
 - 🏗️ Entity hierarchy visualization (AoTest → AoMeasurement)
-- 🚀 Validate, build, and optimize Jaquel queries for ASAM ODS
+- 🚀 Validate, explain and execute JAQueL queries for ASAM ODS
 - 📦 Bulk timeseries/submatrix data access and script generation
 - 📊 Automatic Jupyter notebook generation for measurement comparison
 - 📈 Matplotlib visualization code generation
@@ -27,7 +27,7 @@
 - 🔎 Measurement hierarchy exploration and discovery
 - 💡 Interactive starting prompts for guided workflows
 - 🤖 AI-guided bulk API learning with `get_bulk_api_help` tool
-- 📝 Comprehensive examples, documentation, and test suite
+- 📝 Comprehensive documentation and test suite
 
 ---
 
@@ -166,41 +166,42 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 
 ## Features
 
-### Core Validation Tools
+### Core MCP Tools
 
-#### Query Building & Validation
-- **validate_query** - Check query syntax and structure
-- **explain_query** - Get plain English explanation
+#### Connection Management
+- **connect_ods_server** - Establish ODS connection
+- **disconnect_ods_server** - Close ODS connection
+- **get_ods_connection_info** - Get connection status
 
-#### Pattern & Example Library
-- **get_query_pattern** - Get template for common patterns
-- **list_query_patterns** - List available patterns
-- **generate_query_skeleton** - Generate query skeleton for entity
-- **get_operator_documentation** - Learn about operators
-
-#### Schema Inspection (Requires Connection)
+#### Schema Inspection
 - **check_entity_schema** - Get all fields for entity
 - **list_ods_entities** - List all entities with relationships
 - **get_test_to_measurement_hierarchy** - Get ASAM ODS test hierarchy structure
 
-#### Connection Management (NEW)
-- **connect_ods_server** - Establish ODS connection
-- **disconnect_ods_server** - Close ODS connection
-- **get_ods_connection_info** - Get connection status
-- **execute_ods_query** - Execute query on ODS server
+#### Query Building & Validation
+- **validate_query** - Check query syntax and structure
+- **explain_query** - Get plain English explanation
+- **execute_query** - Execute query on ODS server
+
+#### Timeseries/Submatrix Data Access
 - **get_submatrix_measurement_quantities** - List measurement quantities for submatrix
 - **read_submatrix_data** - Read timeseries data from submatrix
 - **generate_submatrix_fetcher_script** - Generate Python scripts for data fetching
 
+#### Pattern & Example Library
+- **generate_query_skeleton** - Generate query skeleton (basic query) for entity
+- **get_query_pattern** - Get template for common patterns
+- **list_query_patterns** - List available patterns
+- **get_operator_documentation** - Learn about operators
+
+
 ### Starting Prompts
 Discover and use the server's capabilities through **interactive guided prompts**:
+- **ODS Server Connection** - Set up and manage connections
 - **Validate a Jaquel Query** - Learn query validation
 - **Explore Query Patterns** - Find common query templates
-- **ODS Server Connection** - Set up and manage connections
-- **Build Filter Conditions** - Master WHERE clause construction
 - **Bulk Data Access** - Master the 3-step Bulk API workflow
 - **Measurement Analysis** - Compare measurements and visualize data
-- **Optimize & Debug** - Improve query performance
 
 See [`PROMPTS.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/PROMPTS.md) for complete details on all starting prompts.
 
@@ -270,7 +271,7 @@ Solution: Check URL, server availability, firewall
 
 1. **Use specific filters** - Avoid querying all records
 2. **Limit rows** - Always use `$rowlimit` appropriately
-3. **Select attributes** - Only retrieve needed columns
+3. **Select attributes** - Only retrieve needed columns/attributes
 4. **Index awareness** - Filter on indexed fields first
 5. **Connection reuse** - Keep connection open when possible
 6. **Cache schemas** - Schema inspection is cached

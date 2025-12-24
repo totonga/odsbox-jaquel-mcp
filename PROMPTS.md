@@ -1,10 +1,10 @@
 # Starting Prompts for ASAM ODS Jaquel MCP Server
 
-Your MCP server now includes **7 helpful starting prompts** that guide users on how to effectively use the available tools. These prompts are designed to help both new and experienced users understand the capabilities and workflows.
+The MCP server includes **helpful starting prompts** that guide users on how to effectively use the available tools. These prompts are designed to help both new and experienced users understand the capabilities and workflows.
 
 ## Available Prompts
 
-### 1. 📌 Set Up ODS Server Connection
+### 📌 Set Up ODS Server Connection
 **Name:** `setup_ods_connection`
 
 Learn how to establish a connection to an ASAM ODS server for live model inspection, schema validation, and direct query execution.
@@ -16,11 +16,11 @@ Learn how to establish a connection to an ASAM ODS server for live model inspect
 - `get_test_to_measurement_hierarchy` - Explore hierarchy
 - `list_ods_entities` - List entities in model
 - `generate_query_skeleton` - Generate entity-specific starters
-- `execute_ods_query` - Run queries on server
+- `execute_query` - Run queries on server
 
 ---
 
-### 2. 📌 Validate a Jaquel Query
+### 📌 Validate a Jaquel Query
 **Name:** `validate_query`
 
 Learn how to validate a Jaquel query for syntax errors and best practices. Provides detailed feedback on query structure and suggestions for improvement.
@@ -31,7 +31,7 @@ Learn how to validate a Jaquel query for syntax errors and best practices. Provi
 
 ---
 
-### 3. 📌 Explore Jaquel Query Patterns
+### 📌 Explore Jaquel Query Patterns
 **Name:** `explore_patterns`
 
 Discover common Jaquel query patterns and templates for:
@@ -49,7 +49,7 @@ Discover common Jaquel query patterns and templates for:
 
 ---
 
-### 5. 📌 Bulk Data Access & Submatrix Reading
+### 📌 Bulk Data Access & Submatrix Reading
 **Name:** `bulk_data_access`
 
 Master the **3-step Bulk API workflow** for efficient timeseries data access:
@@ -71,7 +71,7 @@ Master the **3-step Bulk API workflow** for efficient timeseries data access:
 
 ---
 
-### 6. 📌 Measurement Analysis & Comparison
+### 📌 Measurement Analysis & Comparison
 **Name:** `analyze_measurements`
 
 Learn how to analyze and compare measurements across quantities with:

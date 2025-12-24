@@ -270,7 +270,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📋")],
         ),
         Tool(
-            name="execute_ods_query",
+            name="execute_query",
             title="Execute ODS Query",
             description="Execute a Jaquel query directly on connected ODS server",
             inputSchema={
@@ -714,8 +714,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     elif name == "list_ods_entities":
         return SchemaToolHandler.list_ods_entities(arguments)
 
-    elif name == "execute_ods_query":
-        return ConnectionToolHandler.execute_ods_query(arguments)
+    elif name == "execute_query":
+        return ConnectionToolHandler.execute_query(arguments)
 
     # ========================================================================
     # SUBMATRIX DATA ACCESS TOOLS
@@ -784,7 +784,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 ## 🚀 QUICK START - Choose Your Path
 
 **Path 1: Connect to ODS & Execute Queries**
-- `connect_ods_server` → `list_ods_entities` → `get_test_to_measurement_hierarchy` → `execute_ods_query`
+- `connect_ods_server` → `list_ods_entities` → `get_test_to_measurement_hierarchy` → `execute_query`
 - Or: `read_submatrix_data` for efficient timeseries access
 - Generate reusable scripts: `generate_submatrix_fetcher_script`
 
@@ -830,7 +830,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 2. `list_ods_entities` - See available entities
 3. `get_test_to_measurement_hierarchy` - Explore test to measurement structure
 4. `check_entity_schema` - Inspect entity fields
-5. `execute_ods_query` - Run your query
+5. `execute_query` - Run your query
 6. Analyze results with measurement tools
 
 **Workflow 2: Read Timeseries Data Efficiently**
@@ -849,7 +849,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 ## ⚠️ KEY TIPS
 
 - **Connection State**: Connection persists across tool calls. Call `disconnect_ods_server` when done.
-- **Bulk API**: For large timeseries data (submatrices), prefer `read_submatrix_data` over `execute_ods_query`
+- **Bulk API**: For large timeseries data (submatrices), prefer `read_submatrix_data` over `execute_query`
 - **Pattern Matching**: `read_submatrix_data` supports wildcards for efficient data filtering (e.g., "Temp*", "*Speed")
 
 ## ❓ WHEN TO USE WHICH TOOL
@@ -861,7 +861,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 - "...connect to ASAM ODS?" → `connect_ods_server`
 - "...find entities?" → `list_ods_entities`
 - "...understand structure?" → `get_test_to_measurement_hierarchy` or `check_entity_schema`
-- "...read measurement data?" → `read_submatrix_data` or `execute_ods_query`
+- "...read measurement data?" → `read_submatrix_data` or `execute_query`
 - "...create a reusable script?" → `generate_submatrix_fetcher_script`
 - "...compare measurements?" → `compare_measurements` + `generate_measurement_comparison_notebook`
 - "...understand submatrix data access?" → `get_bulk_api_help`

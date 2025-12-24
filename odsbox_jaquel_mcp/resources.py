@@ -188,7 +188,7 @@ Once connected, explore what's available:
 2. `get_query_pattern` - Get specific pattern
 3. `explain_query` - Understand query syntax
 4. `validate_query` - Check query syntax
-6. `execute_ods_query` - Run query and get results
+6. `execute_query` - Run query and get results
 
 **Output**: Query results containing measurements and metadata
 
@@ -196,7 +196,7 @@ Once connected, explore what's available:
 
 **Goal**: Access large measurement datasets efficiently
 
-1. `execute_ods_query` - Get measurements with submatrix IDs
+1. `execute_query` - Get measurements with submatrix IDs
 2. `get_submatrix_measurement_quantities` - See available time series
 3. `read_submatrix_data` - Fetch data with optional pattern matching
 4. `generate_submatrix_fetcher_script` - Create reusable Python script
@@ -207,7 +207,7 @@ Once connected, explore what's available:
 
 **Goal**: Compare measurements across different runs/conditions
 
-1. `execute_ods_query` - Get measurements
+1. `execute_query` - Get measurements
 2. `query_measurement_hierarchy` - Explore measurement structure
    - extract_measurements: Get all measurements
    - get_unique_quantities: See available quantities
@@ -276,7 +276,7 @@ AoTest (Test/Measurement Run)
 
 ### Finding Tests
 ```
-Use execute_ods_query with:
+Use execute_query with:
 - Entity: AoTest
 - Optional filters: name
 ```
@@ -308,7 +308,7 @@ Use `check_entity_schema` to see all available fields:
 }
 ```
 
-**Use**: `execute_ods_query` directly
+**Use**: `execute_query` directly
 **Performance**: Good for small result sets, may be slow for thousands of records
 
 ## Pattern 2: Filtered Query
@@ -326,14 +326,14 @@ Use `check_entity_schema` to see all available fields:
 
 **Use**:
 1. Validate with `validate_query`
-2. Execute with `execute_ods_query`
+2. Execute with `execute_query`
 
 ## Pattern 3: Bulk Data Access (Timeseries)
 
 **When**: You need large timeseries datasets
 
 **Steps**:
-1. First, get measurement IDs: `execute_ods_query`
+1. First, get measurement IDs: `execute_query`
 2. Extract submatrix IDs from results
 3. Use `read_submatrix_data` instead of fetching individual points
 
@@ -361,7 +361,7 @@ Use `check_entity_schema` to see all available fields:
 **Use**: 
 1. Validate structure: `validate_query`
 2. Optimize: `suggest_optimizations`
-3. Execute: `execute_ods_query`
+3. Execute: `execute_query`
 
 ## Pattern 5: Time Range Query
 
