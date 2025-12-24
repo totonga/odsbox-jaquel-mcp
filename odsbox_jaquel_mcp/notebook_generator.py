@@ -57,7 +57,7 @@ class NotebookGenerator:
         ods_url: str,
         ods_username: str,
         ods_password: str,
-        available_quantities: list[str | None] = None,
+        available_quantities: list[str] | None = None,
         plot_type: str = "scatter",
         title: str = "Measurement Comparison",
     ) -> dict[str, Any]:
