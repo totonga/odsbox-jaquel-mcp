@@ -2,7 +2,6 @@
 
 from .base_handler import BaseToolHandler
 from .connection_tools import ConnectionToolHandler
-from .filter_tools import FilterToolHandler
 from .help_tools import HelpToolHandler
 from .measurement_tools import MeasurementToolHandler
 from .query_tools import QueryToolHandler
@@ -14,7 +13,6 @@ __all__ = [
     "BaseToolHandler",
     "ValidationToolHandler",
     "QueryToolHandler",
-    "FilterToolHandler",
     "SchemaToolHandler",
     "ConnectionToolHandler",
     "SubmatrixToolHandler",

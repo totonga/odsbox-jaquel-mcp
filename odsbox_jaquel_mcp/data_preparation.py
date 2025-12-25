@@ -183,7 +183,7 @@ class MeasurementDataPreparator:
         measurements_df: pd.DataFrame,
         local_columns_df: pd.DataFrame,
         measurement_quantity_names: list[str],
-        unit_lookup: dict[int, str | None] = None,
+        unit_lookup: dict[int, str] | None = None,
     ) -> list[dict[str, Any]]:
         """
         Prepare all measurement data items for visualization.
@@ -233,6 +233,6 @@ class MeasurementDataPreparator:
             )
 
         # Sort by title for consistent output
-        measurement_data_items.sort(key=lambda x: x["title"])
+        measurement_data_items.sort(key=lambda x: str(x["title"]))
 
         return measurement_data_items

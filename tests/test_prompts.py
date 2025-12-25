@@ -45,7 +45,7 @@ class TestPromptLibrary:
     def test_validate_query_prompt(self):
         """Test the validate_query prompt."""
         content = PromptLibrary.get_prompt_content("validate_query", {})
-        assert "validate_jaquel_query" in content
+        assert "validate_query" in content
         assert "syntax" in content.lower()
 
     def test_explore_patterns_prompt(self):
@@ -60,12 +60,6 @@ class TestPromptLibrary:
         assert "connect_ods_server" in content
         assert "connection" in content.lower()
 
-    def test_build_filters_prompt(self):
-        """Test the build_filters prompt."""
-        content = PromptLibrary.get_prompt_content("build_filters", {})
-        assert "build_filter_condition" in content
-        assert "$eq" in content
-
     def test_bulk_data_access_prompt(self):
         """Test the bulk_data_access prompt."""
         content = PromptLibrary.get_prompt_content("bulk_data_access", {})
@@ -76,11 +70,6 @@ class TestPromptLibrary:
         """Test the analyze_measurements prompt."""
         content = PromptLibrary.get_prompt_content("analyze_measurements", {})
         assert "compare_measurements" in content or "measurement" in content.lower()
-
-    def test_optimize_query_prompt(self):
-        """Test the optimize_query prompt."""
-        content = PromptLibrary.get_prompt_content("optimize_query", {})
-        assert "suggest_optimizations" in content or "optimize" in content.lower()
 
     def test_prompt_content_with_arguments(self):
         """Test that prompt content respects arguments."""

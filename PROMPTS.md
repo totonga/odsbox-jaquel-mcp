@@ -1,10 +1,10 @@
 # Starting Prompts for ASAM ODS Jaquel MCP Server
 
-Your MCP server now includes **7 helpful starting prompts** that guide users on how to effectively use the available tools. These prompts are designed to help both new and experienced users understand the capabilities and workflows.
+The MCP server includes **helpful starting prompts** that guide users on how to effectively use the available tools. These prompts are designed to help both new and experienced users understand the capabilities and workflows.
 
 ## Available Prompts
 
-### 1. 📌 Set Up ODS Server Connection
+### 📌 Set Up ODS Server Connection
 **Name:** `setup_ods_connection`
 
 Learn how to establish a connection to an ASAM ODS server for live model inspection, schema validation, and direct query execution.
@@ -16,24 +16,22 @@ Learn how to establish a connection to an ASAM ODS server for live model inspect
 - `get_test_to_measurement_hierarchy` - Explore hierarchy
 - `list_ods_entities` - List entities in model
 - `generate_query_skeleton` - Generate entity-specific starters
-- `execute_ods_query` - Run queries on server
+- `execute_query` - Run queries on server
 
 ---
 
-### 2. 📌 Validate a Jaquel Query
+### 📌 Validate a Jaquel Query
 **Name:** `validate_query`
 
 Learn how to validate a Jaquel query for syntax errors and best practices. Provides detailed feedback on query structure and suggestions for improvement.
 
 **Related Tools:**
-- `validate_jaquel_query` - Validate entire queries
-- `validate_filter_condition` - Validate individual filters
+- `validate_query` - Validate entire queries
 - `validate_field_exists` - Check if fields exist
-- `validate_filter_against_schema` - Validate against entity schema
 
 ---
 
-### 3. 📌 Explore Jaquel Query Patterns
+### 📌 Explore Jaquel Query Patterns
 **Name:** `explore_patterns`
 
 Discover common Jaquel query patterns and templates for:
@@ -51,23 +49,7 @@ Discover common Jaquel query patterns and templates for:
 
 ---
 
-### 4. 📌 Build Filter Conditions
-**Name:** `build_filters`
-
-Learn how to construct WHERE clause filter conditions for Jaquel queries with:
-- Multiple operators ($eq, $ne, $gt, $lt, $in, $regex, etc.)
-- Comparison logic
-- AND/OR combinations
-
-**Related Tools:**
-- `build_filter_condition` - Create single filter
-- `merge_filter_conditions` - Combine with AND/OR
-- `validate_filter_condition` - Check syntax
-- `validate_filter_against_schema` - Verify against schema
-
----
-
-### 5. 📌 Bulk Data Access & Submatrix Reading
+### 📌 Bulk Data Access & Submatrix Reading
 **Name:** `bulk_data_access`
 
 Master the **3-step Bulk API workflow** for efficient timeseries data access:
@@ -89,7 +71,7 @@ Master the **3-step Bulk API workflow** for efficient timeseries data access:
 
 ---
 
-### 6. 📌 Measurement Analysis & Comparison
+### 📌 Measurement Analysis & Comparison
 **Name:** `analyze_measurements`
 
 Learn how to analyze and compare measurements across quantities with:
@@ -110,22 +92,6 @@ Learn how to analyze and compare measurements across quantities with:
 - `get_unique_tests` - Find test names
 - `get_unique_quantities` - List quantities
 - `build_index` - Create searchable index
-
----
-
-### 7. 📌 Optimize & Debug Jaquel Queries
-**Name:** `optimize_query`
-
-Learn how to optimize queries for better performance and readability:
-- Query simplification suggestions
-- Step-by-step debugging
-- Error fix recommendations
-
-**Related Tools:**
-- `suggest_optimizations` - Get simplifications
-- `debug_query_steps` - Step-by-step breakdown
-- `suggest_error_fixes` - Fix recommendations
-- `explain_jaquel_query` - Understand behavior
 
 ---
 

@@ -176,7 +176,7 @@ class MeasurementHierarchyExplorer:
         test_name: str | None = None,
         status: str | None = None,
         name_pattern: str | None = None,
-        has_quantities: list[str | None] = None,
+        has_quantities: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Filter measurements by various criteria.
 
@@ -294,7 +294,7 @@ class MeasurementHierarchyExplorer:
     @staticmethod
     def query_measurements_by_hierarchy(
         query_result: dict[str, Any],
-        path_filter: list[str | None] = None,
+        path_filter: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         """Query measurements following ODS hierarchy structure.
 
@@ -341,7 +341,7 @@ class MeasurementHierarchyExplorer:
             Index dictionary with multiple lookup methods
         """
         try:
-            index = {
+            index: dict[str, Any] = {
                 "by_id": {},
                 "by_name": {},
                 "by_test": {},

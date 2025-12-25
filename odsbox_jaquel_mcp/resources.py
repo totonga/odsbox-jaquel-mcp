@@ -186,10 +186,9 @@ Once connected, explore what's available:
 
 1. `list_query_patterns` - See available query templates
 2. `get_query_pattern` - Get specific pattern
-3. `explain_jaquel_query` - Understand query syntax
-4. `validate_jaquel_query` - Check query syntax
-5. `validate_filter_against_schema` - Test filter with real schema (requires connection)
-6. `execute_ods_query` - Run query and get results
+3. `explain_query` - Understand query syntax
+4. `validate_query` - Check query syntax
+6. `execute_query` - Run query and get results
 
 **Output**: Query results containing measurements and metadata
 
@@ -197,7 +196,7 @@ Once connected, explore what's available:
 
 **Goal**: Access large measurement datasets efficiently
 
-1. `execute_ods_query` - Get measurements with submatrix IDs
+1. `execute_query` - Get measurements with submatrix IDs
 2. `get_submatrix_measurement_quantities` - See available time series
 3. `read_submatrix_data` - Fetch data with optional pattern matching
 4. `generate_submatrix_fetcher_script` - Create reusable Python script
@@ -208,7 +207,7 @@ Once connected, explore what's available:
 
 **Goal**: Compare measurements across different runs/conditions
 
-1. `execute_ods_query` - Get measurements
+1. `execute_query` - Get measurements
 2. `query_measurement_hierarchy` - Explore measurement structure
    - extract_measurements: Get all measurements
    - get_unique_quantities: See available quantities
@@ -277,7 +276,7 @@ AoTest (Test/Measurement Run)
 
 ### Finding Tests
 ```
-Use execute_ods_query with:
+Use execute_query with:
 - Entity: AoTest
 - Optional filters: name
 ```
@@ -309,7 +308,7 @@ Use `check_entity_schema` to see all available fields:
 }
 ```
 
-**Use**: `execute_ods_query` directly
+**Use**: `execute_query` directly
 **Performance**: Good for small result sets, may be slow for thousands of records
 
 ## Pattern 2: Filtered Query
@@ -325,17 +324,16 @@ Use `check_entity_schema` to see all available fields:
 }
 ```
 
-**Use**: 
-1. Build filter with `build_filter_condition`
-2. Validate with `validate_filter_against_schema`
-3. Execute with `execute_ods_query`
+**Use**:
+1. Validate with `validate_query`
+2. Execute with `execute_query`
 
 ## Pattern 3: Bulk Data Access (Timeseries)
 
 **When**: You need large timeseries datasets
 
 **Steps**:
-1. First, get measurement IDs: `execute_ods_query`
+1. First, get measurement IDs: `execute_query`
 2. Extract submatrix IDs from results
 3. Use `read_submatrix_data` instead of fetching individual points
 
@@ -361,9 +359,8 @@ Use `check_entity_schema` to see all available fields:
 ```
 
 **Use**: 
-1. Validate structure: `validate_jaquel_query`
-2. Optimize: `suggest_optimizations`
-3. Execute: `execute_ods_query`
+1. Validate structure: `validate_query`
+2. Execute: `execute_query`
 
 ## Pattern 5: Time Range Query
 
@@ -380,8 +377,6 @@ Use `check_entity_schema` to see all available fields:
   }
 }
 ```
-
-**Use**: `build_filter_condition` with date operators
 
 ## Performance Tips
 
@@ -478,22 +473,6 @@ list_ods_entities
 Check if your entity is in the list
 ```
 
-### Issue: Invalid Filter
-
-**Cause**: Filter field doesn't exist or wrong syntax
-
-**Solutions**:
-1. Check entity schema: `check_entity_schema EntityName`
-2. Validate field exists: `validate_field_exists EntityName field_name`
-3. Validate filter: `validate_filter_against_schema EntityName {filter}`
-4. Check operator: `get_operator_documentation operator`
-
-**Test**:
-```
-validate_filter_against_schema
-Check error message for details
-```
-
 ## Data Access Issues
 
 ### Issue: Submatrix Not Found
@@ -532,8 +511,6 @@ get_ods_connection_info
 ## Getting Help
 
 - Use `get_bulk_api_help` for data access questions
-- Use `debug_query_steps` to analyze query structure
-- Use `suggest_error_fixes` for validation errors
 - Review TOOLS_GUIDE.md for detailed tool documentation
 """
 
@@ -812,14 +789,6 @@ Use special keys to control query behavior and output.
   "value": {"$avg": true}
 }
 ```
-
-## Using Operators with Tools
-
-- **build_filter_condition**: Create complex filters using comparison & logical operators
-- **validate_filter_against_schema**: Verify operators are valid for entity
-- **execute_ods_query**: Run query with all operators
-- **get_operator_documentation**: Get detailed docs for any operator
-- **suggest_optimizations**: Get performance tips for your operators
 
 ## Performance Tips
 

@@ -35,7 +35,6 @@ from .prompts import PromptLibrary
 from .resources import ResourceLibrary
 from .tools import (
     ConnectionToolHandler,
-    FilterToolHandler,
     HelpToolHandler,
     MeasurementToolHandler,
     QueryToolHandler,
@@ -61,7 +60,7 @@ async def list_tools() -> list[Tool]:
     """List all available MCP tools."""
     return [
         Tool(
-            name="validate_jaquel_query",
+            name="validate_query",
             title="Validate Jaquel Query",
             description="Validate a Jaquel query structure for syntax errors and best practices",
             inputSchema={
@@ -73,23 +72,6 @@ async def list_tools() -> list[Tool]:
                     }
                 },
                 "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="✅")],
-        ),
-        Tool(
-            name="validate_filter_condition",
-            title="Validate Filter Condition",
-            description="Validate a WHERE clause filter condition in a Jaquel query",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "condition": {
-                        "type": "object",
-                        "description": "The filter condition to validate",
-                    }
-                },
-                "required": ["condition"],
             },
             annotations=ToolAnnotations(readOnlyHint=True),
             icons=[Icon(src="✅")],
@@ -110,23 +92,6 @@ async def list_tools() -> list[Tool]:
             },
             annotations=ToolAnnotations(readOnlyHint=True),
             icons=[Icon(src="📚")],
-        ),
-        Tool(
-            name="suggest_optimizations",
-            title="Suggest Query Optimizations",
-            description="Suggest optimizations and simplifications for a Jaquel query",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "object",
-                        "description": "The Jaquel query to optimize",
-                    }
-                },
-                "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="⚡")],
         ),
         Tool(
             name="get_query_pattern",
@@ -182,23 +147,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🦴")],
         ),
         Tool(
-            name="build_filter_condition",
-            title="Build Filter Condition",
-            description="Build a filter condition for WHERE clause",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "field": {"type": "string", "description": "Field name to filter on"},
-                    "operator": {"type": "string", "description": "Comparison operator"},
-                    "value": {"description": "Value to compare against"},
-                },
-                "required": ["field", "operator", "value"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🎯")],
-        ),
-        Tool(
-            name="explain_jaquel_query",
+            name="explain_query",
             title="Explain Jaquel Query",
             description="Explain what a Jaquel query does",
             inputSchema={
@@ -213,29 +162,6 @@ async def list_tools() -> list[Tool]:
             },
             annotations=ToolAnnotations(readOnlyHint=True),
             icons=[Icon(src="💡")],
-        ),
-        Tool(
-            name="merge_filter_conditions",
-            title="Merge Filter Conditions",
-            description="Merge multiple filter conditions with AND/OR logic",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "conditions": {
-                        "type": "array",
-                        "description": "list of filter conditions",
-                        "items": {"type": "object"},
-                    },
-                    "operator": {
-                        "type": "string",
-                        "description": "How to combine conditions",
-                        "enum": ["$and", "$or"],
-                    },
-                },
-                "required": ["conditions", "operator"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔗")],
         ),
         Tool(
             name="check_entity_schema",
@@ -268,59 +194,6 @@ async def list_tools() -> list[Tool]:
             },
             annotations=ToolAnnotations(readOnlyHint=True),
             icons=[Icon(src="🔍")],
-        ),
-        Tool(
-            name="validate_filter_against_schema",
-            title="Validate Filter Against Schema",
-            description="Validate filter against actual entity schema",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "entity_name": {"type": "string", "description": "Entity name"},
-                    "filter_condition": {
-                        "type": "object",
-                        "description": "Filter to validate",
-                    },
-                },
-                "required": ["entity_name", "filter_condition"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="✅")],
-        ),
-        Tool(
-            name="debug_query_steps",
-            title="Debug Query Steps",
-            description="Break down a query into steps for debugging",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "object",
-                        "description": "Query to break down",
-                    }
-                },
-                "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🐛")],
-        ),
-        Tool(
-            name="suggest_error_fixes",
-            title="Suggest Error Fixes",
-            description="Get suggestions to fix query errors",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "issue": {"type": "string", "description": "Description of issue"},
-                    "query": {
-                        "type": "object",
-                        "description": "The problematic query",
-                    },
-                },
-                "required": ["issue"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔧")],
         ),
         Tool(
             name="connect_ods_server",
@@ -380,7 +253,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📋")],
         ),
         Tool(
-            name="execute_ods_query",
+            name="execute_query",
             title="Execute ODS Query",
             description="Execute a Jaquel query directly on connected ODS server",
             inputSchema={
@@ -770,17 +643,11 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     # VALIDATION TOOLS
     # ========================================================================
-    if name == "validate_jaquel_query":
-        return ValidationToolHandler.validate_jaquel_query(arguments)
-
-    elif name == "validate_filter_condition":
-        return ValidationToolHandler.validate_filter_condition(arguments)
+    if name == "validate_query":
+        return ValidationToolHandler.validate_query(arguments)
 
     elif name == "get_operator_documentation":
         return ValidationToolHandler.get_operator_documentation(arguments)
-
-    elif name == "suggest_optimizations":
-        return ValidationToolHandler.suggest_optimizations(arguments)
 
     # ========================================================================
     # QUERY PATTERN TOOLS
@@ -795,25 +662,10 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         return QueryToolHandler.generate_query_skeleton(arguments)
 
     # ========================================================================
-    # FILTER BUILDING TOOLS
-    # ========================================================================
-    elif name == "build_filter_condition":
-        return FilterToolHandler.build_filter_condition(arguments)
-
-    elif name == "merge_filter_conditions":
-        return FilterToolHandler.merge_filter_conditions(arguments)
-
-    # ========================================================================
     # QUERY EXPLANATION & DEBUGGING TOOLS
     # ========================================================================
-    elif name == "explain_jaquel_query":
-        return QueryToolHandler.explain_jaquel_query(arguments)
-
-    elif name == "debug_query_steps":
-        return QueryToolHandler.debug_query_steps(arguments)
-
-    elif name == "suggest_error_fixes":
-        return QueryToolHandler.suggest_error_fixes(arguments)
+    elif name == "explain_query":
+        return QueryToolHandler.explain_query(arguments)
 
     # ========================================================================
     # SCHEMA VALIDATION TOOLS
@@ -823,9 +675,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
     elif name == "validate_field_exists":
         return SchemaToolHandler.validate_field_exists(arguments)
-
-    elif name == "validate_filter_against_schema":
-        return SchemaToolHandler.validate_filter_against_schema(arguments)
 
     # ========================================================================
     # CONNECTION MANAGEMENT TOOLS
@@ -845,8 +694,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     elif name == "list_ods_entities":
         return SchemaToolHandler.list_ods_entities(arguments)
 
-    elif name == "execute_ods_query":
-        return ConnectionToolHandler.execute_ods_query(arguments)
+    elif name == "execute_query":
+        return ConnectionToolHandler.execute_query(arguments)
 
     # ========================================================================
     # SUBMATRIX DATA ACCESS TOOLS
@@ -915,7 +764,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 ## 🚀 QUICK START - Choose Your Path
 
 **Path 1: Connect to ODS & Execute Queries**
-- `connect_ods_server` → `list_ods_entities` → `get_test_to_measurement_hierarchy` → `execute_ods_query`
+- `connect_ods_server` → `list_ods_entities` → `get_test_to_measurement_hierarchy` → `execute_query`
 - Or: `read_submatrix_data` for efficient timeseries access
 - Generate reusable scripts: `generate_submatrix_fetcher_script`
 
@@ -925,27 +774,19 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 - `generate_measurement_comparison_notebook` for Jupyter notebooks
 - `generate_plotting_code` for matplotlib visualizations
 
-**Path 3: Query Validation & Optimization**
-- Use `validate_jaquel_query` to check query syntax
-- `suggest_optimizations` for performance improvements
-- `debug_query_steps` to troubleshoot issues
-
 ## 📚 TOOL CATEGORIES
 
 **Validation & Debugging (7 tools)**
-- Check queries: `validate_jaquel_query`, `explain_jaquel_query`, `debug_query_steps`
-- Fix errors: `suggest_error_fixes`, `suggest_optimizations`
+- Check queries: `validate_query`, `explain_query`
 - Check operators: `get_operator_documentation`
 
 **Query Building (9 tools)**
 - Skeletons: `generate_query_skeleton`
 - Patterns: `list_query_patterns`, `get_query_pattern`
-- Build filters: `build_filter_condition`, `merge_filter_conditions`
 
 **Schema & Entity Inspection (5 tools)**
 - List entities: `list_ods_entities`, `get_test_to_measurement_hierarchy`
 - Check fields: `check_entity_schema`, `validate_field_exists`
-- Validate against schema: `validate_filter_against_schema`
 
 **ODS Connection (3 tools)**
 - Manage: `connect_ods_server`, `disconnect_ods_server`, `get_ods_connection_info`
@@ -969,9 +810,8 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 2. `list_ods_entities` - See available entities
 3. `get_test_to_measurement_hierarchy` - Explore test to measurement structure
 4. `check_entity_schema` - Inspect entity fields
-5. `validate_filter_against_schema` - Test filter with real schema
-6. `execute_ods_query` - Run your query
-7. Analyze results with measurement tools
+5. `execute_query` - Run your query
+6. Analyze results with measurement tools
 
 **Workflow 2: Read Timeseries Data Efficiently**
 1. `get_submatrix_measurement_quantities` - See available data
@@ -989,19 +829,19 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 ## ⚠️ KEY TIPS
 
 - **Connection State**: Connection persists across tool calls. Call `disconnect_ods_server` when done.
-- **Bulk API**: For large timeseries data (submatrices), prefer `read_submatrix_data` over `execute_ods_query`
+- **Bulk API**: For large timeseries data (submatrices), prefer `read_submatrix_data` over `execute_query`
 - **Pattern Matching**: `read_submatrix_data` supports wildcards for efficient data filtering (e.g., "Temp*", "*Speed")
 
 ## ❓ WHEN TO USE WHICH TOOL
 
 **"How do I...?"**
 - "...start building a query?" → `list_query_patterns`
-- "...validate query?" → `explain_jaquel_query`
+- "...validate query?" → `explain_query`
 - "...connect to ODS?" → `connect_ods_server`
 - "...connect to ASAM ODS?" → `connect_ods_server`
 - "...find entities?" → `list_ods_entities`
 - "...understand structure?" → `get_test_to_measurement_hierarchy` or `check_entity_schema`
-- "...read measurement data?" → `read_submatrix_data` or `execute_ods_query`
+- "...read measurement data?" → `read_submatrix_data` or `execute_query`
 - "...create a reusable script?" → `generate_submatrix_fetcher_script`
 - "...compare measurements?" → `compare_measurements` + `generate_measurement_comparison_notebook`
 - "...understand submatrix data access?" → `get_bulk_api_help`
@@ -1012,10 +852,8 @@ Use these for guided workflows:
 - `setup_ods_connection` - Learn connection management
 - `validate_query` - Validate queries step-by-step
 - `explore_patterns` - Discover query patterns
-- `build_filters` - Master filter conditions
 - `bulk_data_access` - Learn Bulk API 3-step workflow
 - `analyze_measurements` - Statistical analysis & visualization
-- `optimize_query` - Debug and optimize queries
 
 ## 🔗 DOCUMENTATION & EXAMPLES
 

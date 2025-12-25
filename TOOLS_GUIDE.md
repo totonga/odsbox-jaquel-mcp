@@ -17,62 +17,57 @@ This document provides a comprehensive guide to all tools available in the ASAM 
 
 ## Overview
 
-The Jaquel MCP Server provides tools for working with ASAM ODS Jaquel queries and bulk data access:
+The MCP Server provides tools for working with ASAM ODS servers using queries and bulk/timeseries data access:
 
-### Jaquel Query Tools (10 tools)
+### ODS Connection & Data Access Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| validate_jaquel_query | Validate complete query | Query dict | Validation result |
-| validate_filter_condition | Validate WHERE clause | Condition dict | Validation result |
-| get_operator_documentation | Get operator docs | Operator name | Documentation |
-| suggest_optimizations | Find improvements | Query dict | List of suggestions |
-| get_query_pattern | Get pattern template | Pattern name | Pattern object |
-| list_query_patterns | List all patterns | None | List of patterns |
-| generate_query_skeleton | Create query skeleton | Entity name, operation | Query skeleton |
-| build_filter_condition | Build condition | Field, operator, value | Condition dict |
-| explain_jaquel_query | Explain in English | Query dict | Text explanation |
-| merge_filter_conditions | Combine conditions | Conditions array, operator | Merged condition |
+| [connect_ods_server](#connect_ods_server) | Connect to ODS server | URL, credentials | Connection status |
+| [disconnect_ods_server](#disconnect_ods_server) | Disconnect from server | None | Status |
+| [get_ods_connection_info](#get_ods_connection_info) | Get connection details | None | Connection info |
 
-### Schema & Validation Tools (5 tools)
+### Schema Inspection Tools
+| [list_ods_entities](#list_ods_entities) | List all entities | None | Entity list |
+| [get_test_to_measurement_hierarchy](#get_test_to_measurement_hierarchy) | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
+| [check_entity_schema](#check_entity_schema) | Get entity fields | Entity name | Field list |
+| [validate_field_exists](#validate_field_exists) | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
+
+### Jaquel Query Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| check_entity_schema | Get entity fields | Entity name | Field list |
-| validate_field_exists | Check field exists | Entity name, field name | Validation result |
-| validate_filter_against_schema | Validate filter vs schema | Entity name, filter | Validation result |
-| debug_query_steps | Break query into steps | Query dict | Debug steps |
-| suggest_error_fixes | Get error suggestions | Issue, query | Fix suggestions |
+| [validate_query](#validate_query) | Validate complete query | Query dict | Validation result |
+| [explain_query](#explain_query) | Explain in English | Query dict | Text explanation |
+| [execute_query](#execute_query) | Execute Jaquel query | Query dict | Query results |
+| [get_operator_documentation](#get_operator_documentation) | Get operator docs | Operator name | Documentation |
+| [get_query_pattern](#get_query_pattern) | Get pattern template | Pattern name | Pattern object |
+| [list_query_patterns](#list_query_patterns) | List all patterns | None | List of patterns |
+| [generate_query_skeleton](#generate_query_skeleton) | Create query skeleton | Entity name, operation | Query skeleton |
 
-### ODS Connection & Data Access Tools (9 tools)
+### Timeseries/Submatrix Data Access Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| connect_ods_server | Connect to ODS server | URL, credentials | Connection status |
-| disconnect_ods_server | Disconnect from server | None | Status |
-| get_ods_connection_info | Get connection details | None | Connection info |
-| list_ods_entities | List all entities | None | Entity list |
-| get_test_to_measurement_hierarchy | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
-| execute_ods_query | Execute Jaquel query | Query dict | Query results |
-| get_submatrix_measurement_quantities | List measurement quantities | Submatrix ID | Quantity list |
-| read_submatrix_data | Read timeseries data | Submatrix ID, patterns | DataFrame data |
-| generate_submatrix_fetcher_script | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
+| [get_submatrix_measurement_quantities](#get_submatrix_measurement_quantities) | List measurement quantities | Submatrix ID | Quantity list |
+| [read_submatrix_data](#read_submatrix_data) | Read timeseries data | Submatrix ID, patterns | DataFrame data |
+| [generate_submatrix_fetcher_script](#generate_submatrix_fetcher_script) | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
 
-### Notebook & Visualization Tools (2 tools)
+### Notebook & Visualization Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| generate_measurement_comparison_notebook | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
-| generate_plotting_code | Generate matplotlib code | Quantities, count, plot type | Python code string |
+| [generate_measurement_comparison_notebook](#generate_measurement_comparison_notebook) | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
+| [generate_plotting_code](#generate_plotting_code) | Generate matplotlib code | Quantities, count, plot type | Python code string |
 
-### Measurement Analysis & Query Tools (2 tools)
+### Measurement Analysis & Query Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| compare_measurements | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
-| query_measurement_hierarchy | Explore measurement structure | Query result, operation | Hierarchy info |
+| [compare_measurements](#compare_measurements) | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
+| [query_measurement_hierarchy](#query_measurement_hierarchy) | Explore measurement structure | Query result, operation | Hierarchy info |
 
 
 ---
 
 ## Tool Reference
 
-### 1. validate_jaquel_query
+### validate_query
 
 **Purpose**: Validate a complete Jaquel query structure.
 
@@ -117,50 +112,7 @@ result = JaquelValidator.validate_query(query)
 
 ---
 
-### 2. validate_filter_condition
-
-**Purpose**: Validate a WHERE clause filter condition.
-
-**Input**:
-```json
-{
-    "condition": {
-        "field": {"$operator": value}
-    },
-    "field_name": "optional_field_name"
-}
-```
-
-**Output**:
-```json
-{
-    "valid": true,
-    "errors": [],
-    "issues": []
-}
-```
-
-**Checks**:
-- ✓ Condition is a dictionary
-- ✓ Operators are recognized ($eq, $like, $between, etc.)
-- ✓ Logical operators ($and, $or, $not) have correct structure
-- ✓ $null/$notnull have value 1
-- ✓ $between/$in require list values
-
-**Example**:
-```python
-condition = {
-    "measurement_begin": {
-        "$between": ["2023-01-01", "2023-12-31"]
-    }
-}
-result = JaquelValidator.validate_filter_condition(condition)
-# Returns: {"valid": true, "errors": [], "issues": []}
-```
-
----
-
-### 3. get_operator_documentation
+### get_operator_documentation
 
 **Purpose**: Get detailed documentation for a Jaquel operator.
 
@@ -200,50 +152,7 @@ doc = JaquelValidator.get_operator_info("$like")
 
 ---
 
-### 4. suggest_optimizations
-
-**Purpose**: Find opportunities to simplify or optimize a query.
-
-**Input**:
-```json
-{
-    "query": {
-        "AoUnit": {"id": {"$eq": 123}},
-        "$attributes": {}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "query_summary": "Query for entity: AoUnit",
-    "suggestions": [
-        "Can simplify: {\"id\": {\"$eq\": 123}} → 123",
-        "$attributes is empty - consider removing it"
-    ]
-}
-```
-
-**Optimization Suggestions**:
-- Simplify verbose $eq to shorthand
-- Use ID shorthand (`EntityName: 123`)
-- Remove empty $attributes
-- Simplify nested paths
-
-**Example**:
-```python
-query = {
-    "AoUnit": {"id": {"$eq": 456}},
-    "$attributes": {}
-}
-result = JaquelOptimizer.suggest_simplifications(query)
-# Suggests: Can use {\"AoUnit\": 456} directly
-```
-
----
-
-### 5. get_query_pattern
+### get_query_pattern
 
 **Purpose**: Get a template for a common query pattern.
 
@@ -281,7 +190,7 @@ print(pattern["template"])
 
 ---
 
-### 6. list_query_patterns
+### list_query_patterns
 
 **Purpose**: List all available query patterns.
 
@@ -312,7 +221,7 @@ patterns = JaquelExamples.list_patterns()
 
 ---
 
-### 7. generate_query_skeleton
+### generate_query_skeleton
 
 **Purpose**: Generate a query skeleton for an entity.
 
@@ -350,45 +259,7 @@ skeleton = JaquelExamples.generate_query_skeleton(
 
 ---
 
-### 8. build_filter_condition
-
-**Purpose**: Build a filter condition programmatically.
-
-**Input**:
-```json
-{
-    "field": "measurement_begin",
-    "operator": "$gte",
-    "value": "2023-01-01T00:00:00Z",
-    "case_insensitive": false
-}
-```
-
-**Output**:
-```json
-{
-    "measurement_begin": {
-        "$gte": "2023-01-01T00:00:00Z"
-    }
-}
-```
-
-**Operators Supported**:
-- All comparison operators: $eq, $neq, $lt, $gt, $lte, $gte, $in, $like, $notlike, $between, $null, $notnull
-
-**Example**:
-```python
-# Build a time range condition
-condition = build_filter_condition(
-    field="measurement_begin",
-    operator="$gte",
-    value="2023-01-01T00:00:00Z"
-)
-```
-
----
-
-### 9. explain_jaquel_query
+### explain_query
 
 **Purpose**: Explain what a query does in plain English.
 
@@ -425,53 +296,14 @@ Ordering:
 **Example**:
 ```python
 query = {...}
-explanation = _explain_query(query)
+explanation = JaquelExplain.explain_query(query)
 print(explanation)
 ```
 
 ---
 
-### 10. merge_filter_conditions
 
-**Purpose**: Merge multiple filter conditions with AND/OR logic.
-
-**Input**:
-```json
-{
-    "conditions": [
-        {"status": "active"},
-        {"value": {"$gte": 0}},
-        {"value": {"$lte": 100}}
-    ],
-    "operator": "$and"
-}
-```
-
-**Output**:
-```json
-{
-    "$and": [
-        {"status": "active"},
-        {"value": {"$gte": 0}},
-        {"value": {"$lte": 100}}
-    ]
-}
-```
-
-**Operators**: `$and`, `$or`
-
-**Example**:
-```python
-conditions = [
-    {"status": "active"},
-    {"value": {"$gte": 0}}
-]
-merged = merge_filter_conditions(conditions, "$and")
-```
-
----
-
-### 11. check_entity_schema
+### check_entity_schema
 
 **Purpose**: Get available fields for an entity from the ODS model schema.
 
@@ -519,7 +351,7 @@ for field in schema['fields']:
 
 ---
 
-### 12. validate_field_exists
+### validate_field_exists
 
 **Purpose**: Check if a field exists in an entity's schema.
 
@@ -557,164 +389,7 @@ else:
 
 ---
 
-### 13. validate_filter_against_schema
-
-**Purpose**: Validate a filter condition against the actual entity schema.
-
-**Input**:
-```json
-{
-    "entity_name": "AoMeasurement",
-    "filter_condition": {
-        "measurement_begin": {"$gte": "2023-01-01"}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "entity_name": "AoMeasurement",
-    "filter_condition": {
-        "measurement_begin": {"$gte": "2023-01-01"}
-    },
-    "valid": true,
-    "field_validations": [
-        {
-            "field": "measurement_begin",
-            "exists": true,
-            "type": "datetime",
-            "operator_valid": true
-        }
-    ],
-    "warnings": [],
-    "errors": []
-}
-```
-
-**Requirements**: Active ODS server connection.
-
-**Example**:
-```python
-filter_cond = {"measurement_begin": {"$gte": "2023-01-01"}}
-result = validate_filter_against_schema("AoMeasurement", filter_cond)
-if result["valid"]:
-    print("Filter is valid against schema")
-else:
-    print("Validation errors:", result["errors"])
-```
-
----
-
-### 14. debug_query_steps
-
-**Purpose**: Break down a Jaquel query into logical steps for debugging.
-
-**Input**:
-```json
-{
-    "query": {
-        "AoMeasurement": {"name": "Test*"},
-        "$attributes": {"id": 1, "name": 1},
-        "$orderby": {"name": 1}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "query_summary": "Query for AoMeasurement entities",
-    "steps": [
-        {
-            "step": 1,
-            "operation": "filter",
-            "description": "Filter AoMeasurement where name matches 'Test*'",
-            "jaquel_fragment": {"AoMeasurement": {"name": "Test*"}}
-        },
-        {
-            "step": 2,
-            "operation": "select_attributes",
-            "description": "Select id and name attributes",
-            "jaquel_fragment": {"$attributes": {"id": 1, "name": 1}}
-        },
-        {
-            "step": 3,
-            "operation": "order_by",
-            "description": "Order results by name ascending",
-            "jaquel_fragment": {"$orderby": {"name": 1}}
-        }
-    ],
-    "estimated_complexity": "simple"
-}
-```
-
-**Example**:
-```python
-steps = debug_query_steps(query)
-for step in steps["steps"]:
-    print(f"Step {step['step']}: {step['description']}")
-```
-
----
-
-### 15. suggest_error_fixes
-
-**Purpose**: Get suggestions to fix common query errors.
-
-**Input**:
-```json
-{
-    "issue": "invalid operator",
-    "query": {
-        "AoMeasurement": {"name": {"$invalid": "test"}}
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "issue": "invalid operator",
-    "query": {
-        "AoMeasurement": {"name": {"$invalid": "test"}}
-    },
-    "suggestions": [
-        {
-            "fix_type": "operator_correction",
-            "description": "Replace $invalid with a valid operator",
-            "suggested_fix": {
-                "AoMeasurement": {"name": {"$eq": "test"}}
-            },
-            "confidence": "high"
-        },
-        {
-            "fix_type": "operator_alternatives",
-            "description": "Use $like for pattern matching instead",
-            "suggested_fix": {
-                "AoMeasurement": {"name": {"$like": "test*"}}
-            },
-            "confidence": "medium"
-        }
-    ],
-    "common_fixes": [
-        "$eq for exact match",
-        "$like for pattern matching",
-        "$in for multiple values"
-    ]
-}
-```
-
-**Example**:
-```python
-suggestions = suggest_error_fixes("invalid operator", query)
-for suggestion in suggestions["suggestions"]:
-    print(f"Fix: {suggestion['description']}")
-```
-
----
-
-### 16. connect_ods_server
+### connect_ods_server
 
 **Purpose**: Establish connection to ASAM ODS server for live model inspection and data access.
 
@@ -744,7 +419,7 @@ for suggestion in suggestions["suggestions"]:
 
 ---
 
-### 17. disconnect_ods_server
+### disconnect_ods_server
 
 **Purpose**: Close connection to ODS server.
 
@@ -763,7 +438,7 @@ for suggestion in suggestions["suggestions"]:
 
 ---
 
-### 18. get_ods_connection_info
+### get_ods_connection_info
 
 **Purpose**: Get current ODS connection information.
 
@@ -784,7 +459,7 @@ for suggestion in suggestions["suggestions"]:
 
 ---
 
-### 19. list_ods_entities
+### list_ods_entities
 
 **Purpose**: Return a list of existing entities from the ODS server ModelCache with their relationships.
 
@@ -824,7 +499,7 @@ for suggestion in suggestions["suggestions"]:
 
 ---
 
-### 20. get_test_to_measurement_hierarchy
+### get_test_to_measurement_hierarchy
 
 **Purpose**: Get the hierarchical entity chain from AoTest to AoMeasurement via the 'children' relation.
 
@@ -891,7 +566,7 @@ query = {
 
 ---
 
-### 21. execute_ods_query
+### execute_query
 
 **Purpose**: Execute a Jaquel query directly on connected ODS server.
 
@@ -918,7 +593,7 @@ query = {
 
 ---
 
-### 22. get_submatrix_measurement_quantities
+### get_submatrix_measurement_quantities
 
 **Purpose**: Get available measurement quantities for a submatrix.
 
@@ -959,7 +634,7 @@ query = {
 
 ---
 
-### 22. read_submatrix_data
+### read_submatrix_data
 
 **Purpose**: Read timeseries data from a submatrix using bulk data access.
 
@@ -992,7 +667,7 @@ query = {
 
 ---
 
-### 23. generate_submatrix_fetcher_script
+### generate_submatrix_fetcher_script
 
 **Purpose**: Generate Python script examples for fetching submatrix data with proper error handling and data processing.
 
@@ -1081,7 +756,7 @@ if __name__ == "__main__":
 
 ## Common Use Cases
 
-### Use Case 1: Validate User Query
+### Validate User Query
 
 ```python
 # User provides a query, validate it
@@ -1100,23 +775,7 @@ else:
     print("Errors:", result["errors"])
 ```
 
-### Use Case 2: Build Complex Filter
-
-```python
-# Build a complex filter step-by-step
-from odsbox_jaquel_mcp import merge_filter_conditions
-
-conditions = [
-    build_filter_condition("status", "$eq", "active"),
-    build_filter_condition("value", "$gte", 100),
-    build_filter_condition("date", "$between", ["2023-01-01", "2023-12-31"])
-]
-
-merged = merge_filter_conditions(conditions, "$and")
-# Use merged in query
-```
-
-### Use Case 3: Learn Operator Usage
+### Learn Operator Usage
 
 ```python
 # User wants to know how to use an operator
@@ -1125,7 +784,7 @@ print(f"Description: {doc['description']}")
 print(f"Example: {doc['example']}")
 ```
 
-### Use Case 4: Generate Query from Scratch
+### Generate Query from Scratch
 
 ```python
 # Generate template, then customize it
@@ -1142,25 +801,11 @@ skeleton["$options"]["$rowlimit"] = 5
 result = JaquelValidator.validate_query(skeleton)
 ```
 
-### Use Case 5: Optimize Existing Query
-
-```python
-# Find opportunities to simplify a query
-verbose_query = {
-    "AoUnit": {"id": {"$eq": 123}},
-    "$attributes": {"id": 1, "name": 1}
-}
-
-suggestions = JaquelOptimizer.suggest_simplifications(verbose_query)
-for suggestion in suggestions:
-    print(suggestion)
-```
-
 ---
 
 ## Query Examples
 
-### Example 1: Simple ID Lookup
+### Simple ID Lookup
 
 ```json
 {
@@ -1168,7 +813,7 @@ for suggestion in suggestions:
 }
 ```
 
-### Example 2: Name Search
+### Name Search
 
 ```json
 {
@@ -1180,7 +825,7 @@ for suggestion in suggestions:
 }
 ```
 
-### Example 3: Time Range Query
+### Time Range Query
 
 ```json
 {
@@ -1193,7 +838,7 @@ for suggestion in suggestions:
 }
 ```
 
-### Example 4: Multiple Conditions
+### Multiple Conditions
 
 ```json
 {
@@ -1209,7 +854,7 @@ for suggestion in suggestions:
 }
 ```
 
-### Example 5: Inner Join
+### Inner Join
 
 ```json
 {
@@ -1223,7 +868,7 @@ for suggestion in suggestions:
 }
 ```
 
-### Example 6: Outer Join
+### Outer Join
 
 ```json
 {
@@ -1236,7 +881,7 @@ for suggestion in suggestions:
 }
 ```
 
-### Example 7: Aggregates
+### Aggregates
 
 ```json
 {
@@ -1303,7 +948,7 @@ for suggestion in suggestions:
 
 ## Tips & Best Practices
 
-### 1. Always Validate Before Using
+### Always Validate Before Using
 
 ```python
 result = JaquelValidator.validate_query(query)
@@ -1311,7 +956,7 @@ if not result["valid"]:
     raise ValueError(result["errors"])
 ```
 
-### 2. Use Patterns as Starting Points
+### Use Patterns as Starting Points
 
 ```python
 # Start with a pattern, then customize
@@ -1320,7 +965,7 @@ query = json.loads(pattern["template"])
 # Modify as needed
 ```
 
-### 3. Use Case-Insensitive for User Searches
+### Use Case-Insensitive for User Searches
 
 ```python
 # Bad: Case-sensitive, might miss data
@@ -1330,7 +975,7 @@ query = json.loads(pattern["template"])
 {"name": {"$like": "Test*", "$options": "i"}}
 ```
 
-### 4. Set Row Limits for Large Queries
+### Set Row Limits for Large Queries
 
 ```python
 # Good: Prevents large result sets
@@ -1340,7 +985,7 @@ query = json.loads(pattern["template"])
 "$options": {"$rowlimit": 1000, "$rowskip": 0}
 ```
 
-### 5. Use Inner Joins for Required Data
+### Use Inner Joins for Required Data
 
 ```python
 # Inner join - related data must exist
@@ -1350,7 +995,7 @@ query = json.loads(pattern["template"])
 "unit:OUTER.name": 1
 ```
 
-### 6. Simplify Verbose Queries
+### Simplify Verbose Queries
 
 ```python
 # Verbose
@@ -1360,15 +1005,15 @@ query = json.loads(pattern["template"])
 {"AoUnit": 123}
 ```
 
-### 7. Document Complex Conditions
+### Document Complex Conditions
 
 ```python
-# Use explain_jaquel_query to understand queries
-explanation = _explain_query(complex_query)
+# Use explain_query to understand queries
+explanation = JaquelExplain.explain_query(complex_query)
 print(explanation)  # Share with team for clarity
 ```
 
-### 8. Test Operators Before Using
+### Test Operators Before Using
 
 ```python
 # Verify operator syntax
@@ -1376,7 +1021,7 @@ info = JaquelValidator.get_operator_info("$like")
 print(info["example"])  # See correct usage
 ```
 
-### 9. Use Explicit $and for Complex Logic
+### Use Explicit $and for Complex Logic
 
 ```python
 # Better for readability
@@ -1387,14 +1032,6 @@ print(info["example"])  # See correct usage
 ]
 
 # Instead of nested conditions
-```
-
-### 10. Merge Related Conditions
-
-```python
-# Use merge_filter_conditions for clean code
-conditions = [cond1, cond2, cond3]
-merged = merge_filter_conditions(conditions, "$and")
 ```
 
 ---
@@ -1426,16 +1063,15 @@ merged = merge_filter_conditions(conditions, "$and")
 
 ### Debugging Tips
 
-1. **Use validate_jaquel_query** to find syntax errors
-2. **Use explain_jaquel_query** to understand complex queries
+1. **Use validate_query** to find syntax errors
+2. **Use explain_query** to understand complex queries
 3. **Use get_operator_documentation** to verify operator syntax
-4. **Use suggest_optimizations** to find issues and improvements
 
 ---
 
 ## Notebook & Visualization Tools (NEW)
 
-### 24. generate_measurement_comparison_notebook
+### generate_measurement_comparison_notebook
 
 **Purpose**: Generate a complete Jupyter notebook for comparing measurements with automatic data retrieval, preparation, and visualization.
 
@@ -1493,7 +1129,7 @@ merged = merge_filter_conditions(conditions, "$and")
 
 ---
 
-### 25. generate_plotting_code
+### generate_plotting_code
 
 **Purpose**: Generate standalone matplotlib plotting code for measurement visualization.
 
@@ -1578,15 +1214,14 @@ Assistant uses tools:
 1. list_query_patterns() → Shows available patterns
 2. get_query_pattern("time_range") → Gets time range template
 3. generate_query_skeleton("AoMeasurement", "get_all") → Creates skeleton
-4. suggest_optimizations() → Cleans up the query
-5. explain_jaquel_query() → Explains the result
+4. explain_query() → Explains the result
 ```
 
 ---
 
 ## Measurement Analysis & Query Tools (NEW)
 
-### 26. compare_measurements
+### compare_measurements
 
 **Purpose**: Compare measurements across quantities with statistical analysis.
 
@@ -1671,7 +1306,7 @@ Assistant uses tools:
 
 ---
 
-### 27. query_measurement_hierarchy
+### query_measurement_hierarchy
 
 **Purpose**: Query and explore ODS measurement hierarchy and structure.
 
@@ -1796,9 +1431,9 @@ Assistant uses tools:
 
 ---
 
-## AI Guidance Tools (NEW)
+## AI Guidance Tools
 
-### 28. get_bulk_api_help
+### get_bulk_api_help
 
 **Purpose**: Get contextual help on bulk API usage for loading timeseries data efficiently. This tool provides step-by-step guidance for AI models learning to use the bulk data access system.
 
@@ -1814,7 +1449,7 @@ Assistant uses tools:
 ```json
 {
     "topic": "the_3_step_rule",
-    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with connect_ods_server\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with execute_ods_query\n   - Get quantities with get_submatrix_measurement_quantities\n   - Explore hierarchy with query_measurement_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use read_submatrix_data for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
+    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with connect_ods_server\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with execute_query\n   - Get quantities with get_submatrix_measurement_quantities\n   - Explore hierarchy with query_measurement_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use read_submatrix_data for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
     "examples_count": 3,
     "related_tools": ["connect_ods_server", "get_submatrix_measurement_quantities", "read_submatrix_data"]
 }
@@ -1843,13 +1478,12 @@ Assistant uses tools:
    - Forgetting to connect first
    - Using wrong column names
    - Not using pattern matching for flexibility
-   - Attempting pagination on bulk data
 
 5. **decision_tree** - How to choose the right approach
    - "I know measurement IDs" → Use bulk API
-   - "I need to search" → Use Jaquel first
+   - "I need to search" → Use Jaquel query first
    - "I want timeseries data" → Bulk API after discovery
-   - "I need to filter" → Combine Jaquel + bulk
+   - "I need to filter" → Combine Jaquel query + bulk
 
 6. **quick_start** - 5-minute getting started guide
    - Import statements
@@ -1961,16 +1595,6 @@ result = get_bulk_api_help(topic="error_handling")
    - Call: `get_bulk_api_help(topic="performance_tips")`
    - Then: Apply optimization
 
-**Documentation Links**:
-
-For comprehensive documentation on bulk API usage, see:
-- [`00_START_HERE.md`](00_START_HERE.md) - Main entry point
-- [`BULK_API_README.md`](BULK_API_README.md) - Complete navigation guide
-- [`BULK_API_USAGE_GUIDE.md`](BULK_API_USAGE_GUIDE.md) - In-depth usage guide
-- [`BULK_API_QUICK_REF.md`](BULK_API_QUICK_REF.md) - Quick reference card
-- [`BULK_API_EXAMPLES.md`](BULK_API_EXAMPLES.md) - 8+ complete workflows
-- [`BULK_API_AI_PROMPT.md`](BULK_API_AI_PROMPT.md) - AI system prompt
-
 ---
 
 ## Additional Resources
@@ -1979,9 +1603,7 @@ For comprehensive documentation on bulk API usage, see:
 - [Jaquel Examples](https://peak-solution.github.io/odsbox/jaquel_examples.html)
 - [ODSBox GitHub](https://github.com/peak-solution/odsbox)
 - [ASAM ODS Standard](https://www.asam.net/)
-- [Bulk API Guides](BULK_API_README.md) - Learn efficient timeseries data loading
 
 ---
 
-**Last Updated**: October 2025
-**Version**: 1.1.0 (Added bulk API guidance tools)
+**Last Updated**: December 2025
