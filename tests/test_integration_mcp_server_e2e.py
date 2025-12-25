@@ -4,7 +4,7 @@ These tests use the MCPServerTestClient to communicate with the MCP server
 via the actual stdio protocol, testing real end-to-end MCP communication.
 
 Run with:
-    pytest tests/test_mcp_server_e2e.py -m integration -v
+    pytest tests/test_integration_mcp_server_e2e.py -v
 """
 
 import json
@@ -201,5 +201,181 @@ async def test_multiple_sequential_calls(mcp_client):
 
     # All calls should succeed independently
     assert result1 != result2 != result3
+
+
+# ============================================================================
+# E2E TESTS WITH ODS SERVER CONNECTION
+# ============================================================================
+# These tests verify the full flow of connecting to ODS and executing
+# queries through the MCP server
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_connect_to_ods_via_mcp(mcp_client, integration_credentials):
+    """Test connecting to ODS server through MCP protocol.
+
+    This test verifies:
+    - connect_ods_server tool works via MCP
+    - ODS server responds successfully
+    - Connection state is established
+    """
+    result = await mcp_client.call_tool(
+        "connect_ods_server",
+        {
+            "url": integration_credentials["url"],
+            "username": integration_credentials["username"],
+            "password": integration_credentials["password"],
+        },
+    )
+
+    assert result is not None
+    # Should contain connection result
+    content = result.get("result", {}).get("content", [])
+    assert len(content) > 0, f"Expected content in result, got: {result}"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_list_entities_via_ods_mcp(mcp_client, integration_credentials):
+    """Test listing ODS entities through MCP after connecting.
+
+    This test verifies:
+    - Can connect to ODS via MCP
+    - Can list entities via MCP
+    - Returns proper entity information
+    """
+    # Connect first
+    await mcp_client.call_tool(
+        "connect_ods_server",
+        {
+            "url": integration_credentials["url"],
+            "username": integration_credentials["username"],
+            "password": integration_credentials["password"],
+        },
+    )
+
+    # Check connection info
+    result = await mcp_client.call_tool("get_ods_connection_info", {})
+    assert result is not None
+    content = result.get("result", {}).get("content", [])
+    assert len(content) > 0, "Should have connection info"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_execute_query_via_ods_mcp(mcp_client, integration_credentials):
+    """Test executing a Jaquel query through MCP with ODS connection.
+
+    This test verifies:
+    - Can connect to ODS via MCP
+    - Can execute queries via MCP
+    - Returns data from ODS
+    """
+    # Connect first
+    await mcp_client.call_tool(
+        "connect_ods_server",
+        {
+            "url": integration_credentials["url"],
+            "username": integration_credentials["username"],
+            "password": integration_credentials["password"],
+        },
+    )
+
+    # Execute a simple query
+    query = {"AoTest": {"name": "*"}, "$attributes": {"id": 1, "name": 1}, "$options": {"$rowlimit": 5}}
+
+    result = await mcp_client.call_tool("execute_query", {"query": query})
+    assert result is not None
+
+    # Should have content with results
+    content = result.get("result", {}).get("content", [])
+    assert len(content) > 0, f"Expected query results, got: {result}"
+
+    # Parse the result
+    text = content[0].get("text", "{}")
+    query_result = json.loads(text)
+    assert isinstance(query_result, dict)
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_validate_query_with_ods_context(mcp_client, integration_credentials):
+    """Test query validation with active ODS connection.
+
+    This test verifies:
+    - Query validation works with ODS connection
+    - Validates against actual schema
+    - Returns validation results
+    """
+    # Connect first
+    await mcp_client.call_tool(
+        "connect_ods_server",
+        {
+            "url": integration_credentials["url"],
+            "username": integration_credentials["username"],
+            "password": integration_credentials["password"],
+        },
+    )
+
+    # Validate a query
+    query = {"AoTest": {"name": "Test*"}, "$attributes": {"id": 1, "name": 1}, "$options": {"$rowlimit": 5}}
+
+    result = await mcp_client.call_tool("validate_query", {"query": query})
+    assert result is not None
+
+    content = result.get("result", {}).get("content", [])
+    assert len(content) > 0, f"Expected validation result, got: {result}"
+
+    text = content[0].get("text", "{}")
+    validation_result = json.loads(text)
+    assert "valid" in validation_result or "errors" in validation_result
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_ods_connection_persistence(mcp_client, integration_credentials):
+    """Test that ODS connection persists across multiple tool calls.
+
+    This test verifies:
+    - Connection state is maintained
+    - Multiple queries can use same connection
+    - No need to reconnect between calls
+    """
+    # Connect
+    await mcp_client.call_tool(
+        "connect_ods_server",
+        {
+            "url": integration_credentials["url"],
+            "username": integration_credentials["username"],
+            "password": integration_credentials["password"],
+        },
+    )
+
+    # Call 1: Get connection info
+    result1 = await mcp_client.call_tool("get_ods_connection_info", {})
+    assert result1 is not None
+
+    # Call 2: Execute query
+    query = {"AoTest": {}, "$attributes": {"id": 1}, "$options": {"$rowlimit": 1}}
+    result2 = await mcp_client.call_tool("execute_query", {"query": query})
+    assert result2 is not None
+
+    # Call 3: Validate different query
+    result3 = await mcp_client.call_tool(
+        "validate_query",
+        {"query": {"AoMeasurement": {}}},
+    )
+    assert result3 is not None
+
+    # All should succeed with same connection
     assert result1 != result2 != result3
-    assert result1 != result2 != result3
+
+    result4 = await mcp_client.call_tool(
+        "explain_query",
+        {"query": query},
+    )
+    assert result4 is not None
+    text: str = result4.get("result", {}).get("content", [])[0].get("text")
+    assert text is not None
+    assert "SQL-like Representation:" in text

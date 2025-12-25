@@ -165,8 +165,8 @@ class JaquelExplain:
 
         # SELECT clause
         select_parts = []
-        if select_statement.columns:
-            for column in select_statement.columns and select_statement.columns.count > 0:
+        if select_statement.columns and len(select_statement.columns) > 0:
+            for column in select_statement.columns:
                 col_aggregate = (
                     ods.AggregateEnum.Name(column.aggregate).replace("AG_", "")
                     if column.aggregate != ods.AggregateEnum.AG_NONE
@@ -182,7 +182,7 @@ class JaquelExplain:
         sql_lines.append(f"SELECT {', '.join(select_parts) if select_parts else '*'}")
 
         # FROM clause
-        if select_statement.columns and select_statement.columns.count > 0:
+        if select_statement.columns and len(select_statement.columns) > 0:
             main_entity = mc.entity_by_aid(select_statement.columns[0].aid)
             sql_lines.append(f"FROM {main_entity.name}")
 
@@ -359,13 +359,11 @@ class JaquelExplain:
 
         explanation_parts.append("\n" + "=" * 50)
         try:
+            sql_representation = JaquelExplain._generate_sql_representation(select_statement, mc)
             explanation_parts.append("SQL-like Representation:")
             explanation_parts.append("=" * 50)
-            sql_representation = JaquelExplain._generate_sql_representation(select_statement, mc)
             explanation_parts.append(sql_representation)
         except Exception as e:
             explanation_parts.append(f"Failed to generate SQL-like representation: {str(e)}")
 
-        return "\n".join(explanation_parts)
-        return "\n".join(explanation_parts)
         return "\n".join(explanation_parts)
