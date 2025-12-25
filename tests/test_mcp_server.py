@@ -33,26 +33,19 @@ class TestMCPServer:
         tool_names = [tool.name for tool in tools]
 
         expected_tools = [
-            "validate_jaquel_query",
-            "validate_filter_condition",
+            "validate_query",
             "get_operator_documentation",
-            "suggest_optimizations",
             "get_query_pattern",
             "list_query_patterns",
             "generate_query_skeleton",
-            "build_filter_condition",
-            "explain_jaquel_query",
-            "merge_filter_conditions",
+            "explain_query",
             "check_entity_schema",
             "validate_field_exists",
-            "validate_filter_against_schema",
-            "debug_query_steps",
-            "suggest_error_fixes",
             "connect_ods_server",
             "disconnect_ods_server",
             "get_ods_connection_info",
             "list_ods_entities",
-            "execute_ods_query",
+            "execute_query",
             "get_submatrix_measurement_quantities",
             "read_submatrix_data",
             "generate_submatrix_fetcher_script",
@@ -62,12 +55,12 @@ class TestMCPServer:
             assert expected_tool in tool_names
 
     @pytest.mark.asyncio
-    async def test_call_tool_validate_jaquel_query(self):
-        """Test calling validate_jaquel_query tool."""
+    async def test_call_tool_validate_query(self):
+        """Test calling validate_query tool."""
         query = {"TestEntity": {}}
         arguments = {"query": query}
 
-        result = await call_tool("validate_jaquel_query", arguments)
+        result = await call_tool("validate_query", arguments)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -79,23 +72,6 @@ class TestMCPServer:
         assert "errors" in response_data
         assert "warnings" in response_data
         assert "suggestions" in response_data
-
-    @pytest.mark.asyncio
-    async def test_call_tool_validate_filter_condition(self):
-        """Test calling validate_filter_condition tool."""
-        condition = {"name": {"$eq": "test"}}
-        arguments = {"condition": condition}
-
-        result = await call_tool("validate_filter_condition", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "valid" in response_data
-        assert "errors" in response_data
-        assert "issues" in response_data
 
     @pytest.mark.asyncio
     async def test_call_tool_get_operator_documentation(self):
@@ -111,22 +87,6 @@ class TestMCPServer:
         response_data = json.loads(result[0].text)
         assert "category" in response_data
         assert response_data["category"] == "comparison"
-
-    @pytest.mark.asyncio
-    async def test_call_tool_suggest_optimizations(self):
-        """Test calling suggest_optimizations tool."""
-        query = {"TestEntity": {}}
-        arguments = {"query": query}
-
-        result = await call_tool("suggest_optimizations", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "query_summary" in response_data
-        assert "suggestions" in response_data
 
     @pytest.mark.asyncio
     async def test_call_tool_get_query_pattern(self):
@@ -174,42 +134,12 @@ class TestMCPServer:
         assert "TestEntity" in response_data
 
     @pytest.mark.asyncio
-    async def test_call_tool_build_filter_condition(self):
-        """Test calling build_filter_condition tool."""
-        arguments = {"field": "name", "operator": "$eq", "value": "test"}
-
-        result = await call_tool("build_filter_condition", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "name" in response_data
-        assert response_data["name"] == {"$eq": "test"}
-
-    @pytest.mark.asyncio
-    async def test_call_tool_build_filter_condition_unknown_operator(self):
-        """Test build_filter_condition with unknown operator."""
-        arguments = {"field": "name", "operator": "$unknown", "value": "test"}
-
-        result = await call_tool("build_filter_condition", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "error" in response_data
-        assert "Unknown operator" in response_data["error"]
-
-    @pytest.mark.asyncio
-    async def test_call_tool_explain_jaquel_query(self):
-        """Test calling explain_jaquel_query tool."""
+    async def test_call_tool_explain_query(self):
+        """Test calling explain_query tool."""
         query = {"TestEntity": {}}
         arguments = {"query": query}
 
-        result = await call_tool("explain_jaquel_query", arguments)
+        result = await call_tool("explain_query", arguments)
 
         assert isinstance(result, list)
         assert len(result) == 1
@@ -221,36 +151,6 @@ class TestMCPServer:
         # It can be either a simple explanation or an error if not connected to ODS
         assert isinstance(explanation, str)
         assert len(explanation) > 0
-
-    @pytest.mark.asyncio
-    async def test_call_tool_merge_filter_conditions(self):
-        """Test calling merge_filter_conditions tool."""
-        conditions = [{"name": "test1"}, {"name": "test2"}]
-        arguments = {"conditions": conditions, "operator": "$and"}
-
-        result = await call_tool("merge_filter_conditions", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "$and" in response_data
-
-    @pytest.mark.asyncio
-    async def test_call_tool_merge_filter_conditions_no_conditions(self):
-        """Test merge_filter_conditions with no conditions."""
-        arguments = {"conditions": [], "operator": "$and"}
-
-        result = await call_tool("merge_filter_conditions", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "error" in response_data
-        assert "No conditions to merge" in response_data["error"]
 
     @patch("odsbox_jaquel_mcp.tools.schema_tools.SchemaInspector.get_entity_schema")
     @pytest.mark.asyncio
@@ -281,53 +181,6 @@ class TestMCPServer:
         assert isinstance(result[0], TextContent)
 
         mock_validate.assert_called_once_with("TestEntity", "name")
-
-    @patch("odsbox_jaquel_mcp.tools.schema_tools.SchemaInspector.validate_filter_against_schema")
-    @pytest.mark.asyncio
-    async def test_call_tool_validate_filter_against_schema(self, mock_validate):
-        """Test calling validate_filter_against_schema tool."""
-        mock_validate.return_value = {"valid": True}
-        arguments = {"entity_name": "TestEntity", "filter_condition": {"name": "test"}}
-
-        result = await call_tool("validate_filter_against_schema", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        mock_validate.assert_called_once_with("TestEntity", {"name": "test"})
-
-    @patch("odsbox_jaquel_mcp.tools.query_tools.QueryDebugger.debug_query_step_by_step")
-    @pytest.mark.asyncio
-    async def test_call_tool_debug_query_steps(self, mock_debug):
-        """Test calling debug_query_steps tool."""
-        mock_debug.return_value = {"steps": []}
-        arguments = {"query": {"TestEntity": {}}}
-
-        result = await call_tool("debug_query_steps", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        mock_debug.assert_called_once_with({"TestEntity": {}})
-
-    @patch("odsbox_jaquel_mcp.tools.query_tools.QueryDebugger.suggest_fixes_for_issue")
-    @pytest.mark.asyncio
-    async def test_call_tool_suggest_error_fixes(self, mock_suggest):
-        """Test calling suggest_error_fixes tool."""
-        mock_suggest.return_value = ["Fix suggestion"]
-        arguments = {"issue": "Test issue", "query": {"TestEntity": {}}}
-
-        result = await call_tool("suggest_error_fixes", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert response_data["issue"] == "Test issue"
-        assert response_data["suggestions"] == ["Fix suggestion"]
 
     @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
     @pytest.mark.asyncio
@@ -427,12 +280,12 @@ class TestMCPServer:
 
     @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.query")
     @pytest.mark.asyncio
-    async def test_call_tool_execute_ods_query(self, mock_query):
-        """Test calling execute_ods_query tool."""
+    async def test_call_tool_execute_query(self, mock_query):
+        """Test calling execute_query tool."""
         mock_query.return_value = {"success": True, "result": "data"}
         arguments = {"query": {"TestEntity": {}}}
 
-        result = await call_tool("execute_ods_query", arguments)
+        result = await call_tool("execute_query", arguments)
 
         assert isinstance(result, list)
         assert len(result) == 1

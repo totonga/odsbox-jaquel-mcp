@@ -21,6 +21,16 @@ class TestJaquelValidator:
         assert result["valid"] is False
         assert "Query must contain an entity name" in result["errors"][0]
 
+    def test_validate_query_multiple_entities(self):
+        """Test validation of query with multiple non-$ entities."""
+        query = {"Entity1": {}, "Entity2": {}}
+        result = JaquelValidator.validate_query(query)
+
+        assert result["valid"] is False
+        assert "Query is only allowed to contain a single non-$ element" in result["errors"][0]
+        assert "Entity1" in result["errors"][0]
+        assert "Entity2" in result["errors"][0]
+
     def test_validate_query_valid_simple(self):
         """Test validation of simple valid query."""
         query = {"TestEntity": {}}
@@ -103,26 +113,37 @@ class TestJaquelValidator:
         assert result["valid"] is False
         assert "$rowskip must be an integer" in result["errors"]
 
-    def test_validate_filter_condition_invalid_type(self):
-        """Test validation of non-dict filter condition."""
-        result = JaquelValidator.validate_filter_condition("not a dict")
-
-        assert result["valid"] is False
-        assert "Condition must be a dictionary" in result["errors"]
-
     def test_validate_filter_condition_valid_simple(self):
         """Test validation of simple valid filter condition."""
         condition = {"name": {"$eq": "test"}}
-        result = JaquelValidator.validate_filter_condition(condition)
+        result = JaquelValidator.validate_query({"AoTest": condition})
 
         assert result["valid"] is True
         assert result["errors"] == []
-        assert result["issues"] == []
+        assert result["warnings"] == []
+
+    def test_validate_filter_condition_valid_simple2(self):
+        """Test validation of simple valid filter condition."""
+        condition = {"name": "test"}
+        result = JaquelValidator.validate_query({"AoTest": condition})
+
+        assert result["valid"] is True
+        assert result["errors"] == []
+        assert result["warnings"] == []
+
+    def test_validate_filter_condition_valid_simple3(self):
+        """Test validation of simple valid filter condition."""
+        condition = {"state": 123}
+        result = JaquelValidator.validate_query({"AoTest": condition})
+
+        assert result["valid"] is True
+        assert result["errors"] == []
+        assert result["warnings"] == []
 
     def test_validate_filter_condition_unknown_operator(self):
         """Test validation with unknown operator."""
         condition = {"name": {"$unknown": "value"}}
-        result = JaquelValidator.validate_filter_condition(condition)
+        result = JaquelValidator.validate_query({"AoTest": condition})
 
         assert result["valid"] is False
         assert "Unknown operator: $unknown" in result["errors"][0]
@@ -130,15 +151,15 @@ class TestJaquelValidator:
     def test_validate_filter_condition_invalid_null_value(self):
         """Test validation of $null with invalid value."""
         condition = {"field": {"$null": 0}}
-        result = JaquelValidator.validate_filter_condition(condition)
+        result = JaquelValidator.validate_query({"AoTest": condition})
 
         assert result["valid"] is True
-        assert "$null should have value 1" in result["issues"][0]
+        assert "$null should have value 1" in result["warnings"][0]
 
     def test_validate_filter_condition_invalid_between_type(self):
         """Test validation of $between with non-list value."""
         condition = {"field": {"$between": "not a list"}}
-        result = JaquelValidator.validate_filter_condition(condition)
+        result = JaquelValidator.validate_query({"AoTest": condition})
 
         assert result["valid"] is False
         assert "$between requires a list value" in result["errors"][0]
@@ -146,18 +167,18 @@ class TestJaquelValidator:
     def test_validate_filter_condition_invalid_and_type(self):
         """Test validation of $and with non-list value."""
         condition = {"$and": "not a list"}
-        result = JaquelValidator.validate_filter_condition(condition)
+        result = JaquelValidator.validate_query({"AoTest": condition})
 
         assert result["valid"] is False
-        assert "$and must contain an array" in result["errors"]
+        assert "$and must contain an array at 'AoTest'" in result["errors"]
 
     def test_validate_filter_condition_invalid_not_type(self):
         """Test validation of $not with non-dict value."""
         condition = {"$not": "not a dict"}
-        result = JaquelValidator.validate_filter_condition(condition)
+        result = JaquelValidator.validate_query({"AoTest": condition})
 
         assert result["valid"] is False
-        assert "$not must contain expression" in result["errors"]
+        assert "$not must contain expression at 'AoTest'" in result["errors"]
 
     def test_get_operator_info_known_operator(self):
         """Test getting info for known operator."""

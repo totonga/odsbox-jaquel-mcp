@@ -19,10 +19,8 @@ class PromptLibrary:
             PromptLibrary._query_validation_prompt(),
             PromptLibrary._query_pattern_prompt(),
             PromptLibrary._ods_connection_prompt(),
-            PromptLibrary._filter_building_prompt(),
             PromptLibrary._bulk_api_guide_prompt(),
             PromptLibrary._measurement_analysis_prompt(),
-            PromptLibrary._query_optimization_prompt(),
         ]
 
     @staticmethod
@@ -88,25 +86,6 @@ class PromptLibrary:
         )
 
     @staticmethod
-    def _filter_building_prompt() -> Prompt:
-        """Prompt for building filter conditions."""
-        return Prompt(
-            name="build_filters",
-            title="Build Filter Conditions",
-            description=(
-                "Learn how to construct filter conditions for Jaquel queries. "
-                "Includes operators, comparison logic, and combining multiple conditions with AND/OR."
-            ),
-            arguments=[
-                PromptArgument(
-                    name="field_info",
-                    description="(Optional) Field name and value you want to filter on",
-                    required=False,
-                )
-            ],
-        )
-
-    @staticmethod
     def _bulk_api_guide_prompt() -> Prompt:
         """Prompt for bulk API and submatrix data access."""
         return Prompt(
@@ -152,26 +131,6 @@ class PromptLibrary:
         )
 
     @staticmethod
-    def _query_optimization_prompt() -> Prompt:
-        """Prompt for query optimization and debugging."""
-        return Prompt(
-            name="optimize_query",
-            title="Optimize & Debug Jaquel Queries",
-            description=(
-                "Learn how to optimize Jaquel queries for better performance and readability. "
-                "Includes query simplification suggestions, step-by-step debugging, "
-                "and error fix recommendations."
-            ),
-            arguments=[
-                PromptArgument(
-                    name="query_issue",
-                    description="(Optional) A query you want to optimize or debug",
-                    required=False,
-                )
-            ],
-        )
-
-    @staticmethod
     def get_prompt_content(prompt_name: str, arguments: dict | None = None) -> str:
         """Generate content for a specific prompt.
 
@@ -195,7 +154,7 @@ class PromptLibrary:
                 "3. Use `get_test_to_measurement_hierarchy` to explore hierarchy entity relations\n"
                 "4. List entities with `list_ods_entities` to explore the entity relationship model\n"
                 "5. Generate query templates with `generate_query_skeleton` for specific entity\n"
-                "6. Execute queries directly with `execute_ods_query`\n\n"
+                "6. Execute queries directly with `execute_query`\n\n"
                 "## Available ODS Connection Tools:\n"
                 "- `connect_ods_server` - Establish connection\n"
                 "- `disconnect_ods_server` - Close connection\n"
@@ -203,7 +162,7 @@ class PromptLibrary:
                 "- `get_test_to_measurement_hierarchy` - Explore test-measurement relationships\n"
                 "- `list_ods_entities` - List available entities in the data model\n"
                 "- `generate_query_skeleton` - Create query templates for entity\n"
-                "- `execute_ods_query` - Run queries on live server\n\n"
+                "- `execute_query` - Run queries on live server\n\n"
             )
             if server_details:
                 content += f"**Your server details:** {server_details}\n"
@@ -213,16 +172,15 @@ class PromptLibrary:
             query_example = arguments.get("query_example", "")
             content = (
                 "# Validating Jaquel Queries\n\n"
-                "Use the `validate_jaquel_query` tool to check your Jaquel queries for:\n"
+                "Use the `validate_query` tool to check your Jaquel queries for:\n"
                 "- Syntax errors and structural issues\n"
                 "- Missing required fields\n"
                 "- Invalid operators or comparisons\n"
                 "- Best practice violations\n\n"
                 "## How to use:\n"
-                "1. Call `validate_jaquel_query` with your query object\n"
+                "1. Call `validate_query` with your query object\n"
                 "2. Review the validation report\n"
-                "3. Use suggestions to fix any issues\n"
-                "4. You can also validate individual filter conditions with `validate_filter_condition`\n\n"
+                "3. Use suggestions to fix any issues\n\n"
             )
             if query_example:
                 content += f"**Your query:**\n```json\n{query_example}\n```\n"
@@ -250,34 +208,6 @@ class PromptLibrary:
             )
             if pattern_type:
                 content += f"**Pattern of interest:** {pattern_type}\n"
-            return content
-
-        elif prompt_name == "build_filters":
-            field_info = arguments.get("field_info", "")
-            content = (
-                "# Building Filter Conditions\n\n"
-                "Create WHERE clause filters for your Jaquel queries.\n\n"
-                "## Filter Building Tools:\n"
-                "- `build_filter_condition` - Create a single filter\n"
-                "- `merge_filter_conditions` - Combine filters with AND/OR logic\n"
-                "- `validate_filter_condition` - Check filter syntax\n"
-                "- `validate_filter_against_schema` - Verify against entity schema\n\n"
-                "## Common Operators:\n"
-                "- `$eq` - Equals\n"
-                "- `$ne` - Not equals\n"
-                "- `$gt`, `$gte` - Greater than\n"
-                "- `$lt`, `$lte` - Less than\n"
-                "- `$in` - In list\n"
-                "- `$regex` - Pattern matching\n"
-                "- `$contains` - Contains substring\n\n"
-                "## Workflow:\n"
-                "1. Use `build_filter_condition` for individual filters\n"
-                "2. Combine multiple filters with `merge_filter_conditions`\n"
-                "3. Validate with `validate_filter_against_schema`\n"
-                "4. Use in your Jaquel query\n\n"
-            )
-            if field_info:
-                content += f"**Field to filter:** {field_info}\n"
             return content
 
         elif prompt_name == "bulk_data_access":
@@ -336,32 +266,6 @@ class PromptLibrary:
             )
             if analysis_type:
                 content += f"**Analysis type:** {analysis_type}\n"
-            return content
-
-        elif prompt_name == "optimize_query":
-            query_issue = arguments.get("query_issue", "")
-            content = (
-                "# Query Optimization & Debugging\n\n"
-                "Improve query performance and fix issues.\n\n"
-                "## Optimization Tools:\n"
-                "- `suggest_optimizations` - Get simplification suggestions\n"
-                "- `debug_query_steps` - Break down query execution\n"
-                "- `suggest_error_fixes` - Get fix recommendations\n"
-                "- `explain_jaquel_query` - Understand what a query does\n\n"
-                "## Common Issues:\n"
-                "- Complex nested structures that can be simplified\n"
-                "- Redundant filters\n"
-                "- Inefficient field selections\n"
-                "- Missing or invalid operators\n\n"
-                "## Debugging Process:\n"
-                "1. Use `explain_jaquel_query` to understand current behavior\n"
-                "2. Call `debug_query_steps` for step-by-step breakdown\n"
-                "3. Use `suggest_optimizations` for improvements\n"
-                "4. If errors occur, use `suggest_error_fixes`\n"
-                "5. Validate with `validate_jaquel_query`\n\n"
-            )
-            if query_issue:
-                content += f"**Query issue:** {query_issue}\n"
             return content
 
         else:

@@ -72,7 +72,7 @@ BULK API vs JAQUEL QUERIES
 │ • Searching for measurement definitions                     │
 │ • Checking what data exists                                 │
 │                                                             │
-│ TOOLS: execute_ods_query, validate_jaquel_query             │
+│ TOOLS: execute_query, validate_query             │
 └─────────────────────────────────────────────────────────────┘
 
 KEY DIFFERENCE:
@@ -137,7 +137,7 @@ User asks about data-related action:
   │
   └─ "Help me find data" / "Which submatrix has...?"
      └─> Use: JAQUEL QUERIES (not bulk API)
-         └─> execute_ods_query to explore metadata
+         └─> execute_query to explore metadata
     """
 
     # Common mistakes
@@ -145,7 +145,7 @@ User asks about data-related action:
 TOP 5 AI MISTAKES WITH BULK API
 
 ❌ MISTAKE 1: Using Jaquel to Load Data
-   Example: execute_ods_query to get measurement values
+   Example: execute_query to get measurement values
    Problem: Jaquel queries return metadata, not data
    Fix: Use read_submatrix_data instead
 
@@ -271,7 +271,7 @@ ERROR: "No columns matched the pattern"
 ERROR: "Submatrix not found" or invalid ID
   Cause: submatrix_id doesn't exist
   Fix: Use Jaquel query to find valid IDs:
-    execute_ods_query({
+    execute_query({
       "AoSubmatrix": {},
       "$attributes": ["id", "name"]
     })

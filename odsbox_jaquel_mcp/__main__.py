@@ -1,8 +1,14 @@
 """Entry point for running the MCP server as a module."""
 
 import asyncio
+import sys
 
-from .server import main as async_main
+# Handle both relative imports (when run as module) and absolute imports (when run as script)
+try:
+    from .server import main as async_main
+except ImportError:
+    # Fallback for when run as script directly
+    from odsbox_jaquel_mcp.server import main as async_main
 
 
 def main():

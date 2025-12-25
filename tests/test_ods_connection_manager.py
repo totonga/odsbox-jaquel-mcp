@@ -34,7 +34,6 @@ class TestODSConnectionManager:
         assert instance._connection_info == {}
         assert not ODSConnectionManager.is_connected()
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_connect_success(self, mock_coni_class):
         """Test successful connection to ODS server."""
@@ -57,16 +56,6 @@ class TestODSConnectionManager:
         assert result["connection"]["available_entities"] == ["Measurement", "Unit", "Test"]
         assert ODSConnectionManager.is_connected()
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", False)
-    def test_connect_odsbox_not_available(self):
-        """Test connection when odsbox is not available."""
-        result = ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
-
-        assert result["success"] is False
-        assert result["error"] == "odsbox not installed"
-        assert not ODSConnectionManager.is_connected()
-
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_connect_failure(self, mock_coni_class):
         """Test connection failure."""
@@ -79,7 +68,6 @@ class TestODSConnectionManager:
         assert result["error_type"] == "Exception"
         assert not ODSConnectionManager.is_connected()
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_disconnect_success(self, mock_coni_class):
         """Test successful disconnection."""
@@ -105,7 +93,6 @@ class TestODSConnectionManager:
         assert result["success"] is True
         assert "Disconnected from ODS server" in result["message"]
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_disconnect_failure(self, mock_coni_class):
         """Test disconnect handles close errors gracefully."""
@@ -150,7 +137,6 @@ class TestODSConnectionManager:
         assert ODSConnectionManager.get_model_cache() is mock_cache
         assert ODSConnectionManager.get_model() is mock_model
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_query_success(self, mock_coni_class):
         """Test successful query execution."""
@@ -180,7 +166,6 @@ class TestODSConnectionManager:
         assert "error" in result
         assert "Not connected to ODS server" in result["error"]
 
-    @patch("odsbox_jaquel_mcp.connection.ODSBOX_AVAILABLE", True)
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_query_failure(self, mock_coni_class):
         """Test query execution failure."""

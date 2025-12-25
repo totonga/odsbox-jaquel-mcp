@@ -4,14 +4,9 @@ from __future__ import annotations
 
 from typing import Any
 
-try:
-    from odsbox import ConI
-    from odsbox.model_cache import ModelCache
-    from odsbox.proto import ods
-
-    ODSBOX_AVAILABLE = True
-except ImportError:
-    ODSBOX_AVAILABLE = False
+from odsbox import ConI
+from odsbox.model_cache import ModelCache
+from odsbox.proto import ods
 
 
 class ODSConnectionManager:
@@ -54,9 +49,6 @@ class ODSConnectionManager:
         Returns:
             Connection status dict
         """
-        if not ODSBOX_AVAILABLE:
-            return {"success": False, "error": "odsbox not installed", "hint": "Install odsbox: pip install odsbox"}
-
         try:
             instance = cls.get_instance()
             # Close existing connection if any

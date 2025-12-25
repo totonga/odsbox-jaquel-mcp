@@ -57,6 +57,41 @@ class JaquelValidator:
     ALL_OPERATORS = COMPARISON_OPERATORS | LOGICAL_OPERATORS | AGGREGATE_FUNCTIONS | SPECIAL_KEYS
 
     @staticmethod
+    def _validate_operator_dict(op_dict: dict[str, Any], path: str, errors: list, issues: list) -> None:
+        """Recursively validate an operator dictionary."""
+        for key, value in op_dict.items():
+            if key.startswith("$"):
+                if key not in JaquelValidator.ALL_OPERATORS:
+                    errors.append(f"Unknown operator: {key} at '{path}'")
+                elif key in JaquelValidator.LOGICAL_OPERATORS:
+                    if key == "$not":
+                        if not isinstance(value, dict):
+                            msg = f"{key} must contain expression at '{path}'"
+                            errors.append(msg)
+                        else:
+                            JaquelValidator._validate_operator_dict(value, f"{path}.{key}", errors, issues)
+                    else:  # $and, $or
+                        if not isinstance(value, list):
+                            msg = f"{key} must contain an array at '{path}'"
+                            errors.append(msg)
+                        else:
+                            for i, item in enumerate(value):
+                                if isinstance(item, dict):
+                                    JaquelValidator._validate_operator_dict(item, f"{path}.{key}[{i}]", errors, issues)
+                elif key in JaquelValidator.COMPARISON_OPERATORS:
+                    if key in ["$null", "$notnull"]:
+                        if value != 1:
+                            msg = f"{key} should have value 1 at '{path}'"
+                            issues.append(msg)
+                    elif key in ["$between", "$in", "$notinset"]:
+                        if not isinstance(value, list):
+                            msg = f"{key} requires a list value at '{path}'"
+                            errors.append(msg)
+            elif isinstance(value, dict):
+                # This is a field condition like {"field": {"$eq": "value"}}
+                JaquelValidator._validate_operator_dict(value, f"{path}.{key}", errors, issues)
+
+    @staticmethod
     def validate_query(query: dict[str, Any]) -> dict[str, Any]:
         """Validate a Jaquel query structure.
 
@@ -71,17 +106,20 @@ class JaquelValidator:
         if not isinstance(query, dict):
             return {"valid": False, "errors": ["Query must be a dictionary"], "warnings": [], "suggestions": []}
 
-        # Find entity name (first non-$ key)
-        entity_name = None
-        for key in query.keys():
-            if not key.startswith("$"):
-                entity_name = key
-                break
+        # Find all non-$ keys (entity names)
+        non_dollar_keys = [key for key in query.keys() if not key.startswith("$")]
 
-        if not entity_name:
+        if not non_dollar_keys:
             msg = "Query must contain an entity name (non-$ key)"
             errors.append(msg)
             return {"valid": False, "errors": errors, "warnings": warnings, "suggestions": suggestions}
+
+        if len(non_dollar_keys) > 1:
+            msg = f"Query is only allowed to contain a single non-$ element which is the entity to look for, but found: {', '.join(non_dollar_keys)}"
+            errors.append(msg)
+            return {"valid": False, "errors": errors, "warnings": warnings, "suggestions": suggestions}
+
+        entity_name = non_dollar_keys[0]
 
         # Validate entity query value
         entity_query = query[entity_name]
@@ -91,6 +129,9 @@ class JaquelValidator:
         elif not isinstance(entity_query, (dict, int, str)):
             msg = f"Entity '{entity_name}' query value must be " "dict, int, or string"
             errors.append(msg)
+
+        if isinstance(entity_query, dict):
+            JaquelValidator._validate_operator_dict(entity_query, entity_name, errors, issues=warnings)
 
         # Validate special keys
         for key in query.keys():
@@ -134,57 +175,6 @@ class JaquelValidator:
                         errors.append(msg)
 
         return {"valid": len(errors) == 0, "errors": errors, "warnings": warnings, "suggestions": suggestions}
-
-    @staticmethod
-    def validate_filter_condition(condition: dict[str, Any], field_name: str = "condition") -> dict[str, Any]:
-        """Validate a filter condition (WHERE clause).
-
-        Returns:
-            dict with 'valid', 'errors', 'issues'.
-        """
-        errors = []
-        issues = []
-
-        if not isinstance(condition, dict):
-            return {"valid": False, "errors": ["Condition must be a dictionary"], "issues": []}
-
-        def validate_operator_dict(op_dict: dict[str, Any], path: str = "") -> None:
-            """Recursively validate an operator dictionary."""
-            for key, value in op_dict.items():
-                if key.startswith("$"):
-                    if key not in JaquelValidator.ALL_OPERATORS:
-                        errors.append(f"Unknown operator: {key}{path}")
-                    elif key in JaquelValidator.LOGICAL_OPERATORS:
-                        if key == "$not":
-                            if not isinstance(value, dict):
-                                msg = f"{key} must contain expression{path}"
-                                errors.append(msg)
-                            else:
-                                validate_operator_dict(value, f"{path}.{key}")
-                        else:  # $and, $or
-                            if not isinstance(value, list):
-                                msg = f"{key} must contain an array{path}"
-                                errors.append(msg)
-                            else:
-                                for i, item in enumerate(value):
-                                    if isinstance(item, dict):
-                                        validate_operator_dict(item, f"{path}.{key}[{i}]")
-                    elif key in JaquelValidator.COMPARISON_OPERATORS:
-                        if key in ["$null", "$notnull"]:
-                            if value != 1:
-                                msg = f"{key} should have value 1{path}"
-                                issues.append(msg)
-                        elif key in ["$between", "$in", "$notinset"]:
-                            if not isinstance(value, list):
-                                msg = f"{key} requires a list value{path}"
-                                errors.append(msg)
-                elif isinstance(value, dict):
-                    # This is a field condition like {"field": {"$eq": "value"}}
-                    validate_operator_dict(value, f" for field '{key}'")
-
-        validate_operator_dict(condition)
-
-        return {"valid": len(errors) == 0, "errors": errors, "issues": issues}
 
     @staticmethod
     def get_operator_info(operator: str) -> dict[str, Any]:
@@ -283,72 +273,3 @@ class JaquelValidator:
             return {"error": f"Unknown operator: {operator}"}
 
         return operator_docs[operator]
-
-
-class JaquelOptimizer:
-    """Optimizes and simplifies Jaquel queries."""
-
-    @staticmethod
-    def suggest_simplifications(query: dict[str, Any]) -> list[str]:
-        """Suggest simplifications for a Jaquel query.
-
-        Returns:
-            list of optimization suggestions.
-        """
-        suggestions: list[str] = []
-
-        # Get entity name
-        entity_name = None
-        entity_query = None
-        for key, value in query.items():
-            if not key.startswith("$"):
-                entity_name = key
-                entity_query = value
-                break
-
-        if not entity_name or entity_query is None:
-            return suggestions
-
-        # Suggest ID shorthand
-        if isinstance(entity_query, dict):
-            if len(entity_query) == 1 and "id" in entity_query:
-                id_val = entity_query["id"]
-                if isinstance(id_val, (int, str)):
-                    msg = (
-                        f'Can simplify: {{"id": {id_val}}} → '
-                        f"{id_val}\n"
-                        f'  Shortened: {{"{entity_name}": {id_val}}}'
-                    )
-                    suggestions.append(msg)
-                elif isinstance(id_val, dict) and "$eq" in id_val:
-                    val = id_val["$eq"]
-                    msg = f'Can simplify: {{"id": {{"$eq": {val}}}}} ' f"→ {val}"
-                    suggestions.append(msg)
-
-            # Suggest nested attribute shorthand
-            if "test" in entity_query and isinstance(entity_query["test"], dict):
-                nested = entity_query["test"]
-                if len(nested) == 1 and "id" in nested:
-                    test_id = nested["id"]
-                    msg = f"Can simplify nested: " f'{{"test": {{"id": {test_id}}}}} → ' f'{{"test.id": {test_id}}}'
-                    suggestions.append(msg)
-
-        # Check for empty $attributes
-        if "$attributes" in query and query["$attributes"] == {}:
-            msg = "$attributes is empty - consider removing it " "to get all attributes"
-            suggestions.append(msg)
-
-        # Check for verbose $eq
-        if "$attributes" in query:
-            attrs = query["$attributes"]
-            for attr_name, attr_val in attrs.items():
-                if isinstance(attr_val, dict) and "$eq" in attr_val and len(attr_val) == 1:
-                    val = attr_val["$eq"]
-                    msg = (
-                        f"Can simplify attribute: "
-                        f'{{"{attr_name}": {{"$eq": {val}}}}} → '
-                        f'{{"{attr_name}": {val}}}'
-                    )
-                    suggestions.append(msg)
-
-        return suggestions
