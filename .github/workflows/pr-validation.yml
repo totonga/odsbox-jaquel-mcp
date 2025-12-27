@@ -1,0 +1,85 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  validate-commits:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+    
+    - name: Set up Node.js (for commitlint)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    - name: Install commitlint
+      run: |
+        npm install --global @commitlint/cli @commitlint/config-conventional
+    
+    - name: Validate PR title (as fallback)
+      run: |
+        TITLE="${{ github.event.pull_request.title }}"
+        VALID_PREFIXES=("feat" "fix" "docs" "style" "refactor" "perf" "test" "chore" "ci" "revert")
+        
+        PREFIX=$(echo "$TITLE" | sed -n 's/^\([a-z]*\).*/\1/p')
+        
+        if [[ ! " ${VALID_PREFIXES[@]} " =~ " ${PREFIX} " ]]; then
+          echo "❌ PR title must start with a valid conventional commit prefix!"
+          echo "Valid prefixes: ${VALID_PREFIXES[*]}"
+          echo "Your PR title: $TITLE"
+          echo ""
+          echo "Examples of valid titles:"
+          echo "  - feat: add new data query feature"
+          echo "  - fix: resolve connection timeout issue"
+          echo "  - docs: update API documentation"
+          exit 1
+        fi
+        
+        echo "✅ PR title follows conventional commit format: '$TITLE'"
+    
+    - name: Validate commit messages
+      run: |
+        # Get all commits in the PR
+        commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
+      continue-on-error: true
+
+  lint-python:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v6
+    
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e '.[dev]'
+    
+    - name: Run flake8
+      run: |
+        flake8 odsbox_jaquel_mcp/ tests/ || true
+    
+    - name: Run black check
+      run: |
+        black --check odsbox_jaquel_mcp/ tests/ || true
+    
+    - name: Run isort check
+      run: |
+        isort --check-only odsbox_jaquel_mcp/ tests/ || true
