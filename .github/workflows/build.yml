@@ -78,6 +78,12 @@ jobs:
         git_committer_name: "github-actions"
         git_committer_email: "actions@users.noreply.github.com"
     
+    - name: Rebuild distributions (if released)
+      if: steps.release.outputs.released == 'true'
+      run: |
+        rm -rf dist/
+        python -m build
+    
     - name: Publish to PyPI
       if: steps.release.outputs.released == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
