@@ -5,29 +5,29 @@ The MCP server includes **helpful starting prompts** that guide users on how to 
 ## Available Prompts
 
 ### 📌 Set Up ODS Server Connection
-**Name:** `setup_ods_connection`
+**Name:** `connect_ods_server`
 
 Learn how to establish a connection to an ASAM ODS server for live model inspection, schema validation, and direct query execution.
 
 **Related Tools:**
-- `connect_ods_server` - Establish connection
-- `disconnect_ods_server` - Close connection
-- `get_ods_connection_info` - Check status
-- `get_test_to_measurement_hierarchy` - Explore hierarchy
-- `list_ods_entities` - List entities in model
-- `generate_query_skeleton` - Generate entity-specific starters
-- `execute_query` - Run queries on server
+- `ods_connect` - Establish connection
+- `ods_disconnect` - Close connection
+- `ods_get_connection_info` - Check status
+- `schema_test_to_measurement_hierarchy` - Explore hierarchy
+- `schema_list_entities` - List entities in model
+- `query_generate_skeleton` - Generate entity-specific starters
+- `query_execute` - Run queries on server
 
 ---
 
 ### 📌 Validate a Jaquel Query
-**Name:** `validate_query`
+**Name:** `query_validate`
 
 Learn how to validate a Jaquel query for syntax errors and best practices. Provides detailed feedback on query structure and suggestions for improvement.
 
 **Related Tools:**
-- `validate_query` - Validate entire queries
-- `validate_field_exists` - Check if fields exist
+- `query_validate` - Validate entire queries
+- `schema_field_exists` - Check if fields exist
 
 ---
 
@@ -43,14 +43,14 @@ Discover common Jaquel query patterns and templates for:
 - Aggregations
 
 **Related Tools:**
-- `list_query_patterns` - See all patterns
-- `get_query_pattern` - Get specific pattern
-- `generate_query_skeleton` - Generate entity-specific starters
+- `query_list_patterns` - See all patterns
+- `query_get_pattern` - Get specific pattern
+- `query_generate_skeleton` - Generate entity-specific starters
 
 ---
 
 ### 📌 Bulk Data Access & Submatrix Reading
-**Name:** `bulk_data_access`
+**Name:** `timeseries_access`
 
 Master the **3-step Bulk API workflow** for efficient timeseries data access:
 1. **Locate** - Find the submatrix ID
@@ -58,10 +58,10 @@ Master the **3-step Bulk API workflow** for efficient timeseries data access:
 3. **Process** - Transform and analyze
 
 **Related Tools:**
-- `read_submatrix_data` - Read data with pattern matching
-- `get_submatrix_measurement_quantities` - List available quantities
-- `generate_submatrix_fetcher_script` - Generate reusable scripts
-- `get_bulk_api_help` - Detailed guidance
+- `data_read_submatrix` - Read data with pattern matching
+- `data_get_quantities` - List available quantities
+- `data_generate_fetcher_script` - Generate reusable scripts
+- `help_bulk_api` - Detailed guidance
 
 **Script Types Available:**
 - `basic` - Simple data fetching
@@ -81,10 +81,10 @@ Learn how to analyze and compare measurements across quantities with:
 - Measurement hierarchy exploration
 
 **Related Tools:**
-- `compare_measurements` - Statistical comparison
-- `query_measurement_hierarchy` - Explore structure
-- `generate_measurement_comparison_notebook` - Create notebooks
-- `generate_plotting_code` - Generate visualization code
+- `data_compare_measurements` - Statistical comparison
+- `data_query_hierarchy` - Explore structure
+- `plot_comparison_notebook` - Create notebooks
+- `plot_generate_code` - Generate visualization code
 
 **Hierarchy Operations:**
 - `extract_measurements` - Get from query results
@@ -114,11 +114,11 @@ from odsbox_jaquel_mcp.prompts import PromptLibrary
 prompts = PromptLibrary.get_all_prompts()
 
 # Get specific prompt content
-content = PromptLibrary.get_prompt_content("validate_query", {})
+content = PromptLibrary.get_prompt_content("query_validate", {})
 
 # Get prompt with arguments
 content = PromptLibrary.get_prompt_content(
-    "bulk_data_access",
+    "timeseries_access",
     {"use_case": "batch processing"}
 )
 ```
@@ -132,7 +132,7 @@ Prompts can include optional arguments to customize their content:
 
 ```json
 {
-  "name": "validate_query",
+  "name": "query_validate",
   "title": "Validate a Jaquel Query",
   "arguments": [
     {
@@ -217,4 +217,4 @@ Starting prompts provide an **onboarding experience** for your MCP server, helpi
 - Avoid common mistakes
 - Efficiently accomplish their goals
 
-Enjoy using your enhanced ASAM ODS Jaquel MCP server! 🚀
+Enjoy using ASAM ODS Jaquel MCP server! 🚀

@@ -68,6 +68,6 @@ class TestMCPServerIntegration:
 
         # Should have connection tools
         tool_names = [tool.name for tool in result]
-        assert "connect_ods_server" in tool_names
-        assert "execute_query" in tool_names
-        assert "validate_query" in tool_names
+        assert "ods_connect" in tool_names
+        assert "query_execute" in tool_names
+        assert "query_validate" in tool_names

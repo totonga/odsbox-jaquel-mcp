@@ -1,13 +1,6 @@
 {
 	"servers": {
-		"odsbox-jaquel": {
-			"type": "stdio",
-			"command": "python",
-			"args": [
-				"-m",
-				"odsbox_jaquel_mcp"
-			],
-			"cwd": "."
+		"ods: {"type": "stdio","command": "python","args": ["-m","odsbox_jaquel_mcp"],"cwd": "."
 		}
 	},
 	"inputs": []

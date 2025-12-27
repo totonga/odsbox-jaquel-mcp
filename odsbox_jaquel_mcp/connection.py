@@ -152,7 +152,7 @@ class ODSConnectionManager:
         instance = cls.get_instance()
 
         if not instance._con_i:
-            return {"error": "Not connected to ODS server", "hint": "Use 'connect_ods_server' tool first"}
+            return {"error": "Not connected to ODS server", "hint": "Use 'ods_connect' tool first"}
 
         try:
             result = instance._con_i.query_data(jaquel_query)

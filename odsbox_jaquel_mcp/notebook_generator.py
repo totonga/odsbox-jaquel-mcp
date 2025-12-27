@@ -51,7 +51,7 @@ class NotebookGenerator:
         }
 
     @staticmethod
-    def generate_measurement_comparison_notebook(
+    def plot_comparison_notebook(
         measurement_query_conditions: dict[str, Any],
         measurement_quantity_names: list[str],
         ods_url: str,

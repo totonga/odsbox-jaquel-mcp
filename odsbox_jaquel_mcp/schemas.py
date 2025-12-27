@@ -35,13 +35,13 @@ class SchemaInspector:
         return ODSConnectionManager.get_model_cache()
 
     @classmethod
-    def list_ods_entities(cls) -> dict[str, Any]:
+    def schema_list_entities(cls) -> dict[str, Any]:
         """List all entities in the ODS model."""
         model = cls._get_model()
         if not model:
             return {
                 "error": "Model not loaded",
-                "hint": ("Connect to ODS server using 'connect_ods_server' tool first"),
+                "hint": ("Connect to ODS server using 'ods_connect' tool first"),
             }
 
         entities = []
@@ -65,7 +65,7 @@ class SchemaInspector:
         if not model_cache:
             return {
                 "error": "Model not loaded",
-                "hint": ("Connect to ODS server using 'connect_ods_server' tool first"),
+                "hint": ("Connect to ODS server using 'ods_connect' tool first"),
             }
 
         try:
@@ -131,7 +131,7 @@ class SchemaInspector:
 
 {f"**Available entities**: {', '.join(schema.get('available_entities', []))}" if schema.get('available_entities') else ""}
 
-Use `list_ods_entities` tool to see all available entities.
+Use `schema_list_entities` tool to see all available entities.
 """
 
         entity = schema.get("entity", entity_name)
@@ -170,13 +170,13 @@ Use `list_ods_entities` tool to see all available entities.
         return md
 
     @classmethod
-    def validate_field_exists(cls, entity_name: str, field_name: str) -> dict[str, Any]:
+    def schema_field_exists(cls, entity_name: str, field_name: str) -> dict[str, Any]:
         """Check if field exists in entity."""
         model_cache: ModelCache = cls._get_model_cache()
         if not model_cache:
             return {
                 "error": "Model not loaded",
-                "hint": ("Connect to ODS server using 'connect_ods_server' tool first"),
+                "hint": ("Connect to ODS server using 'ods_connect' tool first"),
             }
 
         try:
@@ -207,7 +207,7 @@ Use `list_ods_entities` tool to see all available entities.
             return {"error": str(e), "entity": entity_name}
 
     @classmethod
-    def get_test_to_measurement_hierarchy(cls) -> dict[str, Any]:
+    def schema_test_to_measurement_hierarchy(cls) -> dict[str, Any]:
         """Get hierarchical entity chain from AoTest to AoMeasurement via 'children' relation.
 
         This traverses the main ASAM ODS hierarchy:
@@ -220,7 +220,7 @@ Use `list_ods_entities` tool to see all available entities.
         if not model_cache:
             return {
                 "error": "Model not loaded",
-                "hint": "Connect to ODS server using 'connect_ods_server' tool first",
+                "hint": "Connect to ODS server using 'ods_connect' tool first",
             }
 
         hierarchy_chain = []

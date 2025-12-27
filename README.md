@@ -26,7 +26,7 @@
 - 📉 Statistical measurement comparison and correlation analysis
 - 🔎 Measurement hierarchy exploration and discovery
 - 💡 Interactive starting prompts for guided workflows
-- 🤖 AI-guided bulk API learning with `get_bulk_api_help` tool
+- 🤖 AI-guided bulk API learning with `help_bulk_api` tool
 - 📝 Comprehensive documentation and test suite
 
 ---
@@ -169,30 +169,30 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 ### Core MCP Tools
 
 #### Connection Management
-- **connect_ods_server** - Establish ODS connection
-- **disconnect_ods_server** - Close ODS connection
-- **get_ods_connection_info** - Get connection status
+- **ods_connect** - Establish ODS connection
+- **ods_disconnect** - Close ODS connection
+- **ods_get_connection_info** - Get connection status
 
 #### Schema Inspection
-- **check_entity_schema** - Get all fields for entity
-- **list_ods_entities** - List all entities with relationships
-- **get_test_to_measurement_hierarchy** - Get ASAM ODS test hierarchy structure
+- **schema_get_entity** - Get all fields for entity
+- **schema_list_entities** - List all entities with relationships
+- **schema_test_to_measurement_hierarchy** - Get ASAM ODS test hierarchy structure
 
 #### Query Building & Validation
-- **validate_query** - Check query syntax and structure
-- **explain_query** - Get plain English explanation
-- **execute_query** - Execute query on ODS server
+- **query_validate** - Check query syntax and structure
+- **query_describe** - Get plain English explanation
+- **query_execute** - Execute query on ODS server
 
 #### Timeseries/Submatrix Data Access
-- **get_submatrix_measurement_quantities** - List measurement quantities for submatrix
-- **read_submatrix_data** - Read timeseries data from submatrix
-- **generate_submatrix_fetcher_script** - Generate Python scripts for data fetching
+- **data_get_quantities** - List measurement quantities for submatrix
+- **data_read_submatrix** - Read timeseries data from submatrix
+- **data_generate_fetcher_script** - Generate Python scripts for data fetching
 
 #### Pattern & Example Library
-- **generate_query_skeleton** - Generate query skeleton (basic query) for entity
-- **get_query_pattern** - Get template for common patterns
-- **list_query_patterns** - List available patterns
-- **get_operator_documentation** - Learn about operators
+- **query_generate_skeleton** - Generate query skeleton (basic query) for entity
+- **query_get_pattern** - Get template for common patterns
+- **query_list_patterns** - List available patterns
+- **query_get_operator_docs** - Learn about operators
 
 
 ### Starting Prompts
@@ -214,10 +214,10 @@ See [`PROMPTS.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/PROMPT
 ```json
 {
   "error": "Model not loaded",
-  "hint": "Connect to ODS server using 'connect_ods_server' tool first"
+  "hint": "Connect to ODS server using 'ods_connect' tool first"
 }
 ```
-Solution: Call connect_ods_server first
+Solution: Call ods_connect first
 
 #### Invalid entity
 ```json

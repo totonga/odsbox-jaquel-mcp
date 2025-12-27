@@ -60,7 +60,7 @@ async def list_tools() -> list[Tool]:
     """List all available MCP tools."""
     return [
         Tool(
-            name="validate_query",
+            name="query_validate",
             title="Validate Jaquel Query",
             description="Validate a Jaquel query structure for syntax errors and best practices",
             inputSchema={
@@ -77,7 +77,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="✅")],
         ),
         Tool(
-            name="get_operator_documentation",
+            name="query_get_operator_docs",
             title="Get Operator Documentation",
             description="Get documentation and examples for a Jaquel operator",
             inputSchema={
@@ -94,7 +94,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📚")],
         ),
         Tool(
-            name="get_query_pattern",
+            name="query_get_pattern",
             title="Get Query Pattern Template",
             description="Get a template for a common Jaquel query pattern",
             inputSchema={
@@ -115,7 +115,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📋")],
         ),
         Tool(
-            name="list_query_patterns",
+            name="query_list_patterns",
             title="List Available Query Patterns",
             description="list all available Jaquel query patterns and templates",
             inputSchema={
@@ -126,7 +126,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📑")],
         ),
         Tool(
-            name="generate_query_skeleton",
+            name="query_generate_skeleton",
             title="Generate Query Skeleton",
             description="Generate a query skeleton for a specific entity and operation",
             inputSchema={
@@ -147,9 +147,9 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🦴")],
         ),
         Tool(
-            name="explain_query",
-            title="Explain Jaquel Query",
-            description="Explain what a Jaquel query does",
+            name="query_describe",
+            title="Describe JAQueL Query",
+            description="Describe what a Jaquel query does",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -164,7 +164,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="💡")],
         ),
         Tool(
-            name="check_entity_schema",
+            name="schema_get_entity",
             title="Check Entity Schema",
             description="Get available fields for an entity from ODS model",
             inputSchema={
@@ -181,7 +181,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📊")],
         ),
         Tool(
-            name="validate_field_exists",
+            name="schema_field_exists",
             title="Validate Field Exists",
             description="Check if a field exists in entity schema",
             inputSchema={
@@ -196,7 +196,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🔍")],
         ),
         Tool(
-            name="connect_ods_server",
+            name="ods_connect",
             title="Connect to ODS Server",
             description="Establish connection to ASAM ODS server for live model inspection",
             inputSchema={
@@ -220,7 +220,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🔌")],
         ),
         Tool(
-            name="disconnect_ods_server",
+            name="ods_disconnect",
             title="Disconnect from ODS Server",
             description="Close connection to ODS server",
             inputSchema={
@@ -231,7 +231,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🔓")],
         ),
         Tool(
-            name="get_ods_connection_info",
+            name="ods_get_connection_info",
             title="Get ODS Connection Information",
             description="Get current ODS connection information",
             inputSchema={
@@ -242,7 +242,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="ℹ️")],
         ),
         Tool(
-            name="list_ods_entities",
+            name="schema_list_entities",
             title="List ODS Entities",
             description="Return a list of existing entities from the ODS server ModelCache",
             inputSchema={
@@ -253,7 +253,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📋")],
         ),
         Tool(
-            name="execute_query",
+            name="query_execute",
             title="Execute ODS Query",
             description="Execute a Jaquel query directly on connected ODS server",
             inputSchema={
@@ -270,7 +270,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="⚙️")],
         ),
         Tool(
-            name="get_submatrix_measurement_quantities",
+            name="data_get_quantities",
             title="Get Submatrix Measurement Quantities",
             description="Get available measurement quantities for a submatrix",
             inputSchema={
@@ -287,7 +287,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📈")],
         ),
         Tool(
-            name="read_submatrix_data",
+            name="data_read_submatrix",
             title="Read Submatrix Data",
             description="Read timeseries data from a submatrix using bulk data access",
             inputSchema={
@@ -321,7 +321,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📖")],
         ),
         Tool(
-            name="generate_submatrix_fetcher_script",
+            name="data_generate_fetcher_script",
             title="Generate Submatrix Fetcher Script",
             description=(
                 "Generate Python scripts for fetching submatrix data " "with error handling and data processing"
@@ -363,7 +363,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🐍")],
         ),
         Tool(
-            name="generate_measurement_comparison_notebook",
+            name="plot_comparison_notebook",
             title="Generate Measurement Comparison Notebook",
             description="Generate a Jupyter notebook for comparing measurements",
             inputSchema={
@@ -421,7 +421,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📓")],
         ),
         Tool(
-            name="generate_plotting_code",
+            name="plot_generate_code",
             title="Generate Plotting Code",
             description="Generate Python plotting code for measurement comparison",
             inputSchema={
@@ -452,7 +452,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="📊")],
         ),
         Tool(
-            name="compare_measurements",
+            name="data_compare_measurements",
             title="Compare Measurements",
             description="Compare measurements across quantities with statistical analysis",
             inputSchema={
@@ -477,7 +477,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🔀")],
         ),
         Tool(
-            name="query_measurement_hierarchy",
+            name="data_query_hierarchy",
             title="Query Measurement Hierarchy",
             description="Query and explore ODS measurement hierarchy and structure",
             inputSchema={
@@ -514,7 +514,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🌳")],
         ),
         Tool(
-            name="get_bulk_api_help",
+            name="help_bulk_api",
             title="Get Bulk API Help",
             description=(
                 "Get help and guidance on using the Bulk API for loading timeseries data. "
@@ -548,7 +548,7 @@ async def list_tools() -> list[Tool]:
                         "type": "string",
                         "description": (
                             "Optional: Get contextual help for a specific tool "
-                            "(e.g., read_submatrix_data, connect_ods_server)"
+                            "(e.g., data_read_submatrix, ods_connect)"
                         ),
                     },
                 },
@@ -558,7 +558,7 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="❓")],
         ),
         Tool(
-            name="get_test_to_measurement_hierarchy",
+            name="schema_test_to_measurement_hierarchy",
             title="Get Test to Measurement Hierarchy",
             description="Get hierarchical entity chain from AoTest to AoMeasurement via 'children' relation",
             inputSchema={
@@ -643,95 +643,95 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     # VALIDATION TOOLS
     # ========================================================================
-    if name == "validate_query":
-        return ValidationToolHandler.validate_query(arguments)
+    if name == "query_validate":
+        return ValidationToolHandler.query_validate(arguments)
 
-    elif name == "get_operator_documentation":
-        return ValidationToolHandler.get_operator_documentation(arguments)
+    elif name == "query_get_operator_docs":
+        return ValidationToolHandler.query_get_operator_docs(arguments)
 
     # ========================================================================
     # QUERY PATTERN TOOLS
     # ========================================================================
-    elif name == "get_query_pattern":
-        return QueryToolHandler.get_query_pattern(arguments)
+    elif name == "query_get_pattern":
+        return QueryToolHandler.query_get_pattern(arguments)
 
-    elif name == "list_query_patterns":
-        return QueryToolHandler.list_query_patterns(arguments)
+    elif name == "query_list_patterns":
+        return QueryToolHandler.query_list_patterns(arguments)
 
-    elif name == "generate_query_skeleton":
-        return QueryToolHandler.generate_query_skeleton(arguments)
+    elif name == "query_generate_skeleton":
+        return QueryToolHandler.query_generate_skeleton(arguments)
 
     # ========================================================================
     # QUERY EXPLANATION & DEBUGGING TOOLS
     # ========================================================================
-    elif name == "explain_query":
-        return QueryToolHandler.explain_query(arguments)
+    elif name == "query_describe":
+        return QueryToolHandler.query_describe(arguments)
 
     # ========================================================================
     # SCHEMA VALIDATION TOOLS
     # ========================================================================
-    elif name == "check_entity_schema":
-        return SchemaToolHandler.check_entity_schema(arguments)
+    elif name == "schema_get_entity":
+        return SchemaToolHandler.schema_get_entity(arguments)
 
-    elif name == "validate_field_exists":
-        return SchemaToolHandler.validate_field_exists(arguments)
+    elif name == "schema_field_exists":
+        return SchemaToolHandler.schema_field_exists(arguments)
 
     # ========================================================================
     # CONNECTION MANAGEMENT TOOLS
     # ========================================================================
-    elif name == "connect_ods_server":
-        return ConnectionToolHandler.connect_ods_server(arguments)
+    elif name == "ods_connect":
+        return ConnectionToolHandler.ods_connect(arguments)
 
-    elif name == "disconnect_ods_server":
-        return ConnectionToolHandler.disconnect_ods_server(arguments)
+    elif name == "ods_disconnect":
+        return ConnectionToolHandler.ods_disconnect(arguments)
 
-    elif name == "get_ods_connection_info":
-        return ConnectionToolHandler.get_ods_connection_info(arguments)
+    elif name == "ods_get_connection_info":
+        return ConnectionToolHandler.ods_get_connection_info(arguments)
 
     # ========================================================================
     # ODS QUERY EXECUTION TOOLS
     # ========================================================================
-    elif name == "list_ods_entities":
-        return SchemaToolHandler.list_ods_entities(arguments)
+    elif name == "schema_list_entities":
+        return SchemaToolHandler.schema_list_entities(arguments)
 
-    elif name == "execute_query":
-        return ConnectionToolHandler.execute_query(arguments)
+    elif name == "query_execute":
+        return ConnectionToolHandler.query_execute(arguments)
 
     # ========================================================================
     # SUBMATRIX DATA ACCESS TOOLS
     # ========================================================================
-    elif name == "get_submatrix_measurement_quantities":
-        return SubmatrixToolHandler.get_submatrix_measurement_quantities(arguments)
+    elif name == "data_get_quantities":
+        return SubmatrixToolHandler.data_get_quantities(arguments)
 
-    elif name == "read_submatrix_data":
-        return SubmatrixToolHandler.read_submatrix_data(arguments)
+    elif name == "data_read_submatrix":
+        return SubmatrixToolHandler.data_read_submatrix(arguments)
 
-    elif name == "generate_submatrix_fetcher_script":
-        return SubmatrixToolHandler.generate_submatrix_fetcher_script(arguments)
+    elif name == "data_generate_fetcher_script":
+        return SubmatrixToolHandler.data_generate_fetcher_script(arguments)
 
     # ========================================================================
     # MEASUREMENT & VISUALIZATION TOOLS
     # ========================================================================
-    elif name == "generate_measurement_comparison_notebook":
-        return MeasurementToolHandler.generate_measurement_comparison_notebook(arguments)
+    elif name == "plot_comparison_notebook":
+        return MeasurementToolHandler.plot_comparison_notebook(arguments)
 
-    elif name == "generate_plotting_code":
-        return MeasurementToolHandler.generate_plotting_code(arguments)
+    elif name == "plot_generate_code":
+        return MeasurementToolHandler.plot_generate_code(arguments)
 
-    elif name == "compare_measurements":
-        return MeasurementToolHandler.compare_measurements(arguments)
+    elif name == "data_compare_measurements":
+        return MeasurementToolHandler.data_compare_measurements(arguments)
 
-    elif name == "query_measurement_hierarchy":
-        return MeasurementToolHandler.query_measurement_hierarchy(arguments)
+    elif name == "data_query_hierarchy":
+        return MeasurementToolHandler.data_query_hierarchy(arguments)
 
     # ========================================================================
     # HELP & DOCUMENTATION TOOLS
     # ========================================================================
-    elif name == "get_bulk_api_help":
-        return HelpToolHandler.get_bulk_api_help(arguments)
+    elif name == "help_bulk_api":
+        return HelpToolHandler.help_bulk_api(arguments)
 
-    elif name == "get_test_to_measurement_hierarchy":
-        return SchemaToolHandler.get_test_to_measurement_hierarchy(arguments)
+    elif name == "schema_test_to_measurement_hierarchy":
+        return SchemaToolHandler.schema_test_to_measurement_hierarchy(arguments)
 
     else:
         return [
@@ -764,95 +764,95 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries. I
 ## 🚀 QUICK START - Choose Your Path
 
 **Path 1: Connect to ODS & Execute Queries**
-- `connect_ods_server` → `list_ods_entities` → `get_test_to_measurement_hierarchy` → `execute_query`
-- Or: `read_submatrix_data` for efficient timeseries access
-- Generate reusable scripts: `generate_submatrix_fetcher_script`
+- `ods_connect` → `schema_list_entities` → `schema_test_to_measurement_hierarchy` → `query_execute`
+- Or: `data_read_submatrix` for efficient timeseries access
+- Generate reusable scripts: `data_generate_fetcher_script`
 
 **Path 2: Analysis & Visualization**
 - Execute queries to get data
-- `compare_measurements` for statistical analysis
-- `generate_measurement_comparison_notebook` for Jupyter notebooks
-- `generate_plotting_code` for matplotlib visualizations
+- `data_compare_measurements` for statistical analysis
+- `plot_comparison_notebook` for Jupyter notebooks
+- `plot_generate_code` for matplotlib visualizations
 
 ## 📚 TOOL CATEGORIES
 
 **Validation & Debugging (7 tools)**
-- Check queries: `validate_query`, `explain_query`
-- Check operators: `get_operator_documentation`
+- Check queries: `query_validate`, `query_describe`
+- Check operators: `query_get_operator_docs`
 
 **Query Building (9 tools)**
-- Skeletons: `generate_query_skeleton`
-- Patterns: `list_query_patterns`, `get_query_pattern`
+- Skeletons: `query_generate_skeleton`
+- Patterns: `query_list_patterns`, `query_get_pattern`
 
 **Schema & Entity Inspection (5 tools)**
-- List entities: `list_ods_entities`, `get_test_to_measurement_hierarchy`
-- Check fields: `check_entity_schema`, `validate_field_exists`
+- List entities: `schema_list_entities`, `schema_test_to_measurement_hierarchy`
+- Check fields: `schema_get_entity`, `schema_field_exists`
 
 **ODS Connection (3 tools)**
-- Manage: `connect_ods_server`, `disconnect_ods_server`, `get_ods_connection_info`
+- Manage: `ods_connect`, `ods_disconnect`, `ods_get_connection_info`
 
 **Data Access (3 tools)**
-- Submatrix: `read_submatrix_data`, `get_submatrix_measurement_quantities`
-- Scripts: `generate_submatrix_fetcher_script`
+- Submatrix: `data_read_submatrix`, `data_get_quantities`
+- Scripts: `data_generate_fetcher_script`
 
 **Analysis & Visualization (4 tools)**
-- Compare: `compare_measurements`, `query_measurement_hierarchy`
-- Notebooks: `generate_measurement_comparison_notebook`
-- Plots: `generate_plotting_code`
+- Compare: `data_compare_measurements`, `data_query_hierarchy`
+- Notebooks: `plot_comparison_notebook`
+- Plots: `plot_generate_code`
 
 **Help & Documentation (1 tool)**
-- `get_bulk_api_help` - Comprehensive Bulk API guidance
+- `help_bulk_api` - Comprehensive Bulk API guidance
 
 ## 💡 COMMON WORKFLOWS
 
 **Workflow 1: Connect to ODS & Execute Query**
-1. `connect_ods_server` - Provide URL, username, password
-2. `list_ods_entities` - See available entities
-3. `get_test_to_measurement_hierarchy` - Explore test to measurement structure
-4. `check_entity_schema` - Inspect entity fields
-5. `execute_query` - Run your query
+1. `ods_connect` - Provide URL, username, password
+2. `schema_list_entities` - See available entities
+3. `schema_test_to_measurement_hierarchy` - Explore test to measurement structure
+4. `schema_get_entity` - Inspect entity fields
+5. `query_execute` - Run your query
 6. Analyze results with measurement tools
 
 **Workflow 2: Read Timeseries Data Efficiently**
-1. `get_submatrix_measurement_quantities` - See available data
-2. `read_submatrix_data` - Fetch with pattern matching
-3. `generate_submatrix_fetcher_script` - Create reusable Python script
+1. `data_get_quantities` - See available data
+2. `data_read_submatrix` - Fetch with pattern matching
+3. `data_generate_fetcher_script` - Create reusable Python script
 4. Use script for automation
 
 **Workflow 3: Compare Multiple Measurements**
 1. Execute query to get measurements
-2. `query_measurement_hierarchy` - Explore structure (extract_measurements, get_unique_quantities)
-3. `generate_measurement_comparison_notebook` - Create Jupyter notebook
-4. `compare_measurements` - Statistical analysis
-5. `generate_plotting_code` - Matplotlib code for custom plots
+2. `data_query_hierarchy` - Explore structure (extract_measurements, get_unique_quantities)
+3. `plot_comparison_notebook` - Create Jupyter notebook
+4. `data_compare_measurements` - Statistical analysis
+5. `plot_generate_code` - Matplotlib code for custom plots
 
 ## ⚠️ KEY TIPS
 
-- **Connection State**: Connection persists across tool calls. Call `disconnect_ods_server` when done.
-- **Bulk API**: For large timeseries data (submatrices), prefer `read_submatrix_data` over `execute_query`
-- **Pattern Matching**: `read_submatrix_data` supports wildcards for efficient data filtering (e.g., "Temp*", "*Speed")
+- **Connection State**: Connection persists across tool calls. Call `ods_disconnect` when done.
+- **Bulk API**: For large timeseries data (submatrices), prefer `data_read_submatrix` over `query_execute`
+- **Pattern Matching**: `data_read_submatrix` supports wildcards for efficient data filtering (e.g., "Temp*", "*Speed")
 
 ## ❓ WHEN TO USE WHICH TOOL
 
 **"How do I...?"**
-- "...start building a query?" → `list_query_patterns`
-- "...validate query?" → `explain_query`
-- "...connect to ODS?" → `connect_ods_server`
-- "...connect to ASAM ODS?" → `connect_ods_server`
-- "...find entities?" → `list_ods_entities`
-- "...understand structure?" → `get_test_to_measurement_hierarchy` or `check_entity_schema`
-- "...read measurement data?" → `read_submatrix_data` or `execute_query`
-- "...create a reusable script?" → `generate_submatrix_fetcher_script`
-- "...compare measurements?" → `compare_measurements` + `generate_measurement_comparison_notebook`
-- "...understand submatrix data access?" → `get_bulk_api_help`
+- "...start building a query?" → `query_list_patterns`
+- "...validate query?" → `query_describe`
+- "...connect to ODS?" → `ods_connect`
+- "...connect to ASAM ODS?" → `ods_connect`
+- "...find entities?" → `schema_list_entities`
+- "...understand structure?" → `schema_test_to_measurement_hierarchy` or `schema_get_entity`
+- "...read measurement data?" → `data_read_submatrix` or `query_execute`
+- "...create a reusable script?" → `data_generate_fetcher_script`
+- "...compare measurements?" → `data_compare_measurements` + `plot_comparison_notebook`
+- "...understand submatrix data access?" → `help_bulk_api`
 
 ## 📖 INTERACTIVE STARTING PROMPTS
 
 Use these for guided workflows:
-- `setup_ods_connection` - Learn connection management
-- `validate_query` - Validate queries step-by-step
+- `connect_ods_server` - Learn connection management
+- `query_validate` - Validate queries step-by-step
 - `explore_patterns` - Discover query patterns
-- `bulk_data_access` - Learn Bulk API 3-step workflow
+- `timeseries_access` - Learn Bulk API 3-step workflow
 - `analyze_measurements` - Statistical analysis & visualization
 
 ## 🔗 DOCUMENTATION & EXAMPLES

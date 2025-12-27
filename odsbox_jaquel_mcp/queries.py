@@ -125,7 +125,7 @@ class JaquelExamples:
         return list(JaquelExamples.BASIC_PATTERNS.keys())
 
     @staticmethod
-    def generate_query_skeleton(entity_name: str, operation: str = "get_all") -> dict[str, Any]:
+    def query_generate_skeleton(entity_name: str, operation: str = "get_all") -> dict[str, Any]:
         """Generate a query skeleton for an entity.
 
         Args:
@@ -261,7 +261,7 @@ class JaquelExplain:
         return "\n".join(sql_lines)
 
     @staticmethod
-    def explain_query(query: dict[str, Any]) -> str:
+    def query_describe(query: dict[str, Any]) -> str:
         """Generate human-readable explanation of a query."""
         if not query:
             return "Empty query"
@@ -306,7 +306,7 @@ class JaquelExplain:
         if select_statement.where:
             explanation_parts.append("Where Clause:")
             for condition in select_statement.where:
-                if condition.condition is not None:
+                if condition.HasField("condition"):
                     c_entity = mc.entity_by_aid(condition.condition.aid)
                     c_attribute = condition.condition.attribute
                     c_operator = ods.SelectStatement.ConditionItem.Condition.OperatorEnum.Name(
@@ -317,7 +317,7 @@ class JaquelExplain:
                     if isinstance(c_value, str):
                         c_value = f"'{c_value}'"
                     explanation_parts.append(f"  - Condition: {c_entity.name}.{c_attribute} {c_operator} {c_value}")
-                if condition.conjunction is not None:
+                if condition.HasField("conjunction"):
                     conjunction = ods.SelectStatement.ConditionItem.ConjuctionEnum.Name(condition.conjunction).replace(
                         "CO_", ""
                     )

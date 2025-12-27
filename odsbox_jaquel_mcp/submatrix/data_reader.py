@@ -87,7 +87,7 @@ class SubmatrixDataReader:
             raise RuntimeError(f"Failed to get measurement quantities: {e}") from e
 
     @staticmethod
-    def read_submatrix_data(
+    def data_read_submatrix(
         submatrix_id: int,
         measurement_quantity_patterns: list[str] | None = None,
         case_insensitive: bool = False,

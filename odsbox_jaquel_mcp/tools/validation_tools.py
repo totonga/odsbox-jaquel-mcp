@@ -14,17 +14,17 @@ class ValidationToolHandler(BaseToolHandler):
     """Handles query validation tools."""
 
     @staticmethod
-    def validate_query(arguments: dict[str, Any]) -> list[TextContent]:
+    def query_validate(arguments: dict[str, Any]) -> list[TextContent]:
         """Validate a Jaquel query structure."""
         try:
             query = arguments.get("query", {})
-            result = JaquelValidator.validate_query(query)
+            result = JaquelValidator.query_validate(query)
             return ValidationToolHandler.json_response(result)
         except Exception as e:
             return ValidationToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def get_operator_documentation(arguments: dict[str, Any]) -> list[TextContent]:
+    def query_get_operator_docs(arguments: dict[str, Any]) -> list[TextContent]:
         """Get documentation for a Jaquel operator."""
         try:
             operator = arguments.get("operator")

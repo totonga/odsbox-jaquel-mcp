@@ -27,7 +27,7 @@ class PromptLibrary:
     def _query_validation_prompt() -> Prompt:
         """Prompt for validating a Jaquel query."""
         return Prompt(
-            name="validate_query",
+            name="query_validate",
             title="Validate a Jaquel Query",
             description=(
                 "Learn how to validate a Jaquel query for syntax errors and best practices. "
@@ -69,7 +69,7 @@ class PromptLibrary:
     def _ods_connection_prompt() -> Prompt:
         """Prompt for connecting to an ODS server."""
         return Prompt(
-            name="setup_ods_connection",
+            name="connect_ods_server",
             title="Set Up ODS Server Connection",
             description=(
                 "Learn how to establish a connection to an ASAM ODS server for live model inspection, "
@@ -89,7 +89,7 @@ class PromptLibrary:
     def _bulk_api_guide_prompt() -> Prompt:
         """Prompt for bulk API and submatrix data access."""
         return Prompt(
-            name="bulk_data_access",
+            name="timeseries_access",
             title="Bulk Data Access & Submatrix Reading",
             description=(
                 "Master the 3-step Bulk API workflow for efficient timeseries data access. "
@@ -143,42 +143,42 @@ class PromptLibrary:
         """
         arguments = arguments or {}
 
-        if prompt_name == "setup_ods_connection":
+        if prompt_name == "connect_ods_server":
             server_details = arguments.get("server_details", "")
             content = (
                 "# Setting Up ODS Server Connection\n\n"
                 "Connect to your ASAM ODS server to enable live data model inspection and query data execution.\n\n"
                 "## Connection Steps:\n"
-                "1. Use `connect_ods_server` with your server URL, username, and password\n"
-                "2. Verify connection with `get_ods_connection_info`\n"
-                "3. Use `get_test_to_measurement_hierarchy` to explore hierarchy entity relations\n"
-                "4. List entities with `list_ods_entities` to explore the entity relationship model\n"
-                "5. Generate query templates with `generate_query_skeleton` for specific entity\n"
-                "6. Execute queries directly with `execute_query`\n\n"
+                "1. Use `ods_connect` with your server URL, username, and password\n"
+                "2. Verify connection with `ods_get_connection_info`\n"
+                "3. Use `schema_test_to_measurement_hierarchy` to explore hierarchy entity relations\n"
+                "4. List entities with `schema_list_entities` to explore the entity relationship model\n"
+                "5. Generate query templates with `query_generate_skeleton` for specific entity\n"
+                "6. Execute queries directly with `query_execute`\n\n"
                 "## Available ODS Connection Tools:\n"
-                "- `connect_ods_server` - Establish connection\n"
-                "- `disconnect_ods_server` - Close connection\n"
-                "- `get_ods_connection_info` - Check current connection status\n"
-                "- `get_test_to_measurement_hierarchy` - Explore test-measurement relationships\n"
-                "- `list_ods_entities` - List available entities in the data model\n"
-                "- `generate_query_skeleton` - Create query templates for entity\n"
-                "- `execute_query` - Run queries on live server\n\n"
+                "- `ods_connect` - Establish connection\n"
+                "- `ods_disconnect` - Close connection\n"
+                "- `ods_get_connection_info` - Check current connection status\n"
+                "- `schema_test_to_measurement_hierarchy` - Explore test-measurement relationships\n"
+                "- `schema_list_entities` - List available entities in the data model\n"
+                "- `query_generate_skeleton` - Create query templates for entity\n"
+                "- `query_execute` - Run queries on live server\n\n"
             )
             if server_details:
                 content += f"**Your server details:** {server_details}\n"
             return content
 
-        elif prompt_name == "validate_query":
+        elif prompt_name == "query_validate":
             query_example = arguments.get("query_example", "")
             content = (
                 "# Validating Jaquel Queries\n\n"
-                "Use the `validate_query` tool to check your Jaquel queries for:\n"
+                "Use the `query_validate` tool to check your Jaquel queries for:\n"
                 "- Syntax errors and structural issues\n"
                 "- Missing required fields\n"
                 "- Invalid operators or comparisons\n"
                 "- Best practice violations\n\n"
                 "## How to use:\n"
-                "1. Call `validate_query` with your query object\n"
+                "1. Call `query_validate` with your query object\n"
                 "2. Review the validation report\n"
                 "3. Use suggestions to fix any issues\n\n"
             )
@@ -201,16 +201,16 @@ class PromptLibrary:
                 "- `outer_join` - Outer join for optional relationships\n"
                 "- `aggregates` - Aggregate functions like count, sum, avg\n\n"
                 "## How to use:\n"
-                "1. Call `list_query_patterns` to see all available patterns\n"
-                "2. Use `get_query_pattern` with a specific pattern name\n"
+                "1. Call `query_list_patterns` to see all available patterns\n"
+                "2. Use `query_get_pattern` with a specific pattern name\n"
                 "3. Adapt the template to your entity and requirements\n"
-                "4. Use `generate_query_skeleton` for entity-specific starting points\n\n"
+                "4. Use `query_generate_skeleton` for entity-specific starting points\n\n"
             )
             if pattern_type:
                 content += f"**Pattern of interest:** {pattern_type}\n"
             return content
 
-        elif prompt_name == "bulk_data_access":
+        elif prompt_name == "timeseries_access":
             use_case = arguments.get("use_case", "")
             content = (
                 "# Bulk API & Submatrix Data Access\n\n"
@@ -220,19 +220,19 @@ class PromptLibrary:
                 "2. **Access** - Use Bulk API to read the data efficiently\n"
                 "3. **Process** - Transform and analyze the data\n\n"
                 "## Key Tools:\n"
-                "- `read_submatrix_data` - Read data with pattern matching\n"
-                "- `get_submatrix_measurement_quantities` - List available quantities\n"
-                "- `generate_submatrix_fetcher_script` - Generate reusable scripts\n"
-                "- `get_bulk_api_help` - Get detailed guidance\n\n"
+                "- `data_read_submatrix` - Read data with pattern matching\n"
+                "- `data_get_quantities` - List available quantities\n"
+                "- `data_generate_fetcher_script` - Generate reusable scripts\n"
+                "- `help_bulk_api` - Get detailed guidance\n\n"
                 "## Script Generation Types:\n"
                 "- `basic` - Simple data fetching\n"
                 "- `advanced` - With analysis and visualization\n"
                 "- `batch` - For processing multiple submatrices\n"
                 "- `analysis` - Statistical analysis included\n\n"
                 "## Quick Start:\n"
-                "1. Get measurement quantities: `get_submatrix_measurement_quantities`\n"
-                "2. Read data: `read_submatrix_data` with patterns\n"
-                "3. Generate script for reuse: `generate_submatrix_fetcher_script`\n\n"
+                "1. Get measurement quantities: `data_get_quantities`\n"
+                "2. Read data: `data_read_submatrix` with patterns\n"
+                "3. Generate script for reuse: `data_generate_fetcher_script`\n\n"
             )
             if use_case:
                 content += f"**Your use case:** {use_case}\n"
@@ -244,10 +244,10 @@ class PromptLibrary:
                 "# Measurement Analysis & Comparison\n\n"
                 "Analyze and compare measurements with statistical analysis and visualization.\n\n"
                 "## Analysis Tools:\n"
-                "- `compare_measurements` - Statistical comparison across quantities\n"
-                "- `query_measurement_hierarchy` - Explore measurement structure\n"
-                "- `generate_measurement_comparison_notebook` - Create Jupyter notebooks\n"
-                "- `generate_plotting_code` - Generate matplotlib visualization code\n\n"
+                "- `data_compare_measurements` - Statistical comparison across quantities\n"
+                "- `data_query_hierarchy` - Explore measurement structure\n"
+                "- `plot_comparison_notebook` - Create Jupyter notebooks\n"
+                "- `plot_generate_code` - Generate matplotlib visualization code\n\n"
                 "## Hierarchy Operations:\n"
                 "- `extract_measurements` - Get measurements from query results\n"
                 "- `build_hierarchy` - Create hierarchical structure\n"
@@ -260,7 +260,7 @@ class PromptLibrary:
                 "- `subplots` - Individual subplot per measurement\n\n"
                 "## Workflow:\n"
                 "1. Execute a query to get measurements\n"
-                "2. Use `query_measurement_hierarchy` to explore\n"
+                "2. Use `data_query_hierarchy` to explore\n"
                 "3. Generate notebooks or plots\n"
                 "4. Perform statistical comparisons\n\n"
             )

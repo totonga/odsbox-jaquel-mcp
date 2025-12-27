@@ -42,9 +42,9 @@ class TestNotebookGenerator(unittest.TestCase):
         self.assertEqual(cell["cell_type"], "code")
         # Description is accepted but not stored in our implementation
 
-    def test_generate_measurement_comparison_notebook_structure(self):
+    def test_plot_comparison_notebook_structure(self):
         """Test notebook structure generation."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={
                 "Name": {"$like": "Profile_*"},
             },
@@ -65,7 +65,7 @@ class TestNotebookGenerator(unittest.TestCase):
 
     def test_notebook_has_required_cells(self):
         """Test that notebook contains all required cell sections."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={"Name": {"$like": "Profile_*"}},
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
@@ -91,7 +91,7 @@ class TestNotebookGenerator(unittest.TestCase):
 
     def test_notebook_includes_ods_credentials(self):
         """Test that notebook includes ODS connection info."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed"],
             ods_url="https://my-ods.example.com/api",
@@ -107,7 +107,7 @@ class TestNotebookGenerator(unittest.TestCase):
     def test_notebook_includes_measurement_quantities(self):
         """Test that notebook includes measurement quantities."""
         quantities = ["Motor_speed", "Torque", "Ambient"]
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=quantities,
             ods_url="http://localhost:8087/api",
@@ -122,7 +122,7 @@ class TestNotebookGenerator(unittest.TestCase):
 
     def test_notebook_scatter_plot_type(self):
         """Test notebook generation with scatter plot type."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
@@ -138,7 +138,7 @@ class TestNotebookGenerator(unittest.TestCase):
 
     def test_notebook_line_plot_type(self):
         """Test notebook generation with line plot type."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
@@ -155,7 +155,7 @@ class TestNotebookGenerator(unittest.TestCase):
     def test_notebook_title_in_cells(self):
         """Test that notebook title appears in first cell."""
         title = "My Custom Measurement Analysis"
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
@@ -169,7 +169,7 @@ class TestNotebookGenerator(unittest.TestCase):
 
     def test_save_notebook_creates_file(self):
         """Test that save_notebook creates a valid .ipynb file."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={"Name": {"$eq": "Test"}},
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
@@ -193,7 +193,7 @@ class TestNotebookGenerator(unittest.TestCase):
 
     def test_save_notebook_preserves_content(self):
         """Test that saved notebook preserves original content."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
@@ -223,7 +223,7 @@ class TestNotebookGenerator(unittest.TestCase):
     def test_notebook_available_quantities_documentation(self):
         """Test that available quantities are included in documentation."""
         available = ["Speed", "Torque", "Ambient", "Coolant"]
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
@@ -239,7 +239,7 @@ class TestNotebookGenerator(unittest.TestCase):
 
     def test_notebook_metadata_complete(self):
         """Test that notebook metadata is complete."""
-        notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+        notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",

@@ -42,10 +42,10 @@ class TestPromptLibrary:
             assert len(content) > 0
             assert prompt.title in content or "#" in content
 
-    def test_validate_query_prompt(self):
-        """Test the validate_query prompt."""
-        content = PromptLibrary.get_prompt_content("validate_query", {})
-        assert "validate_query" in content
+    def test_query_validate_prompt(self):
+        """Test the query_validate prompt."""
+        content = PromptLibrary.get_prompt_content("query_validate", {})
+        assert "query_validate" in content
         assert "syntax" in content.lower()
 
     def test_explore_patterns_prompt(self):
@@ -54,27 +54,27 @@ class TestPromptLibrary:
         assert "get_all_instances" in content
         assert "get_by_id" in content
 
-    def test_setup_ods_connection_prompt(self):
-        """Test the setup_ods_connection prompt."""
-        content = PromptLibrary.get_prompt_content("setup_ods_connection", {})
-        assert "connect_ods_server" in content
+    def test_connect_ods_server_prompt(self):
+        """Test the connect_ods_server prompt."""
+        content = PromptLibrary.get_prompt_content("connect_ods_server", {})
+        assert "ods_connect" in content
         assert "connection" in content.lower()
 
-    def test_bulk_data_access_prompt(self):
-        """Test the bulk_data_access prompt."""
-        content = PromptLibrary.get_prompt_content("bulk_data_access", {})
+    def test_timeseries_access_prompt(self):
+        """Test the timeseries_access prompt."""
+        content = PromptLibrary.get_prompt_content("timeseries_access", {})
         assert "3-step" in content or "Bulk API" in content
-        assert "read_submatrix_data" in content
+        assert "data_read_submatrix" in content
 
     def test_analyze_measurements_prompt(self):
         """Test the analyze_measurements prompt."""
         content = PromptLibrary.get_prompt_content("analyze_measurements", {})
-        assert "compare_measurements" in content or "measurement" in content.lower()
+        assert "data_compare_measurements" in content or "measurement" in content.lower()
 
     def test_prompt_content_with_arguments(self):
         """Test that prompt content respects arguments."""
         args = {"query_example": '{"TestEntity": {}}'}
-        content = PromptLibrary.get_prompt_content("validate_query", args)
+        content = PromptLibrary.get_prompt_content("query_validate", args)
         assert '{"TestEntity": {}}' in content
 
     def test_unknown_prompt_name(self):

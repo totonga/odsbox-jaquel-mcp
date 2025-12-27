@@ -14,7 +14,7 @@ class HelpToolHandler(BaseToolHandler):
     """Handles help and documentation tools."""
 
     @staticmethod
-    def get_bulk_api_help(arguments: dict[str, Any]) -> list[TextContent]:
+    def help_bulk_api(arguments: dict[str, Any]) -> list[TextContent]:
         """Get help on using the Bulk API."""
         try:
             topic = arguments.get("topic", "3-step-rule")

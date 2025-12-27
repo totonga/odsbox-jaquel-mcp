@@ -140,40 +140,40 @@ class TestContextualHelp:
     """Test contextual help based on tool names."""
 
     def test_contextual_help_connect_tool(self):
-        """Test contextual help for connect_ods_server tool."""
-        help_text = BulkAPIGuide.get_contextual_help("connect_ods_server")
+        """Test contextual help for ods_connect tool."""
+        help_text = BulkAPIGuide.get_contextual_help("ods_connect")
         assert help_text is not None
         assert isinstance(help_text, str)
         # Should mention connection or ODS server
         assert "connect" in help_text.lower() or "connection" in help_text.lower()
 
     def test_contextual_help_read_tool(self):
-        """Test contextual help for read_submatrix_data tool."""
-        help_text = BulkAPIGuide.get_contextual_help("read_submatrix_data")
+        """Test contextual help for data_read_submatrix tool."""
+        help_text = BulkAPIGuide.get_contextual_help("data_read_submatrix")
         assert help_text is not None
         assert isinstance(help_text, str)
         # Should mention data reading or loading
         assert "read" in help_text.lower() or "load" in help_text.lower()
 
     def test_contextual_help_quantities_tool(self):
-        """Test contextual help for get_submatrix_measurement_quantities tool."""
-        help_text = BulkAPIGuide.get_contextual_help("get_submatrix_measurement_quantities")
+        """Test contextual help for data_get_quantities tool."""
+        help_text = BulkAPIGuide.get_contextual_help("data_get_quantities")
         assert help_text is not None
         assert isinstance(help_text, str)
         # Should mention columns or availability
         assert "column" in help_text.lower() or "available" in help_text.lower()
 
     def test_contextual_help_script_tool(self):
-        """Test contextual help for generate_submatrix_fetcher_script tool."""
-        help_text = BulkAPIGuide.get_contextual_help("generate_submatrix_fetcher_script")
+        """Test contextual help for data_generate_fetcher_script tool."""
+        help_text = BulkAPIGuide.get_contextual_help("data_generate_fetcher_script")
         assert help_text is not None
         assert isinstance(help_text, str)
         # Should mention script generation
         assert "script" in help_text.lower() or "generate" in help_text.lower()
 
     def test_contextual_help_hierarchy_tool(self):
-        """Test contextual help for query_measurement_hierarchy tool."""
-        help_text = BulkAPIGuide.get_contextual_help("query_measurement_hierarchy")
+        """Test contextual help for data_query_hierarchy tool."""
+        help_text = BulkAPIGuide.get_contextual_help("data_query_hierarchy")
         assert help_text is not None
         assert isinstance(help_text, str)
         # Should mention hierarchy
@@ -314,11 +314,11 @@ class TestContextualHelpMethods:
     def test_get_contextual_help_all_bulk_tools(self):
         """Test contextual help for all bulk-related tools."""
         tools = [
-            "connect_ods_server",
-            "read_submatrix_data",
-            "get_submatrix_measurement_quantities",
-            "generate_submatrix_fetcher_script",
-            "query_measurement_hierarchy",
+            "ods_connect",
+            "data_read_submatrix",
+            "data_get_quantities",
+            "data_generate_fetcher_script",
+            "data_query_hierarchy",
         ]
         for tool in tools:
             help_text = BulkAPIGuide.get_contextual_help(tool)
@@ -327,7 +327,7 @@ class TestContextualHelpMethods:
 
     def test_contextual_help_relevance(self):
         """Test that contextual help is relevant to the tool."""
-        help_text = BulkAPIGuide.get_contextual_help("connect_ods_server")
+        help_text = BulkAPIGuide.get_contextual_help("ods_connect")
         if help_text:
             # Should be related to connection
             keywords = ["connect", "connection", "server", "ods", "url", "credential"]

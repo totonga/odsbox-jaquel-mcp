@@ -18,7 +18,7 @@ class MeasurementToolHandler(BaseToolHandler):
     """Handles measurement analysis and visualization tools."""
 
     @staticmethod
-    def generate_measurement_comparison_notebook(arguments: dict[str, Any]) -> list[TextContent]:
+    def plot_comparison_notebook(arguments: dict[str, Any]) -> list[TextContent]:
         """Generate a Jupyter notebook for comparing measurements."""
         try:
             measurement_query_conditions = arguments.get("measurement_query_conditions", {})
@@ -31,7 +31,7 @@ class MeasurementToolHandler(BaseToolHandler):
             title = arguments.get("title", "Measurement Comparison")
             output_path = arguments.get("output_path", None)
 
-            notebook = NotebookGenerator.generate_measurement_comparison_notebook(
+            notebook = NotebookGenerator.plot_comparison_notebook(
                 measurement_query_conditions=measurement_query_conditions,
                 measurement_quantity_names=measurement_quantity_names,
                 ods_url=ods_url,
@@ -62,7 +62,7 @@ class MeasurementToolHandler(BaseToolHandler):
             return MeasurementToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def generate_plotting_code(arguments: dict[str, Any]) -> list[TextContent]:
+    def plot_generate_code(arguments: dict[str, Any]) -> list[TextContent]:
         """Generate Python plotting code for measurement comparison."""
         try:
             measurement_quantity_names = arguments.get("measurement_quantity_names", [])
@@ -106,7 +106,7 @@ class MeasurementToolHandler(BaseToolHandler):
             return MeasurementToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def compare_measurements(arguments: dict[str, Any]) -> list[TextContent]:
+    def data_compare_measurements(arguments: dict[str, Any]) -> list[TextContent]:
         """Compare measurements across quantities with statistical analysis."""
         try:
             quantity_name = arguments.get("quantity_name", "")
@@ -156,7 +156,7 @@ class MeasurementToolHandler(BaseToolHandler):
             return MeasurementToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def query_measurement_hierarchy(arguments: dict[str, Any]) -> list[TextContent]:
+    def data_query_hierarchy(arguments: dict[str, Any]) -> list[TextContent]:
         """Query and explore ODS measurement hierarchy and structure."""
         try:
             query_result = arguments.get("query_result", {})

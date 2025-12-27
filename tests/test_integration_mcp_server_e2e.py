@@ -48,34 +48,34 @@ async def test_server_has_expected_tools(mcp_client):
     tool_names = {tool["name"] for tool in tools}
 
     # Connection tools
-    assert "connect_ods_server" in tool_names
-    assert "disconnect_ods_server" in tool_names
-    assert "get_ods_connection_info" in tool_names
+    assert "ods_connect" in tool_names
+    assert "ods_disconnect" in tool_names
+    assert "ods_get_connection_info" in tool_names
 
     # Query validation tools
-    assert "validate_query" in tool_names
-    assert "explain_query" in tool_names
+    assert "query_validate" in tool_names
+    assert "query_describe" in tool_names
 
     # Schema tools
-    assert "check_entity_schema" in tool_names
-    assert "validate_field_exists" in tool_names
+    assert "schema_get_entity" in tool_names
+    assert "schema_field_exists" in tool_names
 
     # Data access tools
-    assert "read_submatrix_data" in tool_names
-    assert "execute_query" in tool_names
+    assert "data_read_submatrix" in tool_names
+    assert "query_execute" in tool_names
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_validate_query_tool_via_mcp(mcp_client):
-    """Test validate_query tool through MCP protocol.
+async def test_query_validate_tool_via_mcp(mcp_client):
+    """Test query_validate tool through MCP protocol.
 
     This test verifies:
     - Tool call works through stdio protocol
     - Query validation executes correctly
     - Result is properly formatted
     """
-    result = await mcp_client.call_tool("validate_query", {"query": {"TestEntity": {}}})
+    result = await mcp_client.call_tool("query_validate", {"query": {"TestEntity": {}}})
 
     # Result should be a proper response
     assert result is not None
@@ -115,42 +115,15 @@ async def test_list_resources(mcp_client):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_explain_query_tool_via_mcp(mcp_client):
-    """Test explain_query tool through MCP protocol.
-
-    This test verifies:
-    - Query explanation tool works via MCP
-    - Handles complex query objects
-    - Returns proper explanation
-    """
-    query = {
-        "AoMeasurement": {
-            "name": "Temperature*",
-        },
-        "$attributes": {
-            "id": 1,
-            "name": 1,
-        },
-    }
-
-    result = await mcp_client.call_tool("explain_query", {"query": query})
-
-    assert result is not None
-    # Result should contain explanation content
-    assert "result" in result or "content" in result or "error" not in result
-
-
-@pytest.mark.integration
-@pytest.mark.asyncio
-async def test_get_operator_documentation_via_mcp(mcp_client):
-    """Test get_operator_documentation tool through MCP protocol.
+async def test_query_get_operator_docs_via_mcp(mcp_client):
+    """Test query_get_operator_docs tool through MCP protocol.
 
     This test verifies:
     - Operator documentation tool works
     - Returns proper documentation format
     - Handles various operators
     """
-    result = await mcp_client.call_tool("get_operator_documentation", {"operator": "$eq"})
+    result = await mcp_client.call_tool("query_get_operator_docs", {"operator": "$eq"})
 
     assert result is not None
 
@@ -188,15 +161,15 @@ async def test_multiple_sequential_calls(mcp_client):
     - Results are independent
     """
     # Call 1: Validate query
-    result1 = await mcp_client.call_tool("validate_query", {"query": {"Entity1": {}}})
+    result1 = await mcp_client.call_tool("query_validate", {"query": {"Entity1": {}}})
     assert result1 is not None
 
     # Call 2: Get operator docs
-    result2 = await mcp_client.call_tool("get_operator_documentation", {"operator": "$like"})
+    result2 = await mcp_client.call_tool("query_get_operator_docs", {"operator": "$like"})
     assert result2 is not None
 
     # Call 3: List patterns
-    result3 = await mcp_client.call_tool("list_query_patterns", {})
+    result3 = await mcp_client.call_tool("query_list_patterns", {})
     assert result3 is not None
 
     # All calls should succeed independently
@@ -216,12 +189,12 @@ async def test_connect_to_ods_via_mcp(mcp_client, integration_credentials):
     """Test connecting to ODS server through MCP protocol.
 
     This test verifies:
-    - connect_ods_server tool works via MCP
+    - ods_connect tool works via MCP
     - ODS server responds successfully
     - Connection state is established
     """
     result = await mcp_client.call_tool(
-        "connect_ods_server",
+        "ods_connect",
         {
             "url": integration_credentials["url"],
             "username": integration_credentials["username"],
@@ -247,7 +220,7 @@ async def test_list_entities_via_ods_mcp(mcp_client, integration_credentials):
     """
     # Connect first
     await mcp_client.call_tool(
-        "connect_ods_server",
+        "ods_connect",
         {
             "url": integration_credentials["url"],
             "username": integration_credentials["username"],
@@ -256,7 +229,7 @@ async def test_list_entities_via_ods_mcp(mcp_client, integration_credentials):
     )
 
     # Check connection info
-    result = await mcp_client.call_tool("get_ods_connection_info", {})
+    result = await mcp_client.call_tool("ods_get_connection_info", {})
     assert result is not None
     content = result.get("result", {}).get("content", [])
     assert len(content) > 0, "Should have connection info"
@@ -264,7 +237,7 @@ async def test_list_entities_via_ods_mcp(mcp_client, integration_credentials):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_execute_query_via_ods_mcp(mcp_client, integration_credentials):
+async def test_query_execute_via_ods_mcp(mcp_client, integration_credentials):
     """Test executing a Jaquel query through MCP with ODS connection.
 
     This test verifies:
@@ -274,7 +247,7 @@ async def test_execute_query_via_ods_mcp(mcp_client, integration_credentials):
     """
     # Connect first
     await mcp_client.call_tool(
-        "connect_ods_server",
+        "ods_connect",
         {
             "url": integration_credentials["url"],
             "username": integration_credentials["username"],
@@ -285,7 +258,7 @@ async def test_execute_query_via_ods_mcp(mcp_client, integration_credentials):
     # Execute a simple query
     query = {"AoTest": {"name": "*"}, "$attributes": {"id": 1, "name": 1}, "$options": {"$rowlimit": 5}}
 
-    result = await mcp_client.call_tool("execute_query", {"query": query})
+    result = await mcp_client.call_tool("query_execute", {"query": query})
     assert result is not None
 
     # Should have content with results
@@ -300,7 +273,7 @@ async def test_execute_query_via_ods_mcp(mcp_client, integration_credentials):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_validate_query_with_ods_context(mcp_client, integration_credentials):
+async def test_query_validate_with_ods_context(mcp_client, integration_credentials):
     """Test query validation with active ODS connection.
 
     This test verifies:
@@ -310,7 +283,7 @@ async def test_validate_query_with_ods_context(mcp_client, integration_credentia
     """
     # Connect first
     await mcp_client.call_tool(
-        "connect_ods_server",
+        "ods_connect",
         {
             "url": integration_credentials["url"],
             "username": integration_credentials["username"],
@@ -321,7 +294,7 @@ async def test_validate_query_with_ods_context(mcp_client, integration_credentia
     # Validate a query
     query = {"AoTest": {"name": "Test*"}, "$attributes": {"id": 1, "name": 1}, "$options": {"$rowlimit": 5}}
 
-    result = await mcp_client.call_tool("validate_query", {"query": query})
+    result = await mcp_client.call_tool("query_validate", {"query": query})
     assert result is not None
 
     content = result.get("result", {}).get("content", [])
@@ -344,7 +317,7 @@ async def test_ods_connection_persistence(mcp_client, integration_credentials):
     """
     # Connect
     await mcp_client.call_tool(
-        "connect_ods_server",
+        "ods_connect",
         {
             "url": integration_credentials["url"],
             "username": integration_credentials["username"],
@@ -353,17 +326,17 @@ async def test_ods_connection_persistence(mcp_client, integration_credentials):
     )
 
     # Call 1: Get connection info
-    result1 = await mcp_client.call_tool("get_ods_connection_info", {})
+    result1 = await mcp_client.call_tool("ods_get_connection_info", {})
     assert result1 is not None
 
     # Call 2: Execute query
     query = {"AoTest": {}, "$attributes": {"id": 1}, "$options": {"$rowlimit": 1}}
-    result2 = await mcp_client.call_tool("execute_query", {"query": query})
+    result2 = await mcp_client.call_tool("query_execute", {"query": query})
     assert result2 is not None
 
     # Call 3: Validate different query
     result3 = await mcp_client.call_tool(
-        "validate_query",
+        "query_validate",
         {"query": {"AoMeasurement": {}}},
     )
     assert result3 is not None
@@ -372,10 +345,41 @@ async def test_ods_connection_persistence(mcp_client, integration_credentials):
     assert result1 != result2 != result3
 
     result4 = await mcp_client.call_tool(
-        "explain_query",
-        {"query": query},
+        "query_describe",
+        {
+            "query": {
+                "AoUnit": {
+                    "phys_dimension": {
+                        "$or": [
+                            {
+                                "length_exp": 1,
+                                "mass_exp": 0,
+                                "time_exp": -1,
+                                "current_exp": 0,
+                                "temperature_exp": 0,
+                                "molar_amount_exp": 0,
+                                "luminous_intensity_exp": 0,
+                            },
+                            {
+                                "length_exp": 0,
+                                "mass_exp": 0,
+                                "time_exp": 1,
+                                "current_exp": 0,
+                                "temperature_exp": 0,
+                                "molar_amount_exp": 0,
+                                "luminous_intensity_exp": 0,
+                            },
+                        ]
+                    }
+                },
+                "$attributes": {"name": 1, "factor": 1, "offset": 1, "phys_dimension.name": 1},
+            }
+        },
     )
     assert result4 is not None
-    text: str = result4.get("result", {}).get("content", [])[0].get("text")
-    assert text is not None
+    # Result should contain explanation content
+    content = result4.get("result", {}).get("content", [])
+    assert len(content) > 0, f"Expected content in result, got: {result4}"
+    text = content[0].get("text", "")
+    assert "Textual Representation:" in text
     assert "SQL-like Representation:" in text
