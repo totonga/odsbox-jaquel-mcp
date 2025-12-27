@@ -2,6 +2,19 @@
 
 <!-- version list -->
 
+## v1.1.0 (2025-12-27)
+
+### Continuous Integration
+
+- Migrate pre-commit config to current stage naming conventions
+  ([`01f994c`](https://github.com/totonga/odsbox-jaquel-mcp/commit/01f994cf8c0a73dee3f3de548afcc13ecaa5caa5))
+
+### Features
+
+- Add picture
+  ([`0ff2f29`](https://github.com/totonga/odsbox-jaquel-mcp/commit/0ff2f2996f25541821ac2fa6636e54edb790cb01))
+
+
 ## v1.0.5 (2025-12-27)
 
 ### Bug Fixes
