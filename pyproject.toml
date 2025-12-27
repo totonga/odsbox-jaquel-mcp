@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "odsbox-jaquel-mcp"
 dynamic = ["version"]
-description = "ASAM ODS Jaquel MCP Server - A Model Context Protocol server for creating and validating Jaquel queries"
+description = "ASAM ODS MCP Server - Query and analyze measurement data from ASAM ODS servers in AI agent systems."
 readme = "README.md"
 requires-python = ">=3.13"
 license = {text = "Apache-2.0"}
@@ -76,6 +76,7 @@ Homepage = "https://github.com/totonga/odsbox-jaquel-mcp/tree/main#readme"
 Documentation = "https://github.com/totonga/odsbox-jaquel-mcp/tree/main#readme"
 Repository = "https://github.com/totonga/odsbox-jaquel-mcp"
 Tracker = "https://github.com/totonga/odsbox-jaquel-mcp/issues"
+Changelog = "https://github.com/totonga/odsbox-jaquel-mcp/blob/main/CHANGELOG.md"
 
 [tool.black]
 line-length = 119

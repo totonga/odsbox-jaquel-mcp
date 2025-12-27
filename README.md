@@ -35,6 +35,7 @@
 
 - **Prompts Guide:** See [`PROMPTS.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/PROMPTS.md) for starting prompts documentation
 - **Tool Reference:** See [`TOOLS_GUIDE.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/TOOLS_GUIDE.md)
+- **Changelog:** See [`CHANGELOG.md`](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/CHANGELOG.md)
 
 ## Quick Start
 
