@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.4 (2025-12-27)
+
+### Bug Fixes
+
+- Upload only once
+  ([`c5d5213`](https://github.com/totonga/odsbox-jaquel-mcp/commit/c5d5213ff8ce78270eb2a9cd8491552188cbde6d))
+
+
 ## v1.0.3 (2025-12-27)
 
 ### Bug Fixes
