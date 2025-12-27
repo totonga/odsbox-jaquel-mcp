@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.2 (2025-12-27)
+
+### Bug Fixes
+
+- Updated mcp server.json
+  ([`0bc27dd`](https://github.com/totonga/odsbox-jaquel-mcp/commit/0bc27ddd7d5bb6e2ab649e2f632da8ca0c25b089))
+
+
 ## v1.0.1 (2025-12-27)
 
 ### Bug Fixes
