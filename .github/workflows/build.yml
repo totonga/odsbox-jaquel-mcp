@@ -78,6 +78,12 @@ jobs:
         git_committer_name: "github-actions"
         git_committer_email: "actions@users.noreply.github.com"
     
+    - name: Install build dependencies
+      if: steps.release.outputs.released == 'true'
+      run: |
+        python -m pip install --upgrade pip
+        pip install build wheel setuptools setuptools-scm
+    
     - name: Rebuild distributions (if released)
       if: steps.release.outputs.released == 'true'
       run: |
