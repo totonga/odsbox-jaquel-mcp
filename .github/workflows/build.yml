@@ -90,6 +90,20 @@ jobs:
         rm -rf dist/
         python -m build
     
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v6
+      with:
+        name: python-package-distributions
+        path: dist/
+        retention-days: 90
+    
+    - name: Create Release with artifacts
+      if: steps.release.outputs.released == 'true'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: dist/*
+        token: ${{ github.token }}
+
     - name: Publish to PyPI
       if: steps.release.outputs.released == 'true'
       uses: pypa/gh-action-pypi-publish@release/v1
