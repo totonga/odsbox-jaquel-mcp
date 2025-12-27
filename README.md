@@ -285,6 +285,10 @@ Solution: Check URL, server availability, firewall
 - No credentials stored in config files
 - Use HTTPS with `verify_certificate: true` for production
 
+## Install in VSCode
+
+![install in VSCode](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/docs/install_in_vscode.gif){width=300px}
+
 ## Support
 
 For issues or questions:
