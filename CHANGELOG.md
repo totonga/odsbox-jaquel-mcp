@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.3 (2025-12-27)
+
+### Bug Fixes
+
+- Artifacts are missing at release
+  ([`2f0ad2d`](https://github.com/totonga/odsbox-jaquel-mcp/commit/2f0ad2d0435b008ba414bd9901642b0c90bcb124))
+
+
 ## v1.0.2 (2025-12-27)
 
 ### Bug Fixes
