@@ -1,5 +1,5 @@
 {
-    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+    "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
     "name": "io.github.totonga/odsbox-jaquel-mcp",
     "title": "ASAM ODS odsbox jaquel MCP Server",
     "description": "MCP server for ASAM ODS with Jaquel query tools, connection management, and data access",
