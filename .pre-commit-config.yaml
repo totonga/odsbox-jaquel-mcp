@@ -5,7 +5,6 @@ repos:
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
-        args: [--force-scope]
 
   # Code formatting
   - repo: https://github.com/psf/black
@@ -50,5 +49,5 @@ repos:
       - id: detect-private-key
 
 # Local configuration
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: false

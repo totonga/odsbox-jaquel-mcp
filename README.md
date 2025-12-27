@@ -46,7 +46,7 @@
 The easiest way to use this MCP server is with `uvx`:
 
 ```bash
-uvx odsbox-jaquel-mcp
+uvx odsbox-jaquel-mcp@latest
 ```
 
 This automatically installs and runs the server without managing virtual environments.
@@ -76,7 +76,7 @@ The server runs on stdin/stdout and waits for MCP messages from an MCP client:
 
 ```bash
 # With uvx (auto-installs and runs)
-uvx odsbox-jaquel-mcp
+uvx odsbox-jaquel-mcp@latest
 
 # With pipx (if installed)
 odsbox-jaquel-mcp
@@ -92,9 +92,10 @@ Add to your MCP client configuration (e.g., Claude Desktop, VS Code):
 ```json
 {
   "mcpServers": {
-    "odsbox-jaquel": {
+    "ods-mcp": {
+      "type": "stdio",
       "command": "uvx",
-      "args": ["odsbox-jaquel-mcp"]
+      "args": ["odsbox-jaquel-mcp@latest"]
     }
   }
 }
@@ -105,7 +106,8 @@ Or with pipx:
 ```json
 {
   "mcpServers": {
-    "odsbox-jaquel": {
+    "ods-mcp": {
+      "type": "stdio",
       "command": "odsbox-jaquel-mcp"
     }
   }
@@ -144,7 +146,7 @@ flake8 .
 python -m build
 
 # Test with MCP Inspector
-npx @modelcontextprotocol/inspector uvx odsbox-jaquel-mcp
+npx @modelcontextprotocol/inspector uvx odsbox-jaquel-mcp@latest
 ```
 
 ## Contributing
