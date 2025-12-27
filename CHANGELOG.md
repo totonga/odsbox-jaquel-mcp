@@ -2,6 +2,30 @@
 
 <!-- version list -->
 
+## v1.0.0 (2025-12-27)
+
+### Bug Fixes
+
+- No 1.0 release
+  ([`0f11cbe`](https://github.com/totonga/odsbox-jaquel-mcp/commit/0f11cbec009a8f85b2693fe6a00189632aa6d169))
+
+- Python-semantic-release/python-semantic-release@v10.5.3
+  ([`5060472`](https://github.com/totonga/odsbox-jaquel-mcp/commit/5060472465460ddf6316d505eaaa05d55ddfdd2f))
+
+### Continuous Integration
+
+- Rebuild to have the right version
+  ([`d221e1f`](https://github.com/totonga/odsbox-jaquel-mcp/commit/d221e1febabedaacc05382ea3eeaffddc0268ec7))
+
+### Features
+
+- Add pre-commit hooks and CI validation
+  ([`3a84859`](https://github.com/totonga/odsbox-jaquel-mcp/commit/3a8485969e59a3b2d0ed3472cda11851070066c4))
+
+- Rename tools and some other cleanup
+  ([`cf8f666`](https://github.com/totonga/odsbox-jaquel-mcp/commit/cf8f666726c717cd45a835a7801e5caa52110aab))
+
+
 ## v0.5.0 (2025-12-27)
 
 ### Bug Fixes

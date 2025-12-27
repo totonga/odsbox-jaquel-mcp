@@ -7,12 +7,12 @@
         "url": "https://github.com/totonga/odsbox-jaquel-mcp",
         "source": "github"
     },
-    "version": "0.5.0",
+    "version": "1.0.0",
     "packages": [
         {
             "registryType": "pypi",
             "identifier": "odsbox-jaquel-mcp",
-            "version": "0.5.0",
+            "version": "1.0.0",
             "transport": {
                 "type": "stdio"
             },
