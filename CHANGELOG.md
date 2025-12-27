@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.5 (2025-12-27)
+
+### Bug Fixes
+
+- Added missing tag
+  ([`ffb9af8`](https://github.com/totonga/odsbox-jaquel-mcp/commit/ffb9af8ca88235fa84647b29fd4fd523b85923c7))
+
+
 ## v1.0.4 (2025-12-27)
 
 ### Bug Fixes
