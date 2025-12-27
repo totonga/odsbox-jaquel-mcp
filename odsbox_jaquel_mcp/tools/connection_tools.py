@@ -14,7 +14,7 @@ class ConnectionToolHandler(BaseToolHandler):
     """Handles ODS connection management tools."""
 
     @staticmethod
-    def connect_ods_server(arguments: dict[str, Any]) -> list[TextContent]:
+    def ods_connect(arguments: dict[str, Any]) -> list[TextContent]:
         """Establish connection to ASAM ODS server."""
         try:
             url = arguments.get("url")
@@ -36,7 +36,7 @@ class ConnectionToolHandler(BaseToolHandler):
             return ConnectionToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def disconnect_ods_server(arguments: dict[str, Any]) -> list[TextContent]:
+    def ods_disconnect(arguments: dict[str, Any]) -> list[TextContent]:
         """Close connection to ODS server."""
         try:
             result = ODSConnectionManager.disconnect()
@@ -45,7 +45,7 @@ class ConnectionToolHandler(BaseToolHandler):
             return ConnectionToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def get_ods_connection_info(arguments: dict[str, Any]) -> list[TextContent]:
+    def ods_get_connection_info(arguments: dict[str, Any]) -> list[TextContent]:
         """Get current ODS connection information."""
         try:
             info = ODSConnectionManager.get_connection_info()
@@ -54,7 +54,7 @@ class ConnectionToolHandler(BaseToolHandler):
             return ConnectionToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def execute_query(arguments: dict[str, Any]) -> list[TextContent]:
+    def query_execute(arguments: dict[str, Any]) -> list[TextContent]:
         """Execute a Jaquel query on connected ODS server."""
         try:
             query = arguments.get("query", {})

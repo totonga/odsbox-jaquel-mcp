@@ -6,7 +6,7 @@ via the stdio protocol, allowing end-to-end testing of MCP functionality.
 Usage:
     client = MCPServerTestClient()
     await client.start()
-    result = await client.call_tool("validate_query", {"query": {...}})
+    result = await client.call_tool("query_validate", {"query": {...}})
     await client.stop()
 """
 
@@ -187,7 +187,7 @@ async def example():
             print(f"  - {tool.get('name')}: {tool.get('description')}")
 
         # Call a tool
-        result = await client.call_tool("validate_query", {"query": {"TestEntity": {}}})
+        result = await client.call_tool("query_validate", {"query": {"TestEntity": {}}})
         print(f"\nValidation result: {json.dumps(result, indent=2)}")
 
 

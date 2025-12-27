@@ -70,7 +70,7 @@ class TestResourceLibrary:
         assert isinstance(content, str)
         assert len(content) > 0
         assert "# ODS Connection Setup Guide" in content
-        assert "connect_ods_server" in content
+        assert "ods_connect" in content
         assert "SSL" in content or "Certificate" in content
 
     def test_get_resource_content_ods_workflow_reference(self):

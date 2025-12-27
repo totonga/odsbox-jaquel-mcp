@@ -40,7 +40,7 @@ async def test_example():
         
         # Call a tool
         result = await client.call_tool(
-            "validate_query",
+            "query_validate",
             {"query": {"TestEntity": {}}}
         )
         print(f"Result: {result}")
@@ -58,7 +58,7 @@ async def test_example():
 async def test_with_context_manager():
     async with MCPServerTestClient() as client:
         tools = await client.list_tools()
-        result = await client.call_tool("validate_query", {...})
+        result = await client.call_tool("query_validate", {...})
         resources = await client.list_resources()
 ```
 
@@ -152,10 +152,10 @@ Methods:
 **Tests**:
 - `test_server_lists_tools` - Verify tools/list endpoint
 - `test_server_has_expected_tools` - Check tool availability
-- `test_validate_query_tool_via_mcp` - Test tool execution
+- `test_query_validate_tool_via_mcp` - Test tool execution
 - `test_list_resources` - Verify resources/list endpoint
-- `test_explain_query_tool_via_mcp` - Test query explanation
-- `test_get_operator_documentation_via_mcp` - Test operator docs
+- `test_query_describe_tool_via_mcp` - Test query explanation
+- `test_query_get_operator_docs_via_mcp` - Test operator docs
 - `test_server_handles_invalid_tool_gracefully` - Error handling
 - `test_multiple_sequential_calls` - Connection stability
 
@@ -211,7 +211,7 @@ python tests/mcp_test_client.py
 This will:
 1. Start MCP server
 2. List tools
-3. Call validate_query
+3. Call query_validate
 4. Print results
 
 ### Inspect server response
@@ -223,7 +223,7 @@ import json
 
 async def debug():
     async with MCPServerTestClient() as client:
-        result = await client.call_tool("validate_query", {"query": {"Test": {}}})
+        result = await client.call_tool("query_validate", {"query": {"Test": {}}})
         print(json.dumps(result, indent=2))
 
 asyncio.run(debug())
@@ -258,7 +258,7 @@ client = MCPServerTestClient(timeout=30.0)  # 30 seconds
 
 Tool responses might need special handling:
 ```python
-result = await client.call_tool("validate_query", {...})
+result = await client.call_tool("query_validate", {...})
 
 # Handle different response formats
 if isinstance(result, dict):
@@ -286,7 +286,7 @@ else:
        "AoMeasurement": {"name": "Temperature*"},
        "$attributes": {"id": 1, "name": 1}
    }
-   result = await mcp_client.call_tool("validate_query", {"query": query})
+   result = await mcp_client.call_tool("query_validate", {"query": query})
    ```
 
 3. **Separate concerns**

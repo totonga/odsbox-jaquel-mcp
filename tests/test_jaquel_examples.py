@@ -36,34 +36,34 @@ class TestJaquelExamples:
         assert "outer_join" in patterns
         assert "aggregates" in patterns
 
-    def test_generate_query_skeleton_get_all(self):
+    def test_query_generate_skeleton_get_all(self):
         """Test generating get_all skeleton."""
-        result = JaquelExamples.generate_query_skeleton("TestEntity", "get_all")
+        result = JaquelExamples.query_generate_skeleton("TestEntity", "get_all")
 
         assert "TestEntity" in result
         assert result["TestEntity"] == {}
         assert "$options" in result
         assert result["$options"]["$rowlimit"] == 5
 
-    def test_generate_query_skeleton_get_by_id(self):
+    def test_query_generate_skeleton_get_by_id(self):
         """Test generating get_by_id skeleton."""
-        result = JaquelExamples.generate_query_skeleton("TestEntity", "get_by_id")
+        result = JaquelExamples.query_generate_skeleton("TestEntity", "get_by_id")
 
         assert "TestEntity" in result
         assert result["TestEntity"] == 123
 
-    def test_generate_query_skeleton_get_by_name(self):
+    def test_query_generate_skeleton_get_by_name(self):
         """Test generating get_by_name skeleton."""
-        result = JaquelExamples.generate_query_skeleton("TestEntity", "get_by_name")
+        result = JaquelExamples.query_generate_skeleton("TestEntity", "get_by_name")
 
         assert "TestEntity" in result
         assert result["TestEntity"] == {"name": "SearchName"}
         assert "$attributes" in result
         assert result["$attributes"] == {"*": 1}
 
-    def test_generate_query_skeleton_search_and_select(self):
+    def test_query_generate_skeleton_search_and_select(self):
         """Test generating search_and_select skeleton."""
-        result = JaquelExamples.generate_query_skeleton("TestEntity", "search_and_select")
+        result = JaquelExamples.query_generate_skeleton("TestEntity", "search_and_select")
 
         assert "TestEntity" in result
         assert result["TestEntity"] == {"name": {"$like": "Search*"}}
@@ -72,16 +72,16 @@ class TestJaquelExamples:
         assert "$options" in result
         assert result["$options"]["$rowlimit"] == 10
 
-    def test_generate_query_skeleton_unknown_operation(self):
+    def test_query_generate_skeleton_unknown_operation(self):
         """Test generating skeleton with unknown operation."""
-        result = JaquelExamples.generate_query_skeleton("TestEntity", "unknown_op")
+        result = JaquelExamples.query_generate_skeleton("TestEntity", "unknown_op")
 
         assert "error" in result
         assert "Unknown operation: unknown_op" in result["error"]
 
-    def test_generate_query_skeleton_default_operation(self):
+    def test_query_generate_skeleton_default_operation(self):
         """Test generating skeleton with default operation."""
-        result = JaquelExamples.generate_query_skeleton("TestEntity")
+        result = JaquelExamples.query_generate_skeleton("TestEntity")
 
         assert "TestEntity" in result
         assert result["TestEntity"] == {}

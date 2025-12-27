@@ -53,6 +53,7 @@ dev = [
     "mypy>=1.0",
     "build>=0.8.0",
     "pandas-stubs>=2.3",
+    "python-semantic-release>=9.0",
 ]
 play = [
     "flask",
@@ -104,3 +105,17 @@ markers = [
     "unit: marks tests as unit tests",
 ]
 asyncio_mode = "auto"
+
+[tool.semantic_release]
+version_variables = ["server.json:version"]
+version_pattern = "v{version}"
+build_command = "pip install build && python -m build"
+publish_cmd = "pip install twine && twine upload dist/* --skip-existing"
+changelog_file = "CHANGELOG.md"
+branch = "main"
+hvcs = "github"
+commit_subject = "chore(release): version {version}"
+upload_to_pypi = true
+upload_to_vcs_release = true
+remove_dist = true
+allow_zero_version = false

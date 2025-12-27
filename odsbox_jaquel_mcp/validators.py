@@ -92,7 +92,7 @@ class JaquelValidator:
                 JaquelValidator._validate_operator_dict(value, f"{path}.{key}", errors, issues)
 
     @staticmethod
-    def validate_query(query: dict[str, Any]) -> dict[str, Any]:
+    def query_validate(query: dict[str, Any]) -> dict[str, Any]:
         """Validate a Jaquel query structure.
 
         Returns:

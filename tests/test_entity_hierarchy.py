@@ -6,7 +6,7 @@ from odsbox_jaquel_mcp.schemas import EntityDescriptions, SchemaInspector
 
 
 class TestGetTestToMeasurementHierarchy:
-    """Test cases for get_test_to_measurement_hierarchy."""
+    """Test cases for schema_test_to_measurement_hierarchy."""
 
     def setup_method(self):
         """Reset singleton instance before each test."""
@@ -20,7 +20,7 @@ class TestGetTestToMeasurementHierarchy:
 
     def test_hierarchy_no_connection(self):
         """Test hierarchy retrieval without connection."""
-        result = SchemaInspector.get_test_to_measurement_hierarchy()
+        result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
         assert "error" in result
         assert "Model not loaded" in result["error"]
@@ -66,7 +66,7 @@ class TestGetTestToMeasurementHierarchy:
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
         # Get hierarchy
-        result = SchemaInspector.get_test_to_measurement_hierarchy()
+        result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
         assert result["success"] is True
         assert result["depth"] == 1
@@ -155,7 +155,7 @@ class TestGetTestToMeasurementHierarchy:
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
         # Get hierarchy
-        result = SchemaInspector.get_test_to_measurement_hierarchy()
+        result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
         assert result["success"] is True
         assert result["depth"] == 3
@@ -189,7 +189,7 @@ class TestGetTestToMeasurementHierarchy:
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
         # Get hierarchy
-        result = SchemaInspector.get_test_to_measurement_hierarchy()
+        result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
         assert result["success"] is False
         assert "error" in result

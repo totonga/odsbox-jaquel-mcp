@@ -22,52 +22,52 @@ The MCP Server provides tools for working with ASAM ODS servers using queries an
 ### ODS Connection & Data Access Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| [connect_ods_server](#connect_ods_server) | Connect to ODS server | URL, credentials | Connection status |
-| [disconnect_ods_server](#disconnect_ods_server) | Disconnect from server | None | Status |
-| [get_ods_connection_info](#get_ods_connection_info) | Get connection details | None | Connection info |
+| [ods_connect](#ods_connect) | Connect to ODS server | URL, credentials | Connection status |
+| [ods_disconnect](#ods_disconnect) | Disconnect from server | None | Status |
+| [ods_get_connection_info](#ods_get_connection_info) | Get connection details | None | Connection info |
 
 ### Schema Inspection Tools
-| [list_ods_entities](#list_ods_entities) | List all entities | None | Entity list |
-| [get_test_to_measurement_hierarchy](#get_test_to_measurement_hierarchy) | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
-| [check_entity_schema](#check_entity_schema) | Get entity fields | Entity name | Field list |
-| [validate_field_exists](#validate_field_exists) | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
+| [schema_list_entities](#schema_list_entities) | List all entities | None | Entity list |
+| [schema_test_to_measurement_hierarchy](#schema_test_to_measurement_hierarchy) | Get AoTest->AoMeasurement chain | None | Hierarchy chain |
+| [schema_get_entity](#schema_get_entity) | Get entity fields | Entity name | Field list |
+| [schema_field_exists](#schema_field_exists) | Check field (attribute or relationship) exists | Entity name, field name | Validation result |
 
 ### Jaquel Query Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| [validate_query](#validate_query) | Validate complete query | Query dict | Validation result |
-| [explain_query](#explain_query) | Explain in English | Query dict | Text explanation |
-| [execute_query](#execute_query) | Execute Jaquel query | Query dict | Query results |
-| [get_operator_documentation](#get_operator_documentation) | Get operator docs | Operator name | Documentation |
-| [get_query_pattern](#get_query_pattern) | Get pattern template | Pattern name | Pattern object |
-| [list_query_patterns](#list_query_patterns) | List all patterns | None | List of patterns |
-| [generate_query_skeleton](#generate_query_skeleton) | Create query skeleton | Entity name, operation | Query skeleton |
+| [query_validate](#query_validate) | Validate complete query | Query dict | Validation result |
+| [query_describe](#query_describe) | Explain in English | Query dict | Text explanation |
+| [query_execute](#query_execute) | Execute Jaquel query | Query dict | Query results |
+| [query_get_operator_docs](#query_get_operator_docs) | Get operator docs | Operator name | Documentation |
+| [query_get_pattern](#query_get_pattern) | Get pattern template | Pattern name | Pattern object |
+| [query_list_patterns](#query_list_patterns) | List all patterns | None | List of patterns |
+| [query_generate_skeleton](#query_generate_skeleton) | Create query skeleton | Entity name, operation | Query skeleton |
 
 ### Timeseries/Submatrix Data Access Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| [get_submatrix_measurement_quantities](#get_submatrix_measurement_quantities) | List measurement quantities | Submatrix ID | Quantity list |
-| [read_submatrix_data](#read_submatrix_data) | Read timeseries data | Submatrix ID, patterns | DataFrame data |
-| [generate_submatrix_fetcher_script](#generate_submatrix_fetcher_script) | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
+| [data_get_quantities](#data_get_quantities) | List measurement quantities | Submatrix ID | Quantity list |
+| [data_read_submatrix](#data_read_submatrix) | Read timeseries data | Submatrix ID, patterns | DataFrame data |
+| [data_generate_fetcher_script](#data_generate_fetcher_script) | Generate Python fetcher scripts | Submatrix ID, script type | Python script |
 
 ### Notebook & Visualization Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| [generate_measurement_comparison_notebook](#generate_measurement_comparison_notebook) | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
-| [generate_plotting_code](#generate_plotting_code) | Generate matplotlib code | Quantities, count, plot type | Python code string |
+| [plot_comparison_notebook](#plot_comparison_notebook) | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
+| [plot_generate_code](#plot_generate_code) | Generate matplotlib code | Quantities, count, plot type | Python code string |
 
 ### Measurement Analysis & Query Tools
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
-| [compare_measurements](#compare_measurements) | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
-| [query_measurement_hierarchy](#query_measurement_hierarchy) | Explore measurement structure | Query result, operation | Hierarchy info |
+| [data_compare_measurements](#data_compare_measurements) | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
+| [data_query_hierarchy](#data_query_hierarchy) | Explore measurement structure | Query result, operation | Hierarchy info |
 
 
 ---
 
 ## Tool Reference
 
-### validate_query
+### query_validate
 
 **Purpose**: Validate a complete Jaquel query structure.
 
@@ -106,13 +106,13 @@ query = {
     "$attributes": {"id": 1, "name": 1},
     "$options": {"$rowlimit": 10}
 }
-result = JaquelValidator.validate_query(query)
+result = JaquelValidator.query_validate(query)
 # Returns: {"valid": true, "errors": [], ...}
 ```
 
 ---
 
-### get_operator_documentation
+### query_get_operator_docs
 
 **Purpose**: Get detailed documentation for a Jaquel operator.
 
@@ -152,7 +152,7 @@ doc = JaquelValidator.get_operator_info("$like")
 
 ---
 
-### get_query_pattern
+### query_get_pattern
 
 **Purpose**: Get a template for a common query pattern.
 
@@ -190,7 +190,7 @@ print(pattern["template"])
 
 ---
 
-### list_query_patterns
+### query_list_patterns
 
 **Purpose**: List all available query patterns.
 
@@ -209,7 +209,7 @@ print(pattern["template"])
         "outer_join",
         "aggregates"
     ],
-    "description": "Use get_query_pattern tool with one of these names"
+    "description": "Use query_get_pattern tool with one of these names"
 }
 ```
 
@@ -221,7 +221,7 @@ patterns = JaquelExamples.list_patterns()
 
 ---
 
-### generate_query_skeleton
+### query_generate_skeleton
 
 **Purpose**: Generate a query skeleton for an entity.
 
@@ -251,7 +251,7 @@ patterns = JaquelExamples.list_patterns()
 
 **Example**:
 ```python
-skeleton = JaquelExamples.generate_query_skeleton(
+skeleton = JaquelExamples.query_generate_skeleton(
     "AoMeasurement",
     "search_and_select"
 )
@@ -259,7 +259,7 @@ skeleton = JaquelExamples.generate_query_skeleton(
 
 ---
 
-### explain_query
+### query_describe
 
 **Purpose**: Explain what a query does in plain English.
 
@@ -296,14 +296,14 @@ Ordering:
 **Example**:
 ```python
 query = {...}
-explanation = JaquelExplain.explain_query(query)
+explanation = JaquelExplain.query_describe(query)
 print(explanation)
 ```
 
 ---
 
 
-### check_entity_schema
+### schema_get_entity
 
 **Purpose**: Get available fields for an entity from the ODS model schema.
 
@@ -343,7 +343,7 @@ print(explanation)
 
 **Example**:
 ```python
-schema = check_entity_schema("AoMeasurement")
+schema = schema_get_entity("AoMeasurement")
 print(f"Entity has {schema['field_count']} fields")
 for field in schema['fields']:
     print(f"- {field['name']}: {field['type']}")
@@ -351,7 +351,7 @@ for field in schema['fields']:
 
 ---
 
-### validate_field_exists
+### schema_field_exists
 
 **Purpose**: Check if a field exists in an entity's schema.
 
@@ -380,7 +380,7 @@ for field in schema['fields']:
 
 **Example**:
 ```python
-result = validate_field_exists("AoMeasurement", "measurement_begin")
+result = schema_field_exists("AoMeasurement", "measurement_begin")
 if result["exists"]:
     print(f"Field exists: {result['field_info']['type']}")
 else:
@@ -389,7 +389,7 @@ else:
 
 ---
 
-### connect_ods_server
+### ods_connect
 
 **Purpose**: Establish connection to ASAM ODS server for live model inspection and data access.
 
@@ -419,7 +419,7 @@ else:
 
 ---
 
-### disconnect_ods_server
+### ods_disconnect
 
 **Purpose**: Close connection to ODS server.
 
@@ -438,7 +438,7 @@ else:
 
 ---
 
-### get_ods_connection_info
+### ods_get_connection_info
 
 **Purpose**: Get current ODS connection information.
 
@@ -459,7 +459,7 @@ else:
 
 ---
 
-### list_ods_entities
+### schema_list_entities
 
 **Purpose**: Return a list of existing entities from the ODS server ModelCache with their relationships.
 
@@ -489,7 +489,7 @@ else:
 }
 ```
 
-**Requirements**: Must be connected to ODS server first using `connect_ods_server`.
+**Requirements**: Must be connected to ODS server first using `ods_connect`.
 
 **Entity Information**:
 - `name`: Entity name
@@ -499,7 +499,7 @@ else:
 
 ---
 
-### get_test_to_measurement_hierarchy
+### schema_test_to_measurement_hierarchy
 
 **Purpose**: Get the hierarchical entity chain from AoTest to AoMeasurement via the 'children' relation.
 
@@ -542,7 +542,7 @@ This is the main ASAM ODS hierarchy for accessing test data:
 }
 ```
 
-**Requirements**: Must be connected to ODS server first using `connect_ods_server`.
+**Requirements**: Must be connected to ODS server first using `ods_connect`.
 
 **Usage**: 
 Use this tool to understand the entity hierarchy for building Jaquel queries that navigate from tests down to measurements. This helps LLMs and users understand the proper entity traversal path.
@@ -566,7 +566,7 @@ query = {
 
 ---
 
-### execute_query
+### query_execute
 
 **Purpose**: Execute a Jaquel query directly on connected ODS server.
 
@@ -593,7 +593,7 @@ query = {
 
 ---
 
-### get_submatrix_measurement_quantities
+### data_get_quantities
 
 **Purpose**: Get available measurement quantities for a submatrix.
 
@@ -634,7 +634,7 @@ query = {
 
 ---
 
-### read_submatrix_data
+### data_read_submatrix
 
 **Purpose**: Read timeseries data from a submatrix using bulk data access.
 
@@ -667,7 +667,7 @@ query = {
 
 ---
 
-### generate_submatrix_fetcher_script
+### data_generate_fetcher_script
 
 **Purpose**: Generate Python script examples for fetching submatrix data with proper error handling and data processing.
 
@@ -768,7 +768,7 @@ user_query = {
     "$options": {"$rowlimit": 50}
 }
 
-result = JaquelValidator.validate_query(user_query)
+result = JaquelValidator.query_validate(user_query)
 if result["valid"]:
     print("Query is valid!")
 else:
@@ -788,7 +788,7 @@ print(f"Example: {doc['example']}")
 
 ```python
 # Generate template, then customize it
-skeleton = JaquelExamples.generate_query_skeleton(
+skeleton = JaquelExamples.query_generate_skeleton(
     "AoMeasurement",
     "search_and_select"
 )
@@ -798,7 +798,7 @@ skeleton["AoMeasurement"]["name"] = {"$like": "Profile*"}
 skeleton["$options"]["$rowlimit"] = 5
 
 # Validate
-result = JaquelValidator.validate_query(skeleton)
+result = JaquelValidator.query_validate(skeleton)
 ```
 
 ---
@@ -951,7 +951,7 @@ result = JaquelValidator.validate_query(skeleton)
 ### Always Validate Before Using
 
 ```python
-result = JaquelValidator.validate_query(query)
+result = JaquelValidator.query_validate(query)
 if not result["valid"]:
     raise ValueError(result["errors"])
 ```
@@ -1008,8 +1008,8 @@ query = json.loads(pattern["template"])
 ### Document Complex Conditions
 
 ```python
-# Use explain_query to understand queries
-explanation = JaquelExplain.explain_query(complex_query)
+# Use query_describe to understand queries
+explanation = JaquelExplain.query_describe(complex_query)
 print(explanation)  # Share with team for clarity
 ```
 
@@ -1063,15 +1063,15 @@ print(info["example"])  # See correct usage
 
 ### Debugging Tips
 
-1. **Use validate_query** to find syntax errors
-2. **Use explain_query** to understand complex queries
-3. **Use get_operator_documentation** to verify operator syntax
+1. **Use query_validate** to find syntax errors
+2. **Use query_describe** to understand complex queries
+3. **Use query_get_operator_docs** to verify operator syntax
 
 ---
 
 ## Notebook & Visualization Tools (NEW)
 
-### generate_measurement_comparison_notebook
+### plot_comparison_notebook
 
 **Purpose**: Generate a complete Jupyter notebook for comparing measurements with automatic data retrieval, preparation, and visualization.
 
@@ -1129,7 +1129,7 @@ print(info["example"])  # See correct usage
 
 ---
 
-### generate_plotting_code
+### plot_generate_code
 
 **Purpose**: Generate standalone matplotlib plotting code for measurement visualization.
 
@@ -1174,7 +1174,7 @@ print(info["example"])  # See correct usage
 
 **Example**:
 ```python
-code = generate_plotting_code(
+code = plot_generate_code(
     measurement_quantity_names=["Speed", "Torque"],
     submatrices_count=9,
     plot_type="scatter"
@@ -1198,7 +1198,7 @@ query = {
     "$attributes": {"id": 1, "name": 1}
 }
 
-result = JaquelValidator.validate_query(query)
+result = JaquelValidator.query_validate(query)
 if result["valid"]:
     # Use with odsbox
     with ConI(...) as con_i:
@@ -1211,17 +1211,17 @@ if result["valid"]:
 User: "Help me create a query for all measurements in 2023"
 
 Assistant uses tools:
-1. list_query_patterns() → Shows available patterns
-2. get_query_pattern("time_range") → Gets time range template
-3. generate_query_skeleton("AoMeasurement", "get_all") → Creates skeleton
-4. explain_query() → Explains the result
+1. query_list_patterns() → Shows available patterns
+2. query_get_pattern("time_range") → Gets time range template
+3. query_generate_skeleton("AoMeasurement", "get_all") → Creates skeleton
+4. query_describe() → Explains the result
 ```
 
 ---
 
 ## Measurement Analysis & Query Tools (NEW)
 
-### compare_measurements
+### data_compare_measurements
 
 **Purpose**: Compare measurements across quantities with statistical analysis.
 
@@ -1306,7 +1306,7 @@ Assistant uses tools:
 
 ---
 
-### query_measurement_hierarchy
+### data_query_hierarchy
 
 **Purpose**: Query and explore ODS measurement hierarchy and structure.
 
@@ -1433,7 +1433,7 @@ Assistant uses tools:
 
 ## AI Guidance Tools
 
-### get_bulk_api_help
+### help_bulk_api
 
 **Purpose**: Get contextual help on bulk API usage for loading timeseries data efficiently. This tool provides step-by-step guidance for AI models learning to use the bulk data access system.
 
@@ -1441,7 +1441,7 @@ Assistant uses tools:
 ```json
 {
     "topic": "the_3_step_rule",
-    "tool": "read_submatrix_data"
+    "tool": "data_read_submatrix"
 }
 ```
 
@@ -1449,9 +1449,9 @@ Assistant uses tools:
 ```json
 {
     "topic": "the_3_step_rule",
-    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with connect_ods_server\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with execute_query\n   - Get quantities with get_submatrix_measurement_quantities\n   - Explore hierarchy with query_measurement_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use read_submatrix_data for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
+    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with ods_connect\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with query_execute\n   - Get quantities with data_get_quantities\n   - Explore hierarchy with data_query_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use data_read_submatrix for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
     "examples_count": 3,
-    "related_tools": ["connect_ods_server", "get_submatrix_measurement_quantities", "read_submatrix_data"]
+    "related_tools": ["ods_connect", "data_get_quantities", "data_read_submatrix"]
 }
 ```
 
@@ -1537,62 +1537,62 @@ Assistant uses tools:
   - `"workflow_examples"` - Complete workflows
 
 - `tool` (optional): Get contextual help for a specific tool:
-  - `"connect_ods_server"` - Connection help
-  - `"read_submatrix_data"` - Data loading help
-  - `"get_submatrix_measurement_quantities"` - Discovery help
-  - `"generate_submatrix_fetcher_script"` - Script generation help
-  - `"query_measurement_hierarchy"` - Hierarchy exploration help
+  - `"ods_connect"` - Connection help
+  - `"data_read_submatrix"` - Data loading help
+  - `"data_get_quantities"` - Discovery help
+  - `"data_generate_fetcher_script"` - Script generation help
+  - `"data_query_hierarchy"` - Hierarchy exploration help
 
 **Examples**:
 
 ### Get fundamental workflow:
 ```python
-result = get_bulk_api_help(topic="the_3_step_rule")
+result = help_bulk_api(topic="the_3_step_rule")
 print(result["help_text"])
 # Returns: CONNECT → DISCOVER → LOAD workflow with benefits
 ```
 
 ### Get contextual help for specific tool:
 ```python
-result = get_bulk_api_help(
+result = help_bulk_api(
     topic="quick_start",
-    tool="read_submatrix_data"
+    tool="data_read_submatrix"
 )
 # Returns: Quick start guide with data loading focus
 ```
 
 ### Decide between tools:
 ```python
-result = get_bulk_api_help(topic="decision_tree")
+result = help_bulk_api(topic="decision_tree")
 # Returns: Decision tree for tool selection
 ```
 
 ### Learn error recovery:
 ```python
-result = get_bulk_api_help(topic="error_handling")
+result = help_bulk_api(topic="error_handling")
 # Returns: Common errors and how to fix them
 ```
 
 **Use Cases**:
 
 1. **AI Learning**: When AI model encounters bulk API for first time
-   - Call: `get_bulk_api_help(topic="the_3_step_rule")`
+   - Call: `help_bulk_api(topic="the_3_step_rule")`
    - Then: Follow the 3-step pattern
 
 2. **Tool Selection**: Unsure whether to use bulk or Jaquel
-   - Call: `get_bulk_api_help(topic="decision_tree")`
+   - Call: `help_bulk_api(topic="decision_tree")`
    - Then: Choose appropriate approach
 
 3. **Error Recovery**: Data loading failed
-   - Call: `get_bulk_api_help(topic="error_handling")`
+   - Call: `help_bulk_api(topic="error_handling")`
    - Then: Apply suggested fix
 
 4. **Pattern Matching**: Unsure about column selection
-   - Call: `get_bulk_api_help(topic="column_patterns")`
+   - Call: `help_bulk_api(topic="column_patterns")`
    - Then: Use correct pattern syntax
 
 5. **Performance**: Need to optimize data loading
-   - Call: `get_bulk_api_help(topic="performance_tips")`
+   - Call: `help_bulk_api(topic="performance_tips")`
    - Then: Apply optimization
 
 ---

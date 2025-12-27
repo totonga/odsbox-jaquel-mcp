@@ -17,13 +17,13 @@ class BulkAPIGuide:
 ║                                                                        ║
 ║  Every interaction with bulk API MUST follow these steps IN ORDER:     ║
 ║                                                                        ║
-║  1️⃣  CONNECT: connect_ods_server(url, username, password)             ║
+║  1️⃣  CONNECT: ods_connect(url, username, password)             ║
 ║      └─ Establish connection to ODS server                             ║
 ║                                                                        ║
-║  2️⃣  DISCOVER: get_submatrix_measurement_quantities(submatrix_id)     ║
+║  2️⃣  DISCOVER: data_get_quantities(submatrix_id)     ║
 ║      └─ Find what measurement columns are available                    ║
 ║                                                                        ║
-║  3️⃣  LOAD: read_submatrix_data(submatrix_id, patterns, ...)           ║
+║  3️⃣  LOAD: data_read_submatrix(submatrix_id, patterns, ...)           ║
 ║      └─ Load the actual timeseries data                                ║
 ║                                                                        ║
 ║  NO EXCEPTIONS. ALWAYS ALL 3 STEPS. ALWAYS IN THIS ORDER.              ║
@@ -35,17 +35,17 @@ class BulkAPIGuide:
 QUICK START: Loading Timeseries Data
 
 📋 Workflow:
-  1. connect_ods_server(url, user, pass)
-  2. get_submatrix_measurement_quantities(submatrix_id)
-  3. read_submatrix_data(submatrix_id, patterns=[...])
+  1. ods_connect(url, user, pass)
+  2. data_get_quantities(submatrix_id)
+  3. data_read_submatrix(submatrix_id, patterns=[...])
 
 📊 What to do next:
-  • Export to CSV/JSON/Parquet: generate_submatrix_fetcher_script
-  • Compare multiple submatrices: generate_measurement_comparison_notebook
-  • Analyze data: generate_submatrix_fetcher_script with include_analysis
+  • Export to CSV/JSON/Parquet: data_generate_fetcher_script
+  • Compare multiple submatrices: plot_comparison_notebook
+  • Analyze data: data_generate_fetcher_script with include_analysis
 
 ⚠️  Common mistake: Using Jaquel queries to load data
-    → Use bulk API instead (read_submatrix_data)
+    → Use bulk API instead (data_read_submatrix)
     → Jaquel is for metadata, bulk API is for data values
     """
 
@@ -61,7 +61,7 @@ BULK API vs JAQUEL QUERIES
 │ • Performing analysis, plotting, or statistics              │
 │ • Exporting data to files (CSV, JSON, etc.)                 │
 │                                                             │
-│ TOOLS: read_submatrix_data, generate_*_fetcher_script       │
+│ TOOLS: data_read_submatrix, generate_*_fetcher_script       │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
@@ -72,7 +72,7 @@ BULK API vs JAQUEL QUERIES
 │ • Searching for measurement definitions                     │
 │ • Checking what data exists                                 │
 │                                                             │
-│ TOOLS: execute_query, validate_query             │
+│ TOOLS: query_execute, query_validate             │
 └─────────────────────────────────────────────────────────────┘
 
 KEY DIFFERENCE:
@@ -115,29 +115,29 @@ DECISION TREE: What Should I Do?
 User asks about data-related action:
   │
   ├─ "What data exists?" / "Show measurements" / "What columns?"
-  │  └─> Use: get_submatrix_measurement_quantities
+  │  └─> Use: data_get_quantities
   │      └─> Shows available columns with units and types
   │
   ├─ "Load the data" / "Show me values" / "Get measurements"
-  │  ├─> Connect: connect_ods_server (if needed)
-  │  ├─> Discover: get_submatrix_measurement_quantities
-  │  └─> Load: read_submatrix_data
+  │  ├─> Connect: ods_connect (if needed)
+  │  ├─> Discover: data_get_quantities
+  │  └─> Load: data_read_submatrix
   │
   ├─ "Compare these measurements across runs"
-  │  └─> Use: generate_measurement_comparison_notebook
+  │  └─> Use: plot_comparison_notebook
   │      └─> Creates Jupyter notebook with plots & analysis
   │
   ├─ "Generate a script I can reuse"
-  │  ├─> First understand: get_submatrix_measurement_quantities
-  │  └─> Then: generate_submatrix_fetcher_script (basic/advanced/batch/analysis)
+  │  ├─> First understand: data_get_quantities
+  │  └─> Then: data_generate_fetcher_script (basic/advanced/batch/analysis)
   │
   ├─ "Plot this data" / "Analyze it"
-  │  ├─> Load: read_submatrix_data
-  │  └─> Generate: generate_submatrix_fetcher_script with include_visualization
+  │  ├─> Load: data_read_submatrix
+  │  └─> Generate: data_generate_fetcher_script with include_visualization
   │
   └─ "Help me find data" / "Which submatrix has...?"
      └─> Use: JAQUEL QUERIES (not bulk API)
-         └─> execute_query to explore metadata
+         └─> query_execute to explore metadata
     """
 
     # Common mistakes
@@ -145,19 +145,19 @@ User asks about data-related action:
 TOP 5 AI MISTAKES WITH BULK API
 
 ❌ MISTAKE 1: Using Jaquel to Load Data
-   Example: execute_query to get measurement values
+   Example: query_execute to get measurement values
    Problem: Jaquel queries return metadata, not data
-   Fix: Use read_submatrix_data instead
+   Fix: Use data_read_submatrix instead
 
 ❌ MISTAKE 2: Skipping Discovery
-   Example: Call read_submatrix_data without first checking available columns
+   Example: Call data_read_submatrix without first checking available columns
    Problem: Don't know exact column names or if columns exist
-   Fix: Call get_submatrix_measurement_quantities first
+   Fix: Call data_get_quantities first
 
 ❌ MISTAKE 3: Forgetting to Connect
-   Example: Call read_submatrix_data without connect_ods_server
+   Example: Call data_read_submatrix without ods_connect
    Problem: Error - "Not connected to ODS server"
-   Fix: Always call connect_ods_server FIRST
+   Fix: Always call ods_connect FIRST
 
 ❌ MISTAKE 4: Assuming Column Names
    Example: Use pattern "temp" without checking if "Temperature" exists
@@ -175,7 +175,7 @@ TOP 5 AI MISTAKES WITH BULK API
 STEP-BY-STEP GUIDE: Load Temperature Data from Submatrix 123
 
 STEP 1: CONNECT
-  Tool: connect_ods_server
+  Tool: ods_connect
   Args: {
     "url": "http://localhost:8087/api",
     "username": "your_user",
@@ -184,7 +184,7 @@ STEP 1: CONNECT
   Result: Connection established ✅
 
 STEP 2: DISCOVER
-  Tool: get_submatrix_measurement_quantities
+  Tool: data_get_quantities
   Args: { "submatrix_id": 123 }
   Result: List of available columns:
     - Time (independent, seconds)
@@ -193,7 +193,7 @@ STEP 2: DISCOVER
     - Fuel_Pressure (bar)
 
 STEP 3: LOAD
-  Tool: read_submatrix_data
+  Tool: data_read_submatrix
   Args: {
     "submatrix_id": 123,
     "measurement_quantity_patterns": ["Time", "Engine_Temperature"],
@@ -203,7 +203,7 @@ STEP 3: LOAD
   Result: DataFrame with 5000 rows, 2 columns ✅
 
 OPTIONAL: GENERATE SCRIPT
-  Tool: generate_submatrix_fetcher_script
+  Tool: data_generate_fetcher_script
   Args: {
     "submatrix_id": 123,
     "script_type": "basic",
@@ -226,11 +226,11 @@ Step 1: PREPARE
 
 Step 2: CONNECT
   "First, connecting to the ODS server..."
-  [Call connect_ods_server if needed]
+  [Call ods_connect if needed]
 
 Step 3: DISCOVER
   "Now I'll check what measurement columns are available..."
-  [Call get_submatrix_measurement_quantities]
+  [Call data_get_quantities]
   Show: "I found 4 columns: Time, Temperature, Pressure, Humidity"
 
 Step 4: CONFIRM
@@ -239,7 +239,7 @@ Step 4: CONFIRM
 
 Step 5: LOAD
   "Loading your data..."
-  [Call read_submatrix_data]
+  [Call data_read_submatrix]
 
 Step 6: DELIVER
   "✅ Loaded 5000 rows with 3 columns"
@@ -258,20 +258,20 @@ Step 7: OFFER
 TROUBLESHOOTING BULK API ERRORS
 
 ERROR: "Not connected to ODS server"
-  Cause: connect_ods_server not called
-  Fix: Call connect_ods_server(url, user, pass) first
+  Cause: ods_connect not called
+  Fix: Call ods_connect(url, user, pass) first
   
 ERROR: "No columns matched the pattern"
   Cause: Column names don't match pattern
   Fix: 
-    1. Call get_submatrix_measurement_quantities to see exact names
+    1. Call data_get_quantities to see exact names
     2. Use exact names or correct wildcards
     3. Try case_insensitive: true
 
 ERROR: "Submatrix not found" or invalid ID
   Cause: submatrix_id doesn't exist
   Fix: Use Jaquel query to find valid IDs:
-    execute_query({
+    query_execute({
       "AoSubmatrix": {},
       "$attributes": ["id", "name"]
     })
@@ -300,35 +300,35 @@ COMMON TOOL USAGE PATTERNS
 ┌─────────────────────────────────────────────────────────────┐
 │ Pattern 1: Simple Load                                      │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. connect_ods_server                                       │
-│ 2. get_submatrix_measurement_quantities                     │
-│ 3. read_submatrix_data                                      │
+│ 1. ods_connect                                       │
+│ 2. data_get_quantities                     │
+│ 3. data_read_submatrix                                      │
 │ Result: DataFrame in memory                                 │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
 │ Pattern 2: Load + Export                                    │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. connect_ods_server                                       │
-│ 2. get_submatrix_measurement_quantities                     │
-│ 3. generate_submatrix_fetcher_script (output_format: csv)   │
+│ 1. ods_connect                                       │
+│ 2. data_get_quantities                     │
+│ 3. data_generate_fetcher_script (output_format: csv)   │
 │ Result: Python script that saves to CSV                     │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
 │ Pattern 3: Multi-Submatrix Comparison                       │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. connect_ods_server                                       │
-│ 2. generate_measurement_comparison_notebook                 │
+│ 1. ods_connect                                       │
+│ 2. plot_comparison_notebook                 │
 │ Result: Jupyter notebook with plots & analysis              │
 └─────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────┐
 │ Pattern 4: Load + Analyze                                   │
 ├─────────────────────────────────────────────────────────────┤
-│ 1. connect_ods_server                                       │
-│ 2. get_submatrix_measurement_quantities                     │
-│ 3. generate_submatrix_fetcher_script (script_type: analysis)│
+│ 1. ods_connect                                       │
+│ 2. data_get_quantities                     │
+│ 3. data_generate_fetcher_script (script_type: analysis)│
 │ Result: Python script with plots & statistics               │
 └─────────────────────────────────────────────────────────────┘
     """
@@ -389,13 +389,13 @@ COMMON TOOL USAGE PATTERNS
         """Get contextual help for a specific tool.
 
         Args:
-            current_tool: Name of the tool (e.g., "read_submatrix_data")
+            current_tool: Name of the tool (e.g., "data_read_submatrix")
 
         Returns:
             Contextual help for the tool
         """
         contextual_tips = {
-            "connect_ods_server": """
+            "ods_connect": """
 ⚠️  IMPORTANT: This must be called FIRST in any bulk API workflow.
 
 Steps:
@@ -404,8 +404,8 @@ Steps:
 
 Don't forget: If you need to connect, do it BEFORE discovery!
             """,
-            "get_submatrix_measurement_quantities": """
-📋 This MUST be called before read_submatrix_data.
+            "data_get_quantities": """
+📋 This MUST be called before data_read_submatrix.
 
 It shows:
 - What columns are available
@@ -415,12 +415,12 @@ It shows:
 
 Always check this first - don't assume column names exist!
             """,
-            "read_submatrix_data": """
+            "data_read_submatrix": """
 🎯 This loads the actual data.
 
 Requirements:
-- Must call connect_ods_server first
-- Must call get_submatrix_measurement_quantities first to know column names
+- Must call ods_connect first
+- Must call data_get_quantities first to know column names
 - Use measurement_quantity_patterns to specify which columns
 
 Parameters:
@@ -428,7 +428,7 @@ Parameters:
 - case_insensitive: Set true if unsure about casing
 - set_independent_as_index: Usually true for time series
             """,
-            "generate_submatrix_fetcher_script": """
+            "data_generate_fetcher_script": """
 ♻️  This generates a reusable Python script.
 
 Use this when:
@@ -442,7 +442,7 @@ Script types:
 - "batch": Multiple submatrices
 - "analysis": Plots + statistics
             """,
-            "generate_measurement_comparison_notebook": """
+            "plot_comparison_notebook": """
 📊 This creates a Jupyter notebook for comparing multiple submatrices.
 
 Use this when:

@@ -20,7 +20,7 @@ class SubmatrixToolHandler(BaseToolHandler):
     """Handles submatrix data access tools."""
 
     @staticmethod
-    def get_submatrix_measurement_quantities(arguments: dict[str, Any]) -> list[TextContent]:
+    def data_get_quantities(arguments: dict[str, Any]) -> list[TextContent]:
         """Get available measurement quantities for a submatrix."""
         try:
             submatrix_id_raw = arguments.get("submatrix_id")
@@ -39,7 +39,7 @@ class SubmatrixToolHandler(BaseToolHandler):
             return SubmatrixToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def read_submatrix_data(arguments: dict[str, Any]) -> list[TextContent]:
+    def data_read_submatrix(arguments: dict[str, Any]) -> list[TextContent]:
         """Read timeseries data from a submatrix."""
         try:
             submatrix_id_raw = arguments.get("submatrix_id")
@@ -53,7 +53,7 @@ class SubmatrixToolHandler(BaseToolHandler):
             date_as_timestamp = arguments.get("date_as_timestamp", True)
             set_independent_as_index = arguments.get("set_independent_as_index", True)
 
-            result = SubmatrixDataReader.read_submatrix_data(
+            result = SubmatrixDataReader.data_read_submatrix(
                 submatrix_id=submatrix_id,
                 measurement_quantity_patterns=measurement_quantity_patterns,
                 case_insensitive=case_insensitive,
@@ -65,7 +65,7 @@ class SubmatrixToolHandler(BaseToolHandler):
             return SubmatrixToolHandler.error_response(str(e), type(e).__name__)
 
     @staticmethod
-    def generate_submatrix_fetcher_script(arguments: dict[str, Any]) -> list[TextContent]:
+    def data_generate_fetcher_script(arguments: dict[str, Any]) -> list[TextContent]:
         """Generate Python scripts for fetching submatrix data."""
         try:
             submatrix_id_raw = arguments.get("submatrix_id")

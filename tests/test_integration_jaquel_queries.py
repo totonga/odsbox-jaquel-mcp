@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 from odsbox_jaquel_mcp import ODSConnectionManager
+from odsbox_jaquel_mcp.queries import JaquelExplain
 
 
 @pytest.mark.integration
@@ -142,3 +143,43 @@ class TestJaquelQueryIntegration:
 
         # Should either return error or empty results, not crash
         assert "error" in result or ("success" in result and "result" in result)
+
+    def test_query_explain_functionality(self):
+        """Test the query explain functionality.
+
+        This test verifies:
+        - Query explanations are returned correctly
+        - Explanation content is meaningful
+        """
+        query = {
+            "AoUnit": {
+                "phys_dimension": {
+                    "$or": [
+                        {
+                            "length_exp": 1,
+                            "mass_exp": 0,
+                            "time_exp": -1,
+                            "current_exp": 0,
+                            "temperature_exp": 0,
+                            "molar_amount_exp": 0,
+                            "luminous_intensity_exp": 0,
+                        },
+                        {
+                            "length_exp": 0,
+                            "mass_exp": 0,
+                            "time_exp": 1,
+                            "current_exp": 0,
+                            "temperature_exp": 0,
+                            "molar_amount_exp": 0,
+                            "luminous_intensity_exp": 0,
+                        },
+                    ]
+                }
+            },
+            "$attributes": {"name": 1, "factor": 1, "offset": 1, "phys_dimension.name": 1},
+        }
+        result = JaquelExplain.query_describe(query)
+
+        assert result is not None
+        assert "Textual Representation:" in result
+        assert "SQL-like Representation:" in result

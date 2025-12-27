@@ -102,8 +102,8 @@ class ResourceLibrary:
 **Error retrieving schema**: {str(e)}
 
 Ensure:
-1. You are connected to an ODS server via `connect_ods_server` tool
-2. The entity name is correct (try `list_ods_entities` to see available entities)
+1. You are connected to an ODS server via `ods_connect` tool
+2. The entity name is correct (try `schema_list_entities` to see available entities)
 3. The entity exists in the ODS model
 """
 
@@ -117,7 +117,7 @@ Ensure:
 
 ## Step 1: Connect to ODS Server
 
-Use the `connect_ods_server` tool with:
+Use the `ods_connect` tool with:
 - **url**: ODS REST API endpoint (e.g., `http://localhost:8087/api`)
 - **username**: Authentication username
 - **password**: Authentication password
@@ -133,7 +133,7 @@ Verify SSL: true
 
 ## Step 2: Verify Connection
 
-After connecting, use `get_ods_connection_info` to verify:
+After connecting, use `ods_get_connection_info` to verify:
 - Connection status (connected/disconnected)
 - Server URL and version
 - Current model information
@@ -142,15 +142,15 @@ After connecting, use `get_ods_connection_info` to verify:
 
 Once connected, explore what's available:
 
-1. **List all entities**: Use `list_ods_entities` to see available entity types
-2. **Get hierarchy**: Use `get_test_to_measurement_hierarchy` to understand relationships
-3. **Inspect entity schema**: Use `check_entity_schema` to see fields of specific entities
+1. **List all entities**: Use `schema_list_entities` to see available entity types
+2. **Get hierarchy**: Use `schema_test_to_measurement_hierarchy` to understand relationships
+3. **Inspect entity schema**: Use `schema_get_entity` to see fields of specific entities
 
 ## Connection State Management
 
 - **Persistent**: Connection remains active across multiple tool calls
 - **One at a time**: Only one connection can be active
-- **Cleanup**: Always call `disconnect_ods_server` when done to free resources
+- **Cleanup**: Always call `ods_disconnect` when done to free resources
 
 ## SSL Certificate Handling
 
@@ -161,8 +161,8 @@ Once connected, explore what's available:
 ## Connection Timeout & Reconnection
 
 - Connections may timeout after inactivity
-- If tools fail with connection errors, reconnect using `connect_ods_server`
-- Check status with `get_ods_connection_info` before operations
+- If tools fail with connection errors, reconnect using `ods_connect`
+- Check status with `ods_get_connection_info` before operations
 """
 
         elif uri == "file:///odsbox/ods-workflow-reference":
@@ -172,11 +172,11 @@ Once connected, explore what's available:
 
 **Goal**: Understand what data is available on an ODS server
 
-1. `connect_ods_server` - Connect with credentials
-2. `get_ods_connection_info` - Verify connection
-3. `list_ods_entities` - See all available entity types
-4. `get_test_to_measurement_hierarchy` - Understand entity relationships
-5. `check_entity_schema` - Inspect fields of a specific entity
+1. `ods_connect` - Connect with credentials
+2. `ods_get_connection_info` - Verify connection
+3. `schema_list_entities` - See all available entity types
+4. `schema_test_to_measurement_hierarchy` - Understand entity relationships
+5. `schema_get_entity` - Inspect fields of a specific entity
 
 **Output**: You now understand the server's data structure
 
@@ -184,11 +184,11 @@ Once connected, explore what's available:
 
 **Goal**: Extract data from ODS server
 
-1. `list_query_patterns` - See available query templates
-2. `get_query_pattern` - Get specific pattern
-3. `explain_query` - Understand query syntax
-4. `validate_query` - Check query syntax
-6. `execute_query` - Run query and get results
+1. `query_list_patterns` - See available query templates
+2. `query_get_pattern` - Get specific pattern
+3. `query_describe` - Understand query syntax
+4. `query_validate` - Check query syntax
+6. `query_execute` - Run query and get results
 
 **Output**: Query results containing measurements and metadata
 
@@ -196,10 +196,10 @@ Once connected, explore what's available:
 
 **Goal**: Access large measurement datasets efficiently
 
-1. `execute_query` - Get measurements with submatrix IDs
-2. `get_submatrix_measurement_quantities` - See available time series
-3. `read_submatrix_data` - Fetch data with optional pattern matching
-4. `generate_submatrix_fetcher_script` - Create reusable Python script
+1. `query_execute` - Get measurements with submatrix IDs
+2. `data_get_quantities` - See available time series
+3. `data_read_submatrix` - Fetch data with optional pattern matching
+4. `data_generate_fetcher_script` - Create reusable Python script
 
 **Output**: Timeseries data in desired format (CSV, JSON, etc.)
 
@@ -207,13 +207,13 @@ Once connected, explore what's available:
 
 **Goal**: Compare measurements across different runs/conditions
 
-1. `execute_query` - Get measurements
-2. `query_measurement_hierarchy` - Explore measurement structure
+1. `query_execute` - Get measurements
+2. `data_query_hierarchy` - Explore measurement structure
    - extract_measurements: Get all measurements
    - get_unique_quantities: See available quantities
    - get_unique_tests: See all test types
-3. `compare_measurements` - Statistical analysis
-4. `generate_measurement_comparison_notebook` - Create Jupyter notebook
+3. `data_compare_measurements` - Statistical analysis
+4. `plot_comparison_notebook` - Create Jupyter notebook
 
 **Output**: Analysis report with statistics and visualizations
 
@@ -221,8 +221,8 @@ Once connected, explore what's available:
 
 **Goal**: Create reusable Python scripts for automation
 
-1. `read_submatrix_data` - Test data access
-2. `generate_submatrix_fetcher_script` - Generate production script
+1. `data_read_submatrix` - Test data access
+2. `data_generate_fetcher_script` - Generate production script
 3. Choose script type:
    - `basic`: Simple data fetching
    - `advanced`: With analysis and visualization
@@ -276,22 +276,22 @@ AoTest (Test/Measurement Run)
 
 ### Finding Tests
 ```
-Use execute_query with:
+Use query_execute with:
 - Entity: AoTest
 - Optional filters: name
 ```
 
 ### Finding Measurements
 ```
-Use get_test_to_measurement_hierarchy to understand relationships
+Use schema_test_to_measurement_hierarchy to understand relationships
 Then navigate: AoTest -> AoSubTest -> AoMeasurement -> AoMeasurementQuantity
 ```
 
 ### Entity Field Names
-Use `check_entity_schema` to see all available fields:
+Use `schema_get_entity` to see all available fields:
 - Returns field names, types, and descriptions
 - Use for building accurate filter conditions
-- Validate field existence with `validate_field_exists`
+- Validate field existence with `schema_field_exists`
 """
 
         elif uri == "file:///odsbox/query-execution-patterns":
@@ -308,7 +308,7 @@ Use `check_entity_schema` to see all available fields:
 }
 ```
 
-**Use**: `execute_query` directly
+**Use**: `query_execute` directly
 **Performance**: Good for small result sets, may be slow for thousands of records
 
 ## Pattern 2: Filtered Query
@@ -325,17 +325,17 @@ Use `check_entity_schema` to see all available fields:
 ```
 
 **Use**:
-1. Validate with `validate_query`
-2. Execute with `execute_query`
+1. Validate with `query_validate`
+2. Execute with `query_execute`
 
 ## Pattern 3: Bulk Data Access (Timeseries)
 
 **When**: You need large timeseries datasets
 
 **Steps**:
-1. First, get measurement IDs: `execute_query`
+1. First, get measurement IDs: `query_execute`
 2. Extract submatrix IDs from results
-3. Use `read_submatrix_data` instead of fetching individual points
+3. Use `data_read_submatrix` instead of fetching individual points
 
 **Why**: Bulk API is optimized for large datasets, much faster
 
@@ -359,8 +359,8 @@ Use `check_entity_schema` to see all available fields:
 ```
 
 **Use**: 
-1. Validate structure: `validate_query`
-2. Execute: `execute_query`
+1. Validate structure: `query_validate`
+2. Execute: `query_execute`
 
 ## Pattern 5: Time Range Query
 
@@ -381,8 +381,8 @@ Use `check_entity_schema` to see all available fields:
 ## Performance Tips
 
 1. **Use Filters Early**: Filter at entity level, not after fetching
-2. **Prefer Bulk API**: For timeseries data, use `read_submatrix_data`
-3. **Pattern Matching**: In `read_submatrix_data`, use patterns to limit columns
+2. **Prefer Bulk API**: For timeseries data, use `data_read_submatrix`
+3. **Pattern Matching**: In `data_read_submatrix`, use patterns to limit columns
 4. **Pagination**: For large result sets, implement server-side pagination
 """
 
@@ -405,7 +405,7 @@ Use `check_entity_schema` to see all available fields:
 **Test**:
 ```
 Connect to ODS server
-Check status with get_ods_connection_info
+Check status with ods_get_connection_info
 ```
 
 ### Issue 2: Authentication Failed
@@ -420,7 +420,7 @@ Check status with get_ods_connection_info
 
 **Test**:
 ```
-Try credentials with: connect_ods_server
+Try credentials with: ods_connect
 If failed, check ODS admin logs
 ```
 
@@ -446,13 +446,13 @@ If works, issue is certificate-related
 
 **Solutions**:
 1. Check network connectivity
-2. Try reconnecting: `disconnect_ods_server` then `connect_ods_server`
+2. Try reconnecting: `ods_disconnect` then `ods_connect`
 3. Check ODS server resource usage
 4. Try connecting from closer network
 
 **Test**:
 ```
-get_ods_connection_info
+ods_get_connection_info
 If no response, connection is dead
 ```
 
@@ -463,13 +463,13 @@ If no response, connection is dead
 **Cause**: Wrong entity name or entity doesn't exist
 
 **Solutions**:
-1. List entities: `list_ods_entities`
+1. List entities: `schema_list_entities`
 2. Check exact entity name (case-sensitive)
 3. Verify entity is accessible
 
 **Test**:
 ```
-list_ods_entities
+schema_list_entities
 Check if your entity is in the list
 ```
 
@@ -481,7 +481,7 @@ Check if your entity is in the list
 
 **Solutions**:
 1. Verify submatrix ID from query results
-2. Check measurement has data: `get_submatrix_measurement_quantities submatrix_id`
+2. Check measurement has data: `data_get_quantities submatrix_id`
 3. Try different measurement
 
 ### Issue: Pattern Matching Returns Empty
@@ -489,28 +489,28 @@ Check if your entity is in the list
 **Cause**: Quantity names don't match pattern
 
 **Solutions**:
-1. List quantities: `get_submatrix_measurement_quantities submatrix_id`
+1. List quantities: `data_get_quantities submatrix_id`
 2. Check exact quantity names
 3. Adjust pattern (e.g., "Temp*" vs "temp*")
-4. Use case-insensitive flag in `read_submatrix_data`
+4. Use case-insensitive flag in `data_read_submatrix`
 
 ## Resource Cleanup
 
 ### Always Disconnect
 ```
 When done with operations:
-disconnect_ods_server
+ods_disconnect
 ```
 
 ### Check Connection State
 ```
 Before running queries:
-get_ods_connection_info
+ods_get_connection_info
 ```
 
 ## Getting Help
 
-- Use `get_bulk_api_help` for data access questions
+- Use `help_bulk_api` for data access questions
 - Review TOOLS_GUIDE.md for detailed tool documentation
 """
 
