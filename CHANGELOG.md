@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.0.1 (2025-12-27)
+
+### Bug Fixes
+
+- Ensure build dependencies are installed before rebuilding distributions
+  ([`61941ba`](https://github.com/totonga/odsbox-jaquel-mcp/commit/61941baafb0fb9d2c01905d1620f8cc7fdae4f5e))
+
+
 ## v1.0.0 (2025-12-27)
 
 ### Bug Fixes
