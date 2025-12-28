@@ -13,8 +13,8 @@
         "ms-python.black-formatter",
         "charliermarsh.ruff",
         "ms-vscode.makefile-tools",
-        "GitHub.copilot",
-        "GitHub.copilot-chat",
+        "github.copilot",
+        "github.copilot-chat",
         "ms-python.isort",
         "ms-python.mypy-type-checker",
         "streetsidesoftware.code-spell-checker"
