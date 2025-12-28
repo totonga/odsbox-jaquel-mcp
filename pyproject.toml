@@ -118,6 +118,7 @@ odsbox_jaquel_mcp = [
     "server_instructions.md",
     "py.typed",
     "templates/*.j2",
+    "resource_files/*",
 ]
 
 [tool.semantic_release]

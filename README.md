@@ -293,4 +293,4 @@ Solution: Check URL, server availability, firewall
 
 For issues or questions:
 1. Check the error message and hints
-2. Review the documentation and examples
+2. Review the documentation
