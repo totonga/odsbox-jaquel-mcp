@@ -7,11 +7,20 @@ including data retrieval, preparation, and visualization.
 from __future__ import annotations
 
 import json
+from pathlib import Path
 from typing import Any
+
+from jinja2 import Environment, FileSystemLoader
 
 
 class NotebookGenerator:
     """Generate Jupyter notebooks for measurement comparison."""
+
+    @staticmethod
+    def _get_jinja_env() -> Environment:
+        """Get configured Jinja2 environment for notebook templates."""
+        template_dir = Path(__file__).parent / "templates"
+        return Environment(loader=FileSystemLoader(str(template_dir)), trim_blocks=True, lstrip_blocks=True)
 
     @staticmethod
     def create_markdown_cell(content: str) -> dict[str, Any]:
@@ -113,196 +122,31 @@ class NotebookGenerator:
         # Data retrieval section
         cells.append(NotebookGenerator.create_markdown_cell("#### Retrieve content from ASAM ODS service"))
 
-        retrieval_code = f"""from odsbox import ConI
-
-with ConI(url="{ods_url}", auth=("{ods_username}", "{ods_password}")) as con_i:
-    # Query measurements to compare
-    measurements = con_i.query_data({{
-            "MeaResult": mea_result_conditions,
-            "$attributes": {{
-                "Name": 1,
-                "Id": 1,
-                "TestStep": {{
-                    "Name": 1,
-                    "Test": {{
-                        "Name": 1,
-                        "StructureLevel": {{
-                            "Name": 1,
-                            "Project": {{
-                                "Name": 1
-                                }}}}}}}},
-            }},
-        }})
-    measurement_ids = measurements["MeaResult.Id"].tolist()
-
-    # Query submatrices of measurements containing the specified measurement quantities
-    submatrices = con_i.query({{
-            "AoSubMatrix": {{
-                "measurement": {{"$in": measurement_ids}},
-                "local_columns": {{
-                    "name": {{
-                        "$in": mq_names
-                    }},
-                }}
-            }},
-            "$attributes": {{
-                "id": 1,
-                "number_of_rows": 1,
-                "measurement": 1,
-            }},
-            "$groupby": {{
-                "id": 1,
-                "measurement": 1,
-                "number_of_rows": 1,
-            }}
-        }})
-    submatrix_ids = submatrices["id"].tolist()
-    
-    # Get units and other info of local columns in submatrices
-    local_columns = con_i.query(
-        {{
-            "AoLocalColumn": {{
-                "submatrix": {{"$in": submatrix_ids}},
-                "$or": [
-                    {{"name": {{"$in": mq_names}}}},
-                    {{"independent": 1}}
-                ]
-            }},
-            "$attributes": {{
-                "id": 1,
-                "name": 1,
-                "independent": 1,
-                "measurement_quantity.unit:OUTER.name": 1,
-            }}
-        }})
-    local_column_ids = local_columns["id"].tolist()
-    
-    # Fetch bulk data for local columns
-    local_columns_signals = con_i.bulk.query({{"id":{{"$in": local_column_ids}}}})"""
-
+        env = NotebookGenerator._get_jinja_env()
+        retrieval_template = env.get_template("notebook_retrieval.j2")
+        retrieval_code = retrieval_template.render(
+            ods_url=ods_url,
+            ods_username=ods_username,
+            ods_password=ods_password,
+        )
         cells.append(NotebookGenerator.create_code_cell(retrieval_code))
 
         # Data preparation section
         cells.append(NotebookGenerator.create_markdown_cell("#### Prepare collected data for plotting"))
 
-        preparation_code = """import pandas as pd
-from odsbox_jaquel_mcp.data_preparation import (
-    MeasurementMetadataExtractor,
-    MeasurementDataPreparator,
-)
-
-# lookup for units of local columns
-local_column_unit_lookup = dict({row["id"]: row["measurement_quantity.unit:OUTER.name"]
-                                 for _, row in local_columns.iterrows()})
-
-# generate title for each submatrix
-submatrix_title_lookup = {}
-for submatrix_id in submatrix_ids:
-    measurement_id = submatrices[submatrices['id'] == submatrix_id]['measurement'].values[0]
-    measurement_info = measurements[measurements['MeaResult.Id'] == measurement_id]
-    if not measurement_info.empty:
-        project = measurement_info['Project.Name'].values[0]
-        profile = measurement_info['MeaResult.Name'].values[0]
-        campaign = measurement_info['Test.Name'].values[0]
-        submatrix_title_lookup[submatrix_id] = f"{project} - {campaign} - {profile}"
-    else:
-        submatrix_title_lookup[submatrix_id] = f"Submatrix {submatrix_id}"
-
-# Prepare measurement data items using helper functions
-submatrix_signals_by_id = local_columns_signals.groupby("submatrix")
-measurement_data_items = MeasurementDataPreparator.prepare_measurement_data_items(
-    submatrix_signals_by_id=submatrix_signals_by_id,
-    submatrices_df=submatrices,
-    measurements_df=measurements,
-    local_columns_df=local_columns,
-    measurement_quantity_names=mq_names,
-    unit_lookup=local_column_unit_lookup,
-)
-
-print(f"Prepared {len(measurement_data_items)} measurement data items for plotting")"""
-
+        preparation_template = env.get_template("notebook_preparation.j2")
+        preparation_code = preparation_template.render()
         cells.append(NotebookGenerator.create_code_cell(preparation_code))
 
         # Visualization section
         cells.append(NotebookGenerator.create_markdown_cell("#### Plot measurements"))
 
         if plot_type == "scatter" and len(measurement_quantity_names) >= 2:
-            qty_0 = measurement_quantity_names[0]
-            qty_1 = measurement_quantity_names[1]
-            plot_code = f"""import matplotlib.pyplot as plt
-
-# Number of submatrices
-num_of_plots = len(measurement_data_items)
-
-# Calculate number of rows (3 submatrices per row)
-cols = 3
-rows = (num_of_plots + cols - 1) // cols  # Ceiling division
-
-fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
-axes = axes.flatten()  # Flatten to 1D array for easy indexing
-
-for i, measurement_data in enumerate(measurement_data_items):
-    ax = axes[i]
-    measurement_data["data"].plot.scatter(
-        x="{qty_0}",
-        y="{qty_1}",
-        c=measurement_data["data"].index,
-        colormap="viridis",
-        ax=ax,
-        alpha=0.7,
-        s=20
-    )
-    ax.set_xlabel(measurement_data["labels"].get("{qty_0}", "{qty_0}"))
-    ax.set_ylabel(measurement_data["labels"].get("{qty_1}", "{qty_1}"))
-    ax.set_title(measurement_data["title"])
-
-# Hide any unused subplots
-for j in range(i + 1, len(axes)):
-    axes[j].axis('off')
-
-plt.tight_layout()
-plt.show()"""
+            plot_template = env.get_template("notebook_plot_scatter.j2")
+            plot_code = plot_template.render(measurement_quantity_names=measurement_quantity_names)
         elif plot_type == "line":
-            quantities_str = ", ".join(f'"{q}"' for q in measurement_quantity_names)
-            plot_code = f"""import matplotlib.pyplot as plt
-
-# Number of submatrices
-num_of_plots = len(measurement_data_items)
-
-# Calculate number of rows (3 submatrices per row)
-cols = 3
-rows = (num_of_plots + cols - 1) // cols
-
-fig, axes = plt.subplots(rows, cols, figsize=(15, 5 * rows))
-axes = axes.flatten()
-
-quantity_names = [{quantities_str}]
-
-for i, measurement_data in enumerate(measurement_data_items):
-    ax = axes[i]
-    
-    for qty in quantity_names:
-        if qty in measurement_data["data"].columns:
-            ax.plot(
-                measurement_data["data"].index,
-                measurement_data["data"][qty],
-                label=measurement_data["labels"].get(qty, qty),
-                marker='o',
-                markersize=4
-            )
-    
-    ax.set_xlabel('Time')
-    ax.set_ylabel('Value')
-    ax.set_title(measurement_data["title"])
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-
-# Hide any unused subplots
-for j in range(i + 1, len(axes)):
-    axes[j].axis('off')
-
-plt.tight_layout()
-plt.show()"""
+            plot_template = env.get_template("notebook_plot_line.j2")
+            plot_code = plot_template.render(measurement_quantity_names=measurement_quantity_names)
         else:
             plot_code = "# Plotting code would be generated here"
 

@@ -41,6 +41,7 @@ dependencies = [
     "odsbox>=1.0.15",
     "pip-system-certs",
     "matplotlib",
+    "Jinja2>=3.0",
 ]
 
 [project.optional-dependencies]
@@ -113,7 +114,11 @@ markers = [
 asyncio_mode = "auto"
 
 [tool.setuptools.package-data]
-odsbox_jaquel_mcp = ["server_instructions.md", "py.typed"]
+odsbox_jaquel_mcp = [
+    "server_instructions.md",
+    "py.typed",
+    "templates/*.j2",
+]
 
 [tool.semantic_release]
 version_variables = ["server.json:version"]

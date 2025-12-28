@@ -1,0 +1,131 @@
+#!/usr/bin/env python3
+"""
+Advanced Submatrix Data Fetcher with Error Handling
+Fetches data from submatrix {{ submatrix_id }}
+"""
+
+import logging
+import sys
+import pandas as pd
+import numpy as np
+from odsbox import ConI
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(f'submatrix_{{ submatrix_id }}_fetcher.log'),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+class SubmatrixDataFetcher:
+    """Advanced data fetcher with error handling."""
+
+    def __init__(self, url: str, username: str, password: str):
+        self.url = url
+        self.username = username
+        self.password = password
+        self.con_i = None
+
+    def connect(self):
+        """Establish connection to ODS server."""
+        try:
+            self.con_i = ConI(url=self.url, auth=(self.username, self.password))
+            logger.info("Successfully connected to ODS server")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to connect: {e}")
+            return False
+
+    def fetch_submatrix_data(self, submatrix_id: int, column_patterns: list = None):
+        """Fetch data from submatrix."""
+        try:
+            logger.info(f"Fetching data from submatrix {submatrix_id}")
+
+            df = self.con_i.bulk.data_read(
+                submatrix_iid=submatrix_id,
+                column_patterns=column_patterns,
+                date_as_timestamp=True,
+                set_independent_as_index=True
+            )
+
+            logger.info(f"Successfully loaded: shape={df.shape}")
+            return df
+
+        except Exception as e:
+            logger.error(f"Error fetching data: {e}")
+            raise
+
+def main():
+    ODS_URL = "http://localhost:8087/api"
+    ODS_USERNAME = "your_username"
+    ODS_PASSWORD = "your_password"
+    SUBMATRIX_ID = {{ submatrix_id }}
+    COLUMN_PATTERNS = [{% for qty in measurement_quantities %}"{{ qty }}"{{ ", " if not loop.last }}{% endfor %}]
+    OUTPUT_FORMAT = "{{ output_format }}"
+
+    fetcher = None
+    try:
+        fetcher = SubmatrixDataFetcher(ODS_URL, ODS_USERNAME, ODS_PASSWORD)
+
+        if not fetcher.connect():
+            sys.exit(1)
+
+        df = fetcher.fetch_submatrix_data(SUBMATRIX_ID, COLUMN_PATTERNS)
+        logger.info(f"Data preview:\n{df.head()}")
+
+        output_file = f"submatrix_{SUBMATRIX_ID}_data.{OUTPUT_FORMAT}"
+        if OUTPUT_FORMAT == "csv":
+            df.to_csv(output_file, index=True)
+        elif OUTPUT_FORMAT == "json":
+            df.to_json(output_file, orient="records", indent=2, date_format="iso")
+        elif OUTPUT_FORMAT == "parquet":
+            df.to_parquet(output_file)
+        elif OUTPUT_FORMAT == "excel":
+            df.to_excel(output_file, index=True)
+
+        {% if include_analysis -%}
+        # Basic data analysis
+        logger.info("Performing basic data analysis...")
+        logger.info("Summary statistics:")
+        logger.info(df.describe())
+
+        missing_data = df.isnull().sum()
+        if missing_data.sum() > 0:
+            logger.info("Missing values per column:")
+            logger.info(missing_data[missing_data > 0])
+        {% endif -%}
+        {% if include_visualization -%}
+
+        # Create visualizations
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        numeric_cols = df.select_dtypes(include=[np.number]).columns
+        if len(numeric_cols) > 0:
+            fig, axes = plt.subplots(len(numeric_cols), 1, figsize=(12, 4*len(numeric_cols)))
+            if len(numeric_cols) == 1:
+                axes = [axes]
+
+            for i, col in enumerate(numeric_cols):
+                df[col].plot(ax=axes[i], title=f'{col} over time')
+                axes[i].set_xlabel('Time')
+                axes[i].set_ylabel(col)
+                axes[i].grid(True, alpha=0.3)
+
+            plt.tight_layout()
+            plt.savefig(f'submatrix_{SUBMATRIX_ID}_plots.png', dpi=150, bbox_inches='tight')
+            plt.show()
+            logger.info(f"Visualizations saved to submatrix_{SUBMATRIX_ID}_plots.png")
+        {% endif %}
+
+        logger.info("Data fetching completed successfully!")
+
+    except Exception as e:
+        logger.error(f"Script failed: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,65 @@
+from odsbox import ConI
+
+with ConI(url="{{ ods_url }}", auth=("{{ ods_username }}", "{{ ods_password }}")) as con_i:
+    # Query measurements to compare
+    measurements = con_i.query_data({
+            "MeaResult": mea_result_conditions,
+            "$attributes": {
+                "Name": 1,
+                "Id": 1,
+                "TestStep": {
+                    "Name": 1,
+                    "Test": {
+                        "Name": 1,
+                        "StructureLevel": {
+                            "Name": 1,
+                            "Project": {
+                                "Name": 1
+                                }}}}}
+            })
+    measurement_ids = measurements["MeaResult.Id"].tolist()
+
+    # Query submatrices of measurements containing the specified measurement quantities
+    submatrices = con_i.query({
+            "AoSubMatrix": {
+                "measurement": {"$in": measurement_ids},
+                "local_columns": {
+                    "name": {
+                        "$in": mq_names
+                    },
+                }
+            },
+            "$attributes": {
+                "id": 1,
+                "number_of_rows": 1,
+                "measurement": 1,
+            },
+            "$groupby": {
+                "id": 1,
+                "measurement": 1,
+                "number_of_rows": 1,
+            }
+        })
+    submatrix_ids = submatrices["id"].tolist()
+
+    # Get units and other info of local columns in submatrices
+    local_columns = con_i.query(
+        {
+            "AoLocalColumn": {
+                "submatrix": {"$in": submatrix_ids},
+                "$or": [
+                    {"name": {"$in": mq_names}},
+                    {"independent": 1}
+                ]
+            },
+            "$attributes": {
+                "id": 1,
+                "name": 1,
+                "independent": 1,
+                "measurement_quantity.unit:OUTER.name": 1,
+            }
+        })
+    local_column_ids = local_columns["id"].tolist()
+
+    # Fetch bulk data for local columns
+    local_columns_signals = con_i.bulk.query({"id": {"$in": local_column_ids}})

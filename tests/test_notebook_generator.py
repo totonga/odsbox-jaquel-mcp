@@ -1,9 +1,12 @@
 """Tests for notebook generator."""
 
+import ast
 import json
 import tempfile
 import unittest
 from pathlib import Path
+
+from jinja2 import Environment
 
 from odsbox_jaquel_mcp.notebook_generator import NotebookGenerator
 
@@ -256,5 +259,364 @@ class TestNotebookGenerator(unittest.TestCase):
         self.assertEqual(kernelspec["display_name"], "Python 3")
 
 
-if __name__ == "__main__":
-    unittest.main()
+class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
+    """Test Jinja2 template rendering in notebook generator."""
+
+    def test_jinja_environment_setup(self):
+        """Test that Jinja2 environment is properly configured."""
+        env = NotebookGenerator._get_jinja_env()
+        self.assertIsInstance(env, Environment)
+
+    def test_jinja_templates_exist(self):
+        """Test that all required templates exist."""
+        env = NotebookGenerator._get_jinja_env()
+
+        required_templates = [
+            "notebook_retrieval.j2",
+            "notebook_preparation.j2",
+            "notebook_plot_scatter.j2",
+            "notebook_plot_line.j2",
+        ]
+
+        for template_name in required_templates:
+            with self.subTest(template=template_name):
+                # Should not raise exception
+                template = env.get_template(template_name)
+                self.assertIsNotNone(template)
+
+    def test_retrieval_template_renders_valid_python(self):
+        """Test that retrieval template generates syntactically valid Python."""
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username="testuser",
+            ods_password="testpass",
+        )
+
+        # Find the retrieval code cell (second code cell after query definition)
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        self.assertGreaterEqual(len(code_cells), 2)
+
+        retrieval_code = "\n".join(code_cells[1]["source"])
+
+        # Should be valid Python
+        try:
+            ast.parse(retrieval_code)
+        except SyntaxError as e:
+            self.fail(f"Retrieval template generated invalid Python: {e}")
+
+    def test_preparation_template_renders_valid_python(self):
+        """Test that preparation template generates syntactically valid Python."""
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username="testuser",
+            ods_password="testpass",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        self.assertGreaterEqual(len(code_cells), 3)
+
+        preparation_code = "\n".join(code_cells[2]["source"])
+
+        # Should be valid Python
+        try:
+            ast.parse(preparation_code)
+        except SyntaxError as e:
+            self.fail(f"Preparation template generated invalid Python: {e}")
+
+    def test_plot_template_renders_valid_python_scatter(self):
+        """Test that scatter plot template generates syntactically valid Python."""
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed", "Torque"],
+            ods_url="http://localhost:8087/api",
+            ods_username="testuser",
+            ods_password="testpass",
+            plot_type="scatter",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        self.assertGreaterEqual(len(code_cells), 4)
+
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # Should be valid Python
+        try:
+            ast.parse(plot_code)
+        except SyntaxError as e:
+            self.fail(f"Scatter plot template generated invalid Python: {e}")
+
+    def test_plot_template_renders_valid_python_line(self):
+        """Test that line plot template generates syntactically valid Python."""
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed", "Torque"],
+            ods_url="http://localhost:8087/api",
+            ods_username="testuser",
+            ods_password="testpass",
+            plot_type="line",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        self.assertGreaterEqual(len(code_cells), 4)
+
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # Should be valid Python
+        try:
+            ast.parse(plot_code)
+        except SyntaxError as e:
+            self.fail(f"Line plot template generated invalid Python: {e}")
+
+    def test_retrieval_template_includes_ods_url(self):
+        """Test that retrieval template properly renders ODS URL."""
+        ods_url = "https://custom-ods.example.com:8443/api"
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url=ods_url,
+            ods_username="user",
+            ods_password="pass",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        retrieval_code = "\n".join(code_cells[1]["source"])
+
+        self.assertIn(ods_url, retrieval_code)
+
+    def test_retrieval_template_includes_credentials(self):
+        """Test that retrieval template properly renders ODS credentials."""
+        username = "testuser123"
+        password = "testpass456"
+
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username=username,
+            ods_password=password,
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        retrieval_code = "\n".join(code_cells[1]["source"])
+
+        self.assertIn(username, retrieval_code)
+        self.assertIn(password, retrieval_code)
+
+    def test_scatter_plot_template_uses_first_two_quantities(self):
+        """Test that scatter plot template correctly uses first two quantities."""
+        quantities = ["Speed", "Torque", "Temperature"]
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=quantities,
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+            plot_type="scatter",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # Should include first two quantities
+        self.assertIn("Speed", plot_code)
+        self.assertIn("Torque", plot_code)
+
+    def test_line_plot_template_lists_all_quantities(self):
+        """Test that line plot template includes all quantities in list."""
+        quantities = ["Speed", "Torque", "Temperature"]
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=quantities,
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+            plot_type="line",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # All quantities should be in the list
+        for qty in quantities:
+            self.assertIn(qty, plot_code)
+
+    def test_single_quantity_scatter_plot_fallback(self):
+        """Test that scatter plot with single quantity falls back to default."""
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+            plot_type="scatter",  # Requires at least 2 quantities
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # Should be the fallback message
+        self.assertIn("Plotting code would be generated here", plot_code)
+
+
+class TestNotebookGeneratorEdgeCases(unittest.TestCase):
+    """Test edge cases in notebook generation."""
+
+    def test_special_characters_in_ods_url(self):
+        """Test handling of special characters in ODS URL."""
+        ods_url = "https://user@host.com:8443/api?key=value&foo=bar"
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url=ods_url,
+            ods_username="user",
+            ods_password="pass",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        retrieval_code = "\n".join(code_cells[1]["source"])
+
+        # Should handle special characters correctly
+        self.assertIn(ods_url, retrieval_code)
+        # Should still be valid Python
+        try:
+            ast.parse(retrieval_code)
+        except SyntaxError as e:
+            self.fail(f"URL with special characters caused syntax error: {e}")
+
+    def test_special_characters_in_credentials(self):
+        """Test handling of special characters in credentials."""
+        password = "p@ssw0rd!#$%&*()"
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password=password,
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        retrieval_code = "\n".join(code_cells[1]["source"])
+
+        # Should handle special characters correctly
+        self.assertIn(password, retrieval_code)
+        # Should still be valid Python
+        try:
+            ast.parse(retrieval_code)
+        except SyntaxError as e:
+            self.fail(f"Special characters in password caused syntax error: {e}")
+
+    def test_many_measurement_quantities(self):
+        """Test handling of many measurement quantities."""
+        quantities = [f"Quantity_{i}" for i in range(50)]
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=quantities,
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+            plot_type="line",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # All quantities should be present
+        for qty in quantities:
+            self.assertIn(qty, plot_code)
+
+        # Should still be valid Python
+        try:
+            ast.parse(plot_code)
+        except SyntaxError as e:
+            self.fail(f"Many quantities caused syntax error: {e}")
+
+    def test_quantity_names_with_special_characters(self):
+        """Test handling of measurement quantities with special characters."""
+        quantities = ["Motor_Speed", "Torque-Value", "Ambient Temp"]
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=quantities,
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+            plot_type="line",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # All quantities should be properly quoted
+        for qty in quantities:
+            self.assertIn(f'"{qty}"', plot_code)
+
+        # Should still be valid Python
+        try:
+            ast.parse(plot_code)
+        except SyntaxError as e:
+            self.fail(f"Special characters in quantities caused syntax error: {e}")
+
+    def test_empty_available_quantities(self):
+        """Test handling of empty available quantities list."""
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+            available_quantities=[],
+        )
+
+        # Should not raise error and should generate valid notebook
+        self.assertIn("cells", notebook)
+        self.assertGreater(len(notebook["cells"]), 0)
+
+    def test_unknown_plot_type(self):
+        """Test handling of unknown plot type."""
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions={},
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+            plot_type="unknown_type",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        plot_code = "\n".join(code_cells[3]["source"])
+
+        # Should fall back to default
+        self.assertIn("Plotting code would be generated here", plot_code)
+
+    def test_complex_query_conditions(self):
+        """Test handling of complex measurement query conditions."""
+        complex_conditions = {
+            "Name": {"$like": "Profile_*"},
+            "Id": {"$gt": 100, "$lt": 200},
+            "$or": [
+                {"Status": {"$eq": "OK"}},
+                {"Status": {"$eq": "PENDING"}},
+            ],
+        }
+        notebook = NotebookGenerator.plot_comparison_notebook(
+            measurement_query_conditions=complex_conditions,
+            measurement_quantity_names=["Speed"],
+            ods_url="http://localhost:8087/api",
+            ods_username="user",
+            ods_password="pass",
+        )
+
+        code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
+        query_code = "\n".join(code_cells[0]["source"])
+
+        # Should include the complex conditions
+        self.assertIn("Profile_*", query_code)
+        self.assertIn("100", query_code)
+        # Should be valid Python
+        try:
+            ast.parse(query_code)
+        except SyntaxError as e:
+            self.fail(f"Complex conditions caused syntax error: {e}")

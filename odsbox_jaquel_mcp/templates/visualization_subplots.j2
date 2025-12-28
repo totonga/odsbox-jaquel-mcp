@@ -1,0 +1,38 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Create a subplot for each measurement quantity
+quantity_names = [{% for qty in measurement_quantity_names %}"{{ qty }}"{{ "," if not loop.last }}{% endfor %}]
+num_quantities = len(quantity_names)
+num_of_plots = {{ submatrices_count }}
+
+fig, axes = plt.subplots(
+    num_quantities, num_of_plots,
+    figsize=(5 * num_of_plots, 5 * num_quantities)
+)
+
+# Handle case when there's only one row or column
+if num_quantities == 1 and num_of_plots == 1:
+    axes = [[axes]]
+elif num_quantities == 1:
+    axes = [axes]
+elif num_of_plots == 1:
+    axes = [[ax] for ax in axes]
+
+for q_idx, qty in enumerate(quantity_names):
+    for m_idx, measurement_data in enumerate(measurement_data_items):
+        ax = axes[q_idx][m_idx] if isinstance(axes[0], list) else axes[q_idx]
+
+        if qty in measurement_data["data"].columns:
+            ax.plot(
+                measurement_data["data"].index,
+                measurement_data["data"][qty],
+                marker='o',
+                markersize=4
+            )
+            ax.set_ylabel(measurement_data["labels"].get(qty, qty))
+            ax.set_title(f"{qty} - {measurement_data['title'].split(chr(10))[0]}")
+            ax.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
