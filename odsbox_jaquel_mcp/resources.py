@@ -12,9 +12,7 @@ This module provides reference materials about:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import cast
 
-from jinja2 import Environment, FileSystemLoader
 from mcp.types import Resource, ResourceTemplate
 from pydantic import AnyUrl
 
@@ -23,10 +21,9 @@ class ResourceLibrary:
     """Collection of reference resources for ODS operations."""
 
     @staticmethod
-    def _get_jinja_env() -> Environment:
-        """Get configured Jinja2 environment for resource templates."""
-        template_dir = Path(__file__).parent / "templates"
-        return Environment(loader=FileSystemLoader(str(template_dir)), trim_blocks=True, lstrip_blocks=True)
+    def _get_resource_dir() -> Path:
+        """Get the path to the resource files directory."""
+        return Path(__file__).parent / "resource_files"
 
     @staticmethod
     def get_all_resources() -> list[Resource]:
@@ -117,20 +114,22 @@ Ensure:
 3. The entity exists in the ODS model
 """
 
-        # Map URIs to template names
-        uri_to_template = {
-            "file:///odsbox/ods-connection-guide": "resource_ods_connection_guide.j2",
-            "file:///odsbox/ods-workflow-reference": "resource_ods_workflow_reference.j2",
-            "file:///odsbox/ods-entity-hierarchy": "resource_ods_entity_hierarchy.j2",
-            "file:///odsbox/query-execution-patterns": "resource_query_execution_patterns.j2",
-            "file:///odsbox/connection-troubleshooting": "resource_connection_troubleshooting.j2",
-            "file:///odsbox/query-operators-reference": "resource_query_operators_reference.j2",
-            "file:///odsbox/jaquel-syntax-guide": "resource_jaquel_syntax_guide.j2",
+        # Map URIs to resource file names
+        uri_to_resource = {
+            "file:///odsbox/ods-connection-guide": "resource_ods_connection_guide.md",
+            "file:///odsbox/ods-workflow-reference": "resource_ods_workflow_reference.md",
+            "file:///odsbox/ods-entity-hierarchy": "resource_ods_entity_hierarchy.md",
+            "file:///odsbox/query-execution-patterns": "resource_query_execution_patterns.md",
+            "file:///odsbox/connection-troubleshooting": "resource_connection_troubleshooting.md",
+            "file:///odsbox/query-operators-reference": "resource_query_operators_reference.md",
+            "file:///odsbox/jaquel-syntax-guide": "resource_jaquel_syntax_guide.md",
         }
 
-        if uri in uri_to_template:
-            env = ResourceLibrary._get_jinja_env()
-            template = env.get_template(uri_to_template[uri])
-            return cast(str, template.render())
+        if uri in uri_to_resource:
+            resource_path = ResourceLibrary._get_resource_dir() / uri_to_resource[uri]
+            try:
+                return resource_path.read_text(encoding="utf-8")
+            except FileNotFoundError:
+                return f"Resource file not found: {resource_path}"
 
         return f"Unknown resource: {uri}"
