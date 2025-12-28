@@ -125,14 +125,15 @@ class SchemaInspector:
         schema = cls.get_entity_schema(entity_name)
 
         if "error" in schema:
-            return f"""# Entity Schema: {entity_name}
-
-**Error**: {schema['error']}
-
-{f"**Available entities**: {', '.join(schema.get('available_entities', []))}" if schema.get('available_entities') else ""}
-
-Use `schema_list_entities` tool to see all available entities.
-"""
+            error_msg = schema["error"]
+            available = schema.get("available_entities", [])
+            available_str = f"**Available entities**: {', '.join(available)}" if available else ""
+            return (
+                f"# Entity Schema: {entity_name}\n\n"
+                f"**Error**: {error_msg}\n\n"
+                f"{available_str}\n\n"
+                "Use `schema_list_entities` tool to see all available entities."
+            )
 
         entity = schema.get("entity", entity_name)
         description = schema.get("description", "No description available")
@@ -153,7 +154,10 @@ Use `schema_list_entities` tool to see all available entities.
         for attr_name, attr_info in sorted(schema.get("attributes", {}).items()):
             is_array = "✓" if attr_info.get("is_array") else "✗"
             nullable = "✓" if attr_info.get("nullable") else "✗"
-            md += f"| `{attr_name}` | `{attr_info['base_name']}` | {attr_info['data_type']} | {is_array} | {nullable} |\n"
+            md += (
+                f"| `{attr_name}` | `{attr_info['base_name']}` | "
+                f"{attr_info['data_type']} | {is_array} | {nullable} |\n"
+            )
 
         md += "\n## Relationships\n\n"
         md += "| Name | Target Entity | Type | Nullable | Inverse | Inverse Type |\n"
@@ -229,7 +233,7 @@ Use `schema_list_entities` tool to see all available entities.
 
             # Start with AoTest base entity
             current_entity = model_cache.entity_by_base_name("AoTest")
-            current_children_relation = None
+            current_children_relation: ods.Model.Relation | None = None
 
             # Traverse from AoTest following 'children' relation
             while current_entity and current_entity.name not in visited:
