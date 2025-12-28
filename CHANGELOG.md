@@ -2,6 +2,21 @@
 
 <!-- version list -->
 
+## v1.1.1 (2025-12-28)
+
+### Bug Fixes
+
+- Update MANIFEST.in and pyproject.toml to include missing files and improve documentation
+  references
+  ([`4dd47f4`](https://github.com/totonga/odsbox-jaquel-mcp/commit/4dd47f4e00e8419a7448c293dd5479335aff6fc7))
+
+### Refactoring
+
+- Refactor code generation and resource management with Jinja2 templates
+  ([#33](https://github.com/totonga/odsbox-jaquel-mcp/pull/33),
+  [`a8c68df`](https://github.com/totonga/odsbox-jaquel-mcp/commit/a8c68df3a3083cb8cf2a400185b18d1829c8aff9))
+
+
 ## v1.1.0 (2025-12-27)
 
 ### Continuous Integration
