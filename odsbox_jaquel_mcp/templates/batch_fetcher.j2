@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""
+Batch Submatrix Data Fetcher
+Processes multiple submatrices efficiently
+"""
+
+import logging
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import pandas as pd
+from odsbox import ConI
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+class BatchSubmatrixFetcher:
+    """Batch processor for multiple submatrices."""
+
+    def __init__(self, url: str, username: str, password: str, max_workers: int = 4):
+        self.url = url
+        self.username = username
+        self.password = password
+        self.max_workers = max_workers
+        self.con_i = None
+
+    def connect(self):
+        """Establish connection."""
+        try:
+            self.con_i = ConI(url=self.url, auth=(self.username, self.password))
+            logger.info("Connected to ODS server")
+            return True
+        except Exception as e:
+            logger.error(f"Connection failed: {e}")
+            return False
+
+    def fetch_single_submatrix(self, submatrix_id: int, column_patterns: list = None):
+        """Fetch data from a single submatrix."""
+        try:
+            df = self.con_i.bulk.data_read(
+                submatrix_iid=submatrix_id,
+                column_patterns=column_patterns,
+                date_as_timestamp=True,
+                set_independent_as_index=True
+            )
+            logger.info(f"Submatrix {submatrix_id}: loaded {df.shape[0]} rows")
+            return {'submatrix_id': submatrix_id, 'dataframe': df, 'success': True}
+        except Exception as e:
+            logger.error(f"Failed submatrix {submatrix_id}: {e}")
+            return {'submatrix_id': submatrix_id, 'dataframe': None, 'success': False, 'error': str(e)}
+
+def main():
+    ODS_URL = "http://localhost:8087/api"
+    ODS_USERNAME = "your_username"
+    ODS_PASSWORD = "your_password"
+    SUBMATRIX_IDS = [{{ submatrix_id }}]  # Add more IDs
+    COLUMN_PATTERNS = [{% for qty in measurement_quantities %}"{{ qty }}"{{ ", " if not loop.last }}{% endfor %}]
+    OUTPUT_FORMAT = "{{ output_format }}"
+
+    fetcher = BatchSubmatrixFetcher(ODS_URL, ODS_USERNAME, ODS_PASSWORD)
+
+    if not fetcher.connect():
+        sys.exit(1)
+
+    logger.info(f"Processing {len(SUBMATRIX_IDS)} submatrices")
+    successful = 0
+
+    for sm_id in SUBMATRIX_IDS:
+        result = fetcher.fetch_single_submatrix(sm_id, COLUMN_PATTERNS)
+        if result['success']:
+            df = result['dataframe']
+            df.to_csv(f"submatrix_{sm_id}_data.{OUTPUT_FORMAT}", index=True)
+            successful += 1
+
+    logger.info(f"Batch completed: {successful}/{len(SUBMATRIX_IDS)} successful")
+
+if __name__ == "__main__":
+    main()

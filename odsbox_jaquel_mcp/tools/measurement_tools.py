@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 from mcp.types import TextContent
@@ -117,13 +116,13 @@ class MeasurementToolHandler(BaseToolHandler):
                 raise ValueError("quantity_name and measurement_data are required")
 
             # Convert string keys to integers for measurement_data
-            converted_data: dict[int | str, Any] = {}
+            converted_data: dict[int, list[float]] = {}  # type: ignore
             for key, values in measurement_data.items():
                 try:
                     meas_id = int(key)
-                    converted_data[meas_id] = values
+                    converted_data[meas_id] = values  # type: ignore
                 except (ValueError, TypeError):
-                    converted_data[key] = values
+                    converted_data[key] = values  # type: ignore
 
             # Perform multi-measurement comparison
             comparison_result = MeasurementAnalyzer.compare_multiple_measurements(quantity_name, converted_data)

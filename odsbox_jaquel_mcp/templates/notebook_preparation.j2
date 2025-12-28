@@ -1,0 +1,35 @@
+import pandas as pd
+from odsbox_jaquel_mcp.data_preparation import (
+    MeasurementMetadataExtractor,
+    MeasurementDataPreparator,
+)
+
+# lookup for units of local columns
+local_column_unit_lookup = dict({row["id"]: row["measurement_quantity.unit:OUTER.name"]
+                                 for _, row in local_columns.iterrows()})
+
+# generate title for each submatrix
+submatrix_title_lookup = {}
+for submatrix_id in submatrix_ids:
+    measurement_id = submatrices[submatrices['id'] == submatrix_id]['measurement'].values[0]
+    measurement_info = measurements[measurements['MeaResult.Id'] == measurement_id]
+    if not measurement_info.empty:
+        project = measurement_info['Project.Name'].values[0]
+        profile = measurement_info['MeaResult.Name'].values[0]
+        campaign = measurement_info['Test.Name'].values[0]
+        submatrix_title_lookup[submatrix_id] = f"{project} - {campaign} - {profile}"
+    else:
+        submatrix_title_lookup[submatrix_id] = f"Submatrix {submatrix_id}"
+
+# Prepare measurement data items using helper functions
+submatrix_signals_by_id = local_columns_signals.groupby("submatrix")
+measurement_data_items = MeasurementDataPreparator.prepare_measurement_data_items(
+    submatrix_signals_by_id=submatrix_signals_by_id,
+    submatrices_df=submatrices,
+    measurements_df=measurements,
+    local_columns_df=local_columns,
+    measurement_quantity_names=mq_names,
+    unit_lookup=local_column_unit_lookup,
+)
+
+print(f"Prepared {len(measurement_data_items)} measurement data items for plotting")

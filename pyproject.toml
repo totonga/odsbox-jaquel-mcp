@@ -41,6 +41,7 @@ dependencies = [
     "odsbox>=1.0.15",
     "pip-system-certs",
     "matplotlib",
+    "Jinja2>=3.0",
 ]
 
 [project.optional-dependencies]
@@ -98,6 +99,7 @@ python_version = "3.13"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -110,6 +112,13 @@ markers = [
     "unit: marks tests as unit tests",
 ]
 asyncio_mode = "auto"
+
+[tool.setuptools.package-data]
+odsbox_jaquel_mcp = [
+    "server_instructions.md",
+    "py.typed",
+    "templates/*.j2",
+]
 
 [tool.semantic_release]
 version_variables = ["server.json:version"]

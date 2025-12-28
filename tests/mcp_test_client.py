@@ -58,7 +58,7 @@ class MCPServerTestClient:
             # Initialize protocol
             await self.session.initialize()
 
-            print(f"✓ Connected to MCP server")
+            print("✓ Connected to MCP server")
 
         except Exception as e:
             # Clean up on failure
@@ -165,6 +165,38 @@ class MCPServerTestClient:
             ]
         except asyncio.TimeoutError:
             raise TimeoutError(f"List resources timed out after {self.timeout}s")
+
+    async def read_resource(self, uri: str) -> dict[str, Any]:
+        """Read content of a resource from the server.
+
+        Args:
+            uri: URI of the resource to read
+
+        Returns:
+            Resource content as dict
+        """
+        if not self.session:
+            raise RuntimeError("Not connected to MCP server. Call start() first.")
+
+        try:
+            result = await asyncio.wait_for(
+                self.session.read_resource(uri),
+                timeout=self.timeout,
+            )
+
+            # Convert ReadResourceResult to dict with contents
+            return {
+                "contents": [
+                    {
+                        "uri": c.uri if hasattr(c, "uri") else uri,
+                        "mimeType": c.mimeType if hasattr(c, "mimeType") else "text/markdown",
+                        "text": c.text if hasattr(c, "text") else str(c),
+                    }
+                    for c in result.contents
+                ]
+            }
+        except asyncio.TimeoutError:
+            raise TimeoutError(f"Read resource '{uri}' timed out after {self.timeout}s")
 
     async def __aenter__(self):
         """Async context manager entry."""

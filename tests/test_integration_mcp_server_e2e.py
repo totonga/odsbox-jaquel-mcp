@@ -115,6 +115,133 @@ async def test_list_resources(mcp_client):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
+async def test_read_resource_ods_connection_guide(mcp_client):
+    """Test reading ODS connection guide resource via MCP.
+
+    This test verifies:
+    - Server responds to resource/read request
+    - Resource content is returned correctly
+    - Content is markdown format
+    """
+    result = await mcp_client.read_resource("file:///odsbox/ods-connection-guide")
+
+    assert result is not None
+    contents = result.get("contents", [])
+    assert len(contents) > 0, f"Expected resource contents, got: {result}"
+
+    content = contents[0]
+    assert "text" in content, "Content should have text"
+    assert len(content["text"]) > 0, "Resource text should not be empty"
+    assert "mimeType" in content
+    assert content["mimeType"] == "text/markdown"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_read_resource_jaquel_syntax_guide(mcp_client):
+    """Test reading Jaquel syntax guide resource via MCP.
+
+    This test verifies:
+    - Can read Jaquel syntax guide resource
+    - Content is properly formatted
+    - Includes expected documentation sections
+    """
+    result = await mcp_client.read_resource("file:///odsbox/jaquel-syntax-guide")
+
+    assert result is not None
+    contents = result.get("contents", [])
+    assert len(contents) > 0
+
+    content = contents[0]
+    text = content["text"]
+    assert len(text) > 0
+    # Verify it's actual documentation content
+    assert any(
+        keyword in text.lower() for keyword in ["jaquel", "query", "syntax", "operator"]
+    ), "Resource should contain Jaquel-related documentation"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_read_all_available_resources(mcp_client):
+    """Test reading all available resources via MCP.
+
+    This test verifies:
+    - All listed resources can be read
+    - Each resource has non-empty content
+    - Content is properly formatted
+    """
+    # First list all resources
+    resources = await mcp_client.list_resources()
+    assert len(resources) > 0, "Should have at least one resource"
+
+    # Try to read each resource
+    for resource in resources:
+        uri = resource["uri"]
+        result = await mcp_client.read_resource(uri)
+
+        assert result is not None, f"Failed to read resource: {uri}"
+
+        contents = result.get("contents", [])
+        assert len(contents) > 0, f"Resource {uri} should have content"
+
+        content = contents[0]
+        assert "text" in content, f"Resource {uri} content missing text"
+        assert len(content["text"]) > 0, f"Resource {uri} text should not be empty"
+        assert content.get("mimeType") in [
+            "text/markdown",
+            "text/plain",
+        ], f"Resource {uri} has unexpected MIME type: {content.get('mimeType')}"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_read_resource_query_operators_reference(mcp_client):
+    """Test reading query operators reference resource via MCP.
+
+    This test verifies:
+    - Operators reference resource can be read
+    - Contains operator documentation
+    """
+    result = await mcp_client.read_resource("file:///odsbox/query-operators-reference")
+
+    assert result is not None
+    contents = result.get("contents", [])
+    assert len(contents) > 0
+
+    content = contents[0]
+    text = content["text"]
+    assert len(text) > 0
+    # Verify it contains operator documentation (check for markdown headers/operators)
+    assert (
+        "#" in text or "$eq" in text or "operator" in text.lower()
+    ), "Operators reference should contain operator documentation"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_read_resource_invalid_uri_graceful_response(mcp_client):
+    """Test that reading invalid resource URI returns graceful response.
+
+    This test verifies:
+    - Server handles invalid URIs gracefully
+    - Returns content indicating unknown resource
+    - Doesn't crash
+    """
+    result = await mcp_client.read_resource("file:///odsbox/nonexistent-resource")
+
+    assert result is not None
+    contents = result.get("contents", [])
+    assert len(contents) > 0
+
+    content = contents[0]
+    text = content["text"]
+    # Server returns helpful message for unknown resources
+    assert "unknown" in text.lower() or "not found" in text.lower(), f"Should indicate unknown resource, got: {text}"
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
 async def test_query_get_operator_docs_via_mcp(mcp_client):
     """Test query_get_operator_docs tool through MCP protocol.
 

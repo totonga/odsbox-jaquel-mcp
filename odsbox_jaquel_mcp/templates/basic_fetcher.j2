@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""
+Basic Submatrix Data Fetcher
+Fetches data from submatrix {{ submatrix_id }}
+"""
+
+import pandas as pd
+from odsbox import ConI
+
+def main():
+    # Connect to ODS server
+    with ConI(url="http://localhost:8087/api", auth=("your_username", "your_password")) as con_i:
+
+        # Fetch data from submatrix
+        df = con_i.bulk.data_read(
+            submatrix_iid={{ submatrix_id }},
+            column_patterns=[{% for qty in measurement_quantities %}"{{ qty }}"{{ ", " if not loop.last }}{% endfor %}],
+            date_as_timestamp=True,
+            set_independent_as_index=True
+        )
+
+        print(f"Loaded data with shape: {df.shape}")
+        print(f"Columns: {list(df.columns)}")
+        print("\nFirst 5 rows:")
+        print(df.head())
+
+        # Save to file
+        {% if output_format == "csv" %}
+        df.to_csv("submatrix_{{ submatrix_id }}_data.csv", index=True)
+        {% elif output_format == "json" %}
+        df.to_json("submatrix_{{ submatrix_id }}_data.json", orient="records", indent=2)
+        {% elif output_format == "parquet" %}
+        df.to_parquet("submatrix_{{ submatrix_id }}_data.parquet")
+        {% elif output_format == "excel" %}
+        df.to_excel("submatrix_{{ submatrix_id }}_data.xlsx", index=True)
+        {% else %}
+        print("Data loaded into DataFrame 'df'")
+        {% endif %}
+        print("\nData saved successfully!")
+
+if __name__ == "__main__":
+    main()
