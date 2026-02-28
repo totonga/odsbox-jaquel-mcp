@@ -326,10 +326,15 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_data_read_submatrix(self, mock_read_data):
         """Test calling data_read_submatrix tool."""
-        # Mock the data_read_submatrix to return sample data
+        # Mock the data_read_submatrix to return sample data with new format
         mock_read_data.return_value = {
-            "data": [[1, 25.5], [2, 26.0], [3, 25.8]],
+            "submatrix_id": 456,
             "columns": ["Time", "Temperature"],
+            "row_count": 1000,
+            "preview_row_count": 100,
+            "data_preview": [[1, 25.5], [2, 26.0], [3, 25.8]],
+            "sampling_method": "auto",
+            "note": "Preview resampled from 1000 to 100 rows using 'auto' method",
         }
 
         arguments = {
@@ -344,8 +349,10 @@ class TestMCPServer:
         assert isinstance(result[0], TextContent)
 
         response_data = json.loads(result[0].text)
-        # Just verify we got a response back
-        assert "data" in response_data or "columns" in response_data or "error" not in response_data
+        # Verify we got the expected fields
+        assert "columns" in response_data
+        assert "row_count" in response_data
+        assert "data_preview" in response_data or "error" not in response_data
 
     @patch("odsbox_jaquel_mcp.tools.submatrix_tools.generate_basic_fetcher_script")
     @pytest.mark.asyncio
