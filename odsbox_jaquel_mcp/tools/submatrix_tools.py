@@ -52,6 +52,8 @@ class SubmatrixToolHandler(BaseToolHandler):
             case_insensitive = arguments.get("case_insensitive", False)
             date_as_timestamp = arguments.get("date_as_timestamp", True)
             set_independent_as_index = arguments.get("set_independent_as_index", True)
+            max_preview_size = int(arguments.get("max_preview_size", 100))
+            preview_sampling_method = arguments.get("preview_sampling_method", "auto")
 
             result = SubmatrixDataReader.data_read_submatrix(
                 submatrix_id=submatrix_id,
@@ -59,6 +61,8 @@ class SubmatrixToolHandler(BaseToolHandler):
                 case_insensitive=case_insensitive,
                 date_as_timestamp=date_as_timestamp,
                 set_independent_as_index=set_independent_as_index,
+                max_preview_size=max_preview_size,
+                preview_sampling_method=preview_sampling_method,
             )
             return SubmatrixToolHandler.json_response(result)
         except Exception as e:

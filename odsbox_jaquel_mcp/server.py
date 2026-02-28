@@ -315,6 +315,15 @@ async def list_tools() -> list[Tool]:
                         "type": "boolean",
                         "description": "Set the independent column as DataFrame index",
                     },
+                    "max_preview_size": {
+                        "type": "integer",
+                        "description": "Maximum number of rows in data preview (default: 100)",
+                    },
+                    "preview_sampling_method": {
+                        "type": "string",
+                        "description": "Method for resampling preview data: auto, uniform, time_aware, random, stratified, minmax",
+                        "enum": ["auto", "uniform", "time_aware", "random", "stratified", "minmax"],
+                    },
                 },
                 "required": ["submatrix_id"],
             },
