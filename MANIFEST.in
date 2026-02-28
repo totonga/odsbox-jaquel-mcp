@@ -2,7 +2,6 @@
 # Project documentation and metadata
 include README.md
 include LICENSE
-include requirements.txt
 include TOOLS_GUIDE.md
 include PROMPTS.md
 

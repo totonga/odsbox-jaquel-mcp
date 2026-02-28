@@ -50,5 +50,4 @@ Your local SSH keys are mounted read-only for Git authentication. This allows se
 ## Troubleshooting
 
 - **Port Forwarding**: If connecting to ODS servers, use port forwarding in VS Code
-- **Dependencies**: Run `pip install -r requirements.txt` if additional packages are needed
 - **Rebuild**: Close the dev container and rebuild with **Dev Containers: Rebuild Container**
