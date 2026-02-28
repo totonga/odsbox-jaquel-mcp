@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.2.0 (2026-02-28)
+
+### Features
+
+- Data_read_submatrix tool now supports resampling for preview
+  ([#37](https://github.com/totonga/odsbox-jaquel-mcp/pull/37),
+  [`4dbed6e`](https://github.com/totonga/odsbox-jaquel-mcp/commit/4dbed6e750ab81d7dea4db311bb954bb8424f172))
+
+
 ## v1.1.1 (2025-12-28)
 
 ### Bug Fixes
