@@ -2,6 +2,20 @@
 
 <!-- version list -->
 
+## v1.3.0 (2026-03-15)
+
+### Bug Fixes
+
+- Bump actions/upload-artifact from 6 to 7
+  ([#38](https://github.com/totonga/odsbox-jaquel-mcp/pull/38),
+  [`6536423`](https://github.com/totonga/odsbox-jaquel-mcp/commit/6536423188d6fee5faf0d44957436cee3915da4d))
+
+### Features
+
+- Added ods_connect_using_env ([#39](https://github.com/totonga/odsbox-jaquel-mcp/pull/39),
+  [`890dd0d`](https://github.com/totonga/odsbox-jaquel-mcp/commit/890dd0dca671ffa07b992f8b28d6e59e64eb1f8d))
+
+
 ## v1.2.0 (2026-02-28)
 
 ### Features
