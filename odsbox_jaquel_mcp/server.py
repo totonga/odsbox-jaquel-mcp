@@ -208,7 +208,12 @@ async def list_tools() -> list[Tool]:
                         "description": "ODS API URL (e.g., http://localhost:8087/api)",
                     },
                     "username": {"type": "string", "description": "Username for auth"},
-                    "password": {"type": "string", "description": "Password for auth"},
+                    "password": {
+                        "type": "string",
+                        "description": "Password for auth",
+                        "format": "password",
+                        "x-mcp-secret": True,
+                    },
                     "verify": {
                         "type": "boolean",
                         "description": "Verify SSL certificates (default: true)",
@@ -219,6 +224,25 @@ async def list_tools() -> list[Tool]:
             },
             annotations=ToolAnnotations(readOnlyHint=True),
             icons=[Icon(src="🔌")],
+        ),
+        Tool(
+            name="ods_connect_using_env",
+            title="Connect to ODS Server (from environment)",
+            description=(
+                "Establish connection to ASAM ODS server using environment variables. "
+                "Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "env_prefix": {
+                        "type": "string",
+                        "description": "Optional: override the environment variable prefix (default: ODSBOX_MCP)",
+                    }
+                },
+            },
+            annotations=ToolAnnotations(readOnlyHint=True),
+            icons=[Icon(src="📦")],
         ),
         Tool(
             name="ods_disconnect",
@@ -399,6 +423,8 @@ async def list_tools() -> list[Tool]:
                     "ods_password": {
                         "type": "string",
                         "description": "ODS password",
+                        "format": "password",
+                        "x-mcp-secret": True,
                     },
                     "available_quantities": {
                         "type": "array",
@@ -691,6 +717,9 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     elif name == "ods_connect":
         return ConnectionToolHandler.ods_connect(arguments)
+
+    elif name == "ods_connect_using_env":
+        return ConnectionToolHandler.ods_connect_using_env(arguments)
 
     elif name == "ods_disconnect":
         return ConnectionToolHandler.ods_disconnect(arguments)

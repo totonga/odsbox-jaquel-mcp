@@ -23,6 +23,7 @@ The MCP Server provides tools for working with ASAM ODS servers using queries an
 | Tool | Purpose | Input | Output |
 |------|---------|-------|--------|
 | [ods_connect](#ods_connect) | Connect to ODS server | URL, credentials | Connection status |
+| [ods_connect_using_env](#ods_connect_using_env) | Connect to ODS server using env vars | env vars (e.g. ODSBOX_MCP_URL) | Connection status |
 | [ods_disconnect](#ods_disconnect) | Disconnect from server | None | Status |
 | [ods_get_connection_info](#ods_get_connection_info) | Get connection details | None | Connection info |
 
@@ -416,6 +417,42 @@ else:
 ```
 
 **Requirements**: Valid ODS server URL and credentials.
+
+---
+
+### ods_connect_using_env
+
+**Purpose**: Establish connection to ASAM ODS server using environment variables.
+
+**Supported environment variables (default prefix `ODSBOX_MCP`)**:
+- `ODSBOX_MCP_URL` / `ODSBOX_MCP_API_URL`
+- `ODSBOX_MCP_USERNAME` / `ODSBOX_MCP_USER`
+- `ODSBOX_MCP_PASSWORD` / `ODSBOX_MCP_PWD`
+- `ODSBOX_MCP_VERIFY` (true/false)  
+
+You can override the prefix using either:
+- tool argument: `env_prefix`
+- environment variable: `ODSBOX_MCP_ENV_PREFIX`
+
+**Input**:
+```json
+{}
+```
+
+**Output**:
+```json
+{
+    "success": true,
+    "message": "Connected to ODS server",
+    "connection": {
+        "url": "http://localhost:8087/api",
+        "username": "sa",
+        "con_i_url": "http://localhost:8087/api/ods/12345"
+    }
+}
+```
+
+**Requirements**: Environment variables must be set for connection information.
 
 ---
 

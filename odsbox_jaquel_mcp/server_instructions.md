@@ -30,7 +30,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries.
 - Check fields: `schema_get_entity`, `schema_field_exists`
 
 **ODS Connection**
-- Manage: `ods_connect`, `ods_disconnect`, `ods_get_connection_info`
+- Manage: `ods_connect`, `ods_connect_using_env`, `ods_disconnect`, `ods_get_connection_info`
 
 **Data Access**
 - Submatrix: `data_read_submatrix`, `data_get_quantities`

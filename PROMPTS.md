@@ -11,6 +11,7 @@ Learn how to establish a connection to an ASAM ODS server for live model inspect
 
 **Related Tools:**
 - `ods_connect` - Establish connection
+- `ods_connect_using_env` - Establish connection using environment variables
 - `ods_disconnect` - Close connection
 - `ods_get_connection_info` - Check status
 - `schema_test_to_measurement_hierarchy` - Explore hierarchy
