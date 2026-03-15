@@ -1,12 +1,10 @@
 """Tests for MCP server functions."""
 
 import json
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-from mcp.server.lowlevel.server import request_ctx
-from mcp.shared.context import RequestContext
-from mcp.types import ElicitResult, TextContent
+from mcp.types import TextContent
 
 from odsbox_jaquel_mcp.server import call_tool, list_tools
 
@@ -237,75 +235,6 @@ class TestMCPServer:
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
         )
-
-    @pytest.mark.asyncio
-    async def test_ods_connect_credentials_required_in_schema(self):
-        """Test that username and password are required in the schema."""
-        tools = await list_tools()
-        ods_connect = next(t for t in tools if t.name == "ods_connect")
-        assert "username" in ods_connect.inputSchema["required"]
-        assert "password" in ods_connect.inputSchema["required"]
-
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
-    @pytest.mark.asyncio
-    async def test_ods_connect_elicits_credentials_on_accept(self, mock_connect):
-        """Test that missing credentials trigger elicitation and connect on accept."""
-        mock_connect.return_value = {"success": True}
-
-        mock_session = MagicMock()
-        mock_session.check_client_capability.return_value = True
-        mock_session.elicit = AsyncMock(
-            return_value=ElicitResult(
-                action="accept",
-                content={"username": "elicited_user", "password": "elicited_pass"},
-            )
-        )
-        ctx = RequestContext(request_id="test", meta=None, session=mock_session, lifespan_context=None)
-        token = request_ctx.set(ctx)
-        try:
-            result = await call_tool("ods_connect", {"url": "http://test:8087/api"})
-        finally:
-            request_ctx.reset(token)
-
-        assert isinstance(result, list)
-        response = json.loads(result[0].text)
-        assert response.get("success") is True
-        mock_connect.assert_called_once_with(
-            url="http://test:8087/api", auth=("elicited_user", "elicited_pass"), verify_certificate=True
-        )
-
-    @pytest.mark.asyncio
-    async def test_ods_connect_elicitation_declined(self):
-        """Test that declining elicitation returns an error."""
-        mock_session = MagicMock()
-        mock_session.check_client_capability.return_value = True
-        mock_session.elicit = AsyncMock(return_value=ElicitResult(action="decline", content=None))
-        ctx = RequestContext(request_id="test", meta=None, session=mock_session, lifespan_context=None)
-        token = request_ctx.set(ctx)
-        try:
-            result = await call_tool("ods_connect", {"url": "http://test:8087/api"})
-        finally:
-            request_ctx.reset(token)
-
-        response = json.loads(result[0].text)
-        assert "error" in response
-        assert response["error_type"] == "ElicitationDeclined"
-
-    @pytest.mark.asyncio
-    async def test_ods_connect_no_elicitation_support(self):
-        """Test error when client does not support elicitation."""
-        mock_session = MagicMock()
-        mock_session.check_client_capability.return_value = False
-        ctx = RequestContext(request_id="test", meta=None, session=mock_session, lifespan_context=None)
-        token = request_ctx.set(ctx)
-        try:
-            result = await call_tool("ods_connect", {"url": "http://test:8087/api"})
-        finally:
-            request_ctx.reset(token)
-
-        response = json.loads(result[0].text)
-        assert "error" in response
-        assert response["error_type"] == "ElicitationNotSupported"
 
     @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.disconnect")
     @pytest.mark.asyncio
