@@ -226,6 +226,25 @@ async def list_tools() -> list[Tool]:
             icons=[Icon(src="🔌")],
         ),
         Tool(
+            name="ods_connect_using_env",
+            title="Connect to ODS Server (from environment)",
+            description=(
+                "Establish connection to ASAM ODS server using environment variables. "
+                "Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "env_prefix": {
+                        "type": "string",
+                        "description": "Optional: override the environment variable prefix (default: ODSBOX_MCP)",
+                    }
+                },
+            },
+            annotations=ToolAnnotations(readOnlyHint=True),
+            icons=[Icon(src="📦")],
+        ),
+        Tool(
             name="ods_disconnect",
             title="Disconnect from ODS Server",
             description="Close connection to ODS server",
@@ -698,6 +717,9 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # ========================================================================
     elif name == "ods_connect":
         return ConnectionToolHandler.ods_connect(arguments)
+
+    elif name == "ods_connect_using_env":
+        return ConnectionToolHandler.ods_connect_using_env(arguments)
 
     elif name == "ods_disconnect":
         return ConnectionToolHandler.ods_disconnect(arguments)

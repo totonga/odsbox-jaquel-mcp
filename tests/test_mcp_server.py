@@ -42,6 +42,7 @@ class TestMCPServer:
             "schema_get_entity",
             "schema_field_exists",
             "ods_connect",
+            "ods_connect_using_env",
             "ods_disconnect",
             "ods_get_connection_info",
             "schema_list_entities",
@@ -235,6 +236,94 @@ class TestMCPServer:
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
         )
+
+    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
+        """Test calling ods_connect_using_env tool with default prefix (ODSBOX_MCP)."""
+        mock_connect.return_value = {"success": True}
+
+        monkeypatch.setenv("ODSBOX_MCP_URL", "http://test:8087/api")
+        monkeypatch.setenv("ODSBOX_MCP_USERNAME", "user")
+        monkeypatch.setenv("ODSBOX_MCP_PASSWORD", "pass")
+        monkeypatch.setenv("ODSBOX_MCP_VERIFY", "false")
+
+        result = await call_tool("ods_connect_using_env", {})
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], TextContent)
+
+        mock_connect.assert_called_once_with(
+            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
+        )
+
+    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
+        """Test calling ods_connect_using_env tool with an explicit env_prefix."""
+        mock_connect.return_value = {"success": True}
+
+        monkeypatch.setenv("ODS_URL", "http://test:8087/api")
+        monkeypatch.setenv("ODS_USERNAME", "user")
+        monkeypatch.setenv("ODS_PASSWORD", "pass")
+        monkeypatch.setenv("ODS_VERIFY", "false")
+
+        result = await call_tool("ods_connect_using_env", {"env_prefix": "ODS"})
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], TextContent)
+
+        mock_connect.assert_called_once_with(
+            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
+        )
+
+    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
+        """Test that ods_connect_using_env falls back to legacy ODS_ env vars when ODSBOX_MCP_ vars are absent."""
+        mock_connect.return_value = {"success": True}
+
+        monkeypatch.delenv("ODSBOX_MCP_URL", raising=False)
+        monkeypatch.delenv("ODSBOX_MCP_USERNAME", raising=False)
+        monkeypatch.delenv("ODSBOX_MCP_PASSWORD", raising=False)
+        monkeypatch.delenv("ODSBOX_MCP_VERIFY", raising=False)
+
+        monkeypatch.setenv("ODS_URL", "http://test:8087/api")
+        monkeypatch.setenv("ODS_USERNAME", "user")
+        monkeypatch.setenv("ODS_PASSWORD", "pass")
+        monkeypatch.setenv("ODS_VERIFY", "true")
+
+        result = await call_tool("ods_connect_using_env", {})
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], TextContent)
+
+        mock_connect.assert_called_once_with(
+            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=True
+        )
+
+    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_missing_required_env_vars(self, mock_connect, monkeypatch):
+        """Test that missing required env vars returns an error response."""
+        mock_connect.return_value = {"success": True}
+
+        monkeypatch.delenv("ODSBOX_MCP_URL", raising=False)
+        monkeypatch.delenv("ODSBOX_MCP_USERNAME", raising=False)
+        monkeypatch.delenv("ODSBOX_MCP_PASSWORD", raising=False)
+
+        result = await call_tool("ods_connect_using_env", {})
+
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], TextContent)
+
+        response_data = json.loads(result[0].text)
+        assert "error" in response_data
+        assert "must be set" in response_data["error"]
 
     @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.disconnect")
     @pytest.mark.asyncio
