@@ -17,6 +17,8 @@ from pathlib import Path
 import mcp.server.stdio
 from mcp.server import InitializationOptions, Server
 from mcp.types import (
+    ClientCapabilities,
+    ElicitationCapability,
     GetPromptResult,
     Icon,
     PromptMessage,
@@ -697,6 +699,49 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
     # CONNECTION MANAGEMENT TOOLS
     # ========================================================================
     elif name == "ods_connect":
+        missing_username = not arguments.get("username")
+        missing_password = not arguments.get("password")
+        if missing_username or missing_password:
+            ctx = server.request_context
+            session = ctx.session
+            supports_elicitation = session.check_client_capability(
+                ClientCapabilities(elicitation=ElicitationCapability())
+            )
+            if not supports_elicitation:
+                return ConnectionToolHandler.error_response(
+                    "username and/or password required but client does not support elicitation",
+                    "ElicitationNotSupported",
+                )
+            result = await session.elicit(
+                message="Please enter your ODS server credentials.",
+                requestedSchema={
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "title": "Username",
+                            "description": "ODS server username",
+                        },
+                        "password": {
+                            "type": "string",
+                            "title": "Password",
+                            "description": "ODS server password",
+                            "format": "password",
+                            "x-mcp-secret": True,
+                        }
+                    },
+                    "required": ["username", "password"],
+                },
+            )
+            if result.action != "accept" or not result.content:
+                return ConnectionToolHandler.error_response(
+                    "Username and password are required to connect",
+                    "ElicitationDeclined",
+                )
+            if result.content.get("username"):
+                arguments["username"] = result.content["username"]
+            if result.content.get("password"):
+                arguments["password"] = result.content["password"]
         return ConnectionToolHandler.ods_connect(arguments)
 
     elif name == "ods_disconnect":
