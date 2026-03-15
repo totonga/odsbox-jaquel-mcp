@@ -55,6 +55,26 @@ class TestMCPServer:
             assert expected_tool in tool_names
 
     @pytest.mark.asyncio
+    async def test_ods_connect_password_marked_as_secret(self):
+        """Test that ods_connect tool marks password as secret with format hint."""
+        tools = await list_tools()
+        ods_connect = next(t for t in tools if t.name == "ods_connect")
+        password_prop = ods_connect.inputSchema["properties"]["password"]
+
+        assert password_prop["format"] == "password"
+        assert password_prop["x-mcp-secret"] is True
+
+    @pytest.mark.asyncio
+    async def test_plot_comparison_notebook_password_marked_as_secret(self):
+        """Test that plot_comparison_notebook marks ods_password as secret."""
+        tools = await list_tools()
+        notebook_tool = next(t for t in tools if t.name == "plot_comparison_notebook")
+        password_prop = notebook_tool.inputSchema["properties"]["ods_password"]
+
+        assert password_prop["format"] == "password"
+        assert password_prop["x-mcp-secret"] is True
+
+    @pytest.mark.asyncio
     async def test_call_tool_query_validate(self):
         """Test calling query_validate tool."""
         query = {"TestEntity": {}}

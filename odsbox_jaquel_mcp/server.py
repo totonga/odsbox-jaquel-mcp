@@ -208,7 +208,12 @@ async def list_tools() -> list[Tool]:
                         "description": "ODS API URL (e.g., http://localhost:8087/api)",
                     },
                     "username": {"type": "string", "description": "Username for auth"},
-                    "password": {"type": "string", "description": "Password for auth"},
+                    "password": {
+                        "type": "string",
+                        "description": "Password for auth",
+                        "format": "password",
+                        "x-mcp-secret": True,
+                    },
                     "verify": {
                         "type": "boolean",
                         "description": "Verify SSL certificates (default: true)",
@@ -399,6 +404,8 @@ async def list_tools() -> list[Tool]:
                     "ods_password": {
                         "type": "string",
                         "description": "ODS password",
+                        "format": "password",
+                        "x-mcp-secret": True,
                     },
                     "available_quantities": {
                         "type": "array",
