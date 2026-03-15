@@ -173,6 +173,7 @@ This project is licensed under the Apache License 2.0. See [LICENSE](https://git
 
 #### Connection Management
 - **ods_connect** - Establish ODS connection
+- **ods_connect_using_env** - Establish ODS connection using environment variables
 - **ods_disconnect** - Close ODS connection
 - **ods_get_connection_info** - Get connection status
 
@@ -288,6 +289,28 @@ Solution: Check URL, server availability, firewall
 ## Install in VSCode
 
 ![install in VSCode](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/docs/install_in_vscode.gif){width=300px}
+
+Try with example server configuration:
+
+```json
+{
+	"servers": {
+		"ods": {
+			"type": "stdio",
+			"command": "uvx",
+			"args": [
+				"odsbox-jaquel-mcp@latest"
+			],
+			"env": {
+				"ODSBOX_MCP_URL": "https://docker.peak-solution.de:10032/api",
+				"ODSBOX_MCP_USER": "Demo",
+				"ODSBOX_MCP_PASSWORD": "mdm"
+			}
+		}
+	},
+	"inputs": []
+}
+```
 
 ## Support
 
