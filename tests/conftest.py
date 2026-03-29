@@ -42,17 +42,3 @@ def integration_credentials():
         "username": "Demo",
         "password": "mdm",
     }
-
-
-@pytest.fixture
-def integration_credentials():
-    """Fixture providing ODS server credentials for integration tests.
-
-    Returns:
-        dict: Dictionary with url, username, and password
-    """
-    return {
-        "url": "https://docker.peak-solution.de:10032/api",
-        "username": "Demo",
-        "password": "mdm",
-    }

@@ -260,10 +260,10 @@ TROUBLESHOOTING BULK API ERRORS
 ERROR: "Not connected to ODS server"
   Cause: ods_connect not called
   Fix: Call ods_connect(url, user, pass) first
-  
+
 ERROR: "No columns matched the pattern"
   Cause: Column names don't match pattern
-  Fix: 
+  Fix:
     1. Call data_get_quantities to see exact names
     2. Use exact names or correct wildcards
     3. Try case_insensitive: true

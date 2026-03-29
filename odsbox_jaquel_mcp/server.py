@@ -10,636 +10,759 @@ live model inspection and schema validation features.
 
 from __future__ import annotations
 
-import asyncio
-import json
+import os
 from pathlib import Path
+from typing import Annotated, Literal
 
-import mcp.server.stdio
-from mcp.server import InitializationOptions, Server
-from mcp.types import (
-    GetPromptResult,
-    Icon,
-    PromptMessage,
-    PromptsCapability,
-    Resource,
-    ResourcesCapability,
-    ServerCapabilities,
-    TextContent,
-    Tool,
-    ToolAnnotations,
-    ToolsCapability,
-)
-from pydantic import AnyUrl
+from fastmcp import Context, FastMCP
+from pydantic import Field
 
 from . import __version__
+from .bulk_api_guide import BulkAPIGuide
+from .connection import ODSConnectionManager
+from .measurement_analysis import ComparisonResult, MeasurementAnalyzer
+from .measurement_queries import MeasurementHierarchyExplorer
+from .notebook_generator import NotebookGenerator
 from .prompts import PromptLibrary
+from .queries import JaquelExamples, JaquelExplain
 from .resources import ResourceLibrary
-from .tools import (
-    ConnectionToolHandler,
-    HelpToolHandler,
-    MeasurementToolHandler,
-    QueryToolHandler,
-    SchemaToolHandler,
-    SubmatrixToolHandler,
-    ValidationToolHandler,
+from .schemas import SchemaInspector
+from .submatrix import SubmatrixDataReader
+from .submatrix.scripts import (
+    generate_advanced_fetcher_script,
+    generate_analysis_fetcher_script,
+    generate_basic_fetcher_script,
+    generate_batch_fetcher_script,
 )
+from .validators import JaquelValidator
+from .visualization_templates import VisualizationTemplateGenerator
 
 # ============================================================================
 # MCP SERVER SETUP
 # ============================================================================
 
-server = Server("odsbox-jaquel-mcp")
-
-
-# ============================================================================
-# MCP TOOLS
-# ============================================================================
-
-
-@server.list_tools()
-async def list_tools() -> list[Tool]:
-    """List all available MCP tools."""
-    return [
-        Tool(
-            name="query_validate",
-            title="Validate Jaquel Query",
-            description="Validate a Jaquel query structure for syntax errors and best practices",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "object",
-                        "description": "The Jaquel query to validate",
-                    }
-                },
-                "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="✅")],
-        ),
-        Tool(
-            name="query_get_operator_docs",
-            title="Get Operator Documentation",
-            description="Get documentation and examples for a Jaquel operator",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "operator": {
-                        "type": "string",
-                        "description": "The operator to get documentation for",
-                    }
-                },
-                "required": ["operator"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📚")],
-        ),
-        Tool(
-            name="query_get_pattern",
-            title="Get Query Pattern Template",
-            description="Get a template for a common Jaquel query pattern",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "pattern": {
-                        "type": "string",
-                        "description": (
-                            "Pattern name: get_all_instances, get_by_id, "
-                            "get_by_name, case_insensitive_search, time_range, "
-                            "inner_join, outer_join, aggregates"
-                        ),
-                    }
-                },
-                "required": ["pattern"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📋")],
-        ),
-        Tool(
-            name="query_list_patterns",
-            title="List Available Query Patterns",
-            description="list all available Jaquel query patterns and templates",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📑")],
-        ),
-        Tool(
-            name="query_generate_skeleton",
-            title="Generate Query Skeleton",
-            description="Generate a query skeleton for a specific entity and operation",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "entity_name": {
-                        "type": "string",
-                        "description": "Name of the entity",
-                    },
-                    "operation": {
-                        "type": "string",
-                        "description": "Type of query: get_all, get_by_id, get_by_name, search_and_select",
-                    },
-                },
-                "required": ["entity_name"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🦴")],
-        ),
-        Tool(
-            name="query_describe",
-            title="Describe JAQueL Query",
-            description="Describe what a Jaquel query does",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "object",
-                        "description": "The Jaquel query",
-                    }
-                },
-                "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="💡")],
-        ),
-        Tool(
-            name="schema_get_entity",
-            title="Check Entity Schema",
-            description="Get available fields for an entity from ODS model",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "entity_name": {
-                        "type": "string",
-                        "description": "Entity name (e.g., 'StructureLevel')",
-                    }
-                },
-                "required": ["entity_name"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📊")],
-        ),
-        Tool(
-            name="schema_field_exists",
-            title="Validate Field Exists",
-            description="Check if a field exists in entity schema",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "entity_name": {"type": "string", "description": "Entity name"},
-                    "field_name": {"type": "string", "description": "Field to check"},
-                },
-                "required": ["entity_name", "field_name"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔍")],
-        ),
-        Tool(
-            name="ods_connect",
-            title="Connect to ODS Server",
-            description="Establish connection to ASAM ODS server for live model inspection",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "ODS API URL (e.g., http://localhost:8087/api)",
-                    },
-                    "username": {"type": "string", "description": "Username for auth"},
-                    "password": {
-                        "type": "string",
-                        "description": "Password for auth",
-                        "format": "password",
-                        "x-mcp-secret": True,
-                    },
-                    "verify": {
-                        "type": "boolean",
-                        "description": "Verify SSL certificates (default: true)",
-                        "default": True,
-                    },
-                },
-                "required": ["url", "username", "password"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔌")],
-        ),
-        Tool(
-            name="ods_connect_using_env",
-            title="Connect to ODS Server (from environment)",
-            description=(
-                "Establish connection to ASAM ODS server using environment variables. "
-                "Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix."
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "env_prefix": {
-                        "type": "string",
-                        "description": "Optional: override the environment variable prefix (default: ODSBOX_MCP)",
-                    }
-                },
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📦")],
-        ),
-        Tool(
-            name="ods_disconnect",
-            title="Disconnect from ODS Server",
-            description="Close connection to ODS server",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔓")],
-        ),
-        Tool(
-            name="ods_get_connection_info",
-            title="Get ODS Connection Information",
-            description="Get current ODS connection information",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="ℹ️")],
-        ),
-        Tool(
-            name="schema_list_entities",
-            title="List ODS Entities",
-            description="Return a list of existing entities from the ODS server ModelCache",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📋")],
-        ),
-        Tool(
-            name="query_execute",
-            title="Execute ODS Query",
-            description="Execute a Jaquel query directly on connected ODS server",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "object",
-                        "description": "Jaquel query to execute",
-                    }
-                },
-                "required": ["query"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="⚙️")],
-        ),
-        Tool(
-            name="data_get_quantities",
-            title="Get Submatrix Measurement Quantities",
-            description="Get available measurement quantities for a submatrix",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "submatrix_id": {
-                        "type": "integer",
-                        "description": "ID of the submatrix",
-                    }
-                },
-                "required": ["submatrix_id"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📈")],
-        ),
-        Tool(
-            name="data_read_submatrix",
-            title="Read Submatrix Data",
-            description="Read timeseries data from a submatrix using bulk data access",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "submatrix_id": {
-                        "type": "integer",
-                        "description": "ID of the submatrix to read",
-                    },
-                    "measurement_quantity_patterns": {
-                        "type": "array",
-                        "description": "List of measurement quantity name patterns to include",
-                        "items": {"type": "string"},
-                    },
-                    "case_insensitive": {
-                        "type": "boolean",
-                        "description": "Whether pattern matching should be case insensitive",
-                    },
-                    "date_as_timestamp": {
-                        "type": "boolean",
-                        "description": "Convert date columns to pandas timestamps",
-                    },
-                    "set_independent_as_index": {
-                        "type": "boolean",
-                        "description": "Set the independent column as DataFrame index",
-                    },
-                    "max_preview_size": {
-                        "type": "integer",
-                        "description": "Maximum number of rows in data preview (default: 100)",
-                    },
-                    "preview_sampling_method": {
-                        "type": "string",
-                        "description": "Method for resampling preview data: auto, uniform, time_aware, random, stratified, minmax",
-                        "enum": ["auto", "uniform", "time_aware", "random", "stratified", "minmax"],
-                    },
-                },
-                "required": ["submatrix_id"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📖")],
-        ),
-        Tool(
-            name="data_generate_fetcher_script",
-            title="Generate Submatrix Fetcher Script",
-            description=(
-                "Generate Python scripts for fetching submatrix data " "with error handling and data processing"
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "submatrix_id": {
-                        "type": "integer",
-                        "description": "ID of the submatrix to fetch data from",
-                    },
-                    "script_type": {
-                        "type": "string",
-                        "description": "Type of script: basic, advanced, batch, analysis",
-                        "enum": ["basic", "advanced", "batch", "analysis"],
-                    },
-                    "output_format": {
-                        "type": "string",
-                        "description": "Desired output format for the data",
-                        "enum": ["csv", "json", "parquet", "excel", "dataframe"],
-                    },
-                    "measurement_quantity_patterns": {
-                        "type": "array",
-                        "description": "List of measurement quantity patterns to include",
-                        "items": {"type": "string"},
-                    },
-                    "include_analysis": {
-                        "type": "boolean",
-                        "description": "Include basic data analysis examples",
-                    },
-                    "include_visualization": {
-                        "type": "boolean",
-                        "description": "Include matplotlib visualization code",
-                    },
-                },
-                "required": ["submatrix_id", "script_type"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🐍")],
-        ),
-        Tool(
-            name="plot_comparison_notebook",
-            title="Generate Measurement Comparison Notebook",
-            description="Generate a Jupyter notebook for comparing measurements",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "measurement_query_conditions": {
-                        "type": "object",
-                        "description": "Filter conditions for measurements",
-                    },
-                    "measurement_quantity_names": {
-                        "type": "array",
-                        "description": "Names of quantities to plot",
-                        "items": {"type": "string"},
-                    },
-                    "ods_url": {
-                        "type": "string",
-                        "description": "ODS server URL",
-                    },
-                    "ods_username": {
-                        "type": "string",
-                        "description": "ODS username",
-                    },
-                    "ods_password": {
-                        "type": "string",
-                        "description": "ODS password",
-                        "format": "password",
-                        "x-mcp-secret": True,
-                    },
-                    "available_quantities": {
-                        "type": "array",
-                        "description": "List of all available quantities (for documentation)",
-                        "items": {"type": "string"},
-                    },
-                    "plot_type": {
-                        "type": "string",
-                        "description": 'Type of plot ("scatter", "line", or "subplots")',
-                        "enum": ["scatter", "line", "subplots"],
-                    },
-                    "title": {
-                        "type": "string",
-                        "description": "Notebook title",
-                    },
-                    "output_path": {
-                        "type": "string",
-                        "description": "Optional path to save notebook (.ipynb file)",
-                    },
-                },
-                "required": [
-                    "measurement_query_conditions",
-                    "measurement_quantity_names",
-                    "ods_url",
-                    "ods_username",
-                    "ods_password",
-                ],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📓")],
-        ),
-        Tool(
-            name="plot_generate_code",
-            title="Generate Plotting Code",
-            description="Generate Python plotting code for measurement comparison",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "measurement_quantity_names": {
-                        "type": "array",
-                        "description": "List of quantity names to plot",
-                        "items": {"type": "string"},
-                    },
-                    "submatrices_count": {
-                        "type": "integer",
-                        "description": "Number of submatrices to plot",
-                    },
-                    "plot_type": {
-                        "type": "string",
-                        "description": 'Type of plot ("scatter", "line", or "subplots")',
-                        "enum": ["scatter", "line", "subplots"],
-                    },
-                },
-                "required": [
-                    "measurement_quantity_names",
-                    "submatrices_count",
-                    "plot_type",
-                ],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="📊")],
-        ),
-        Tool(
-            name="data_compare_measurements",
-            title="Compare Measurements",
-            description="Compare measurements across quantities with statistical analysis",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "quantity_name": {
-                        "type": "string",
-                        "description": "Name of quantity to compare",
-                    },
-                    "measurement_data": {
-                        "type": "object",
-                        "description": "Dict mapping measurement_id (as string) to list of values",
-                    },
-                    "measurement_names": {
-                        "type": "object",
-                        "description": "Optional dict mapping measurement_id to display names",
-                    },
-                },
-                "required": ["quantity_name", "measurement_data"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔀")],
-        ),
-        Tool(
-            name="data_query_hierarchy",
-            title="Query Measurement Hierarchy",
-            description="Query and explore ODS measurement hierarchy and structure",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query_result": {
-                        "type": "object",
-                        "description": "ODS query result to explore",
-                    },
-                    "operation": {
-                        "type": "string",
-                        "description": "Operation to perform on query result",
-                        "enum": [
-                            "extract_measurements",
-                            "build_hierarchy",
-                            "get_unique_tests",
-                            "get_unique_quantities",
-                            "build_index",
-                        ],
-                    },
-                    "test_name": {
-                        "type": "string",
-                        "description": "Optional test name for filtering",
-                    },
-                    "quantity_names": {
-                        "type": "array",
-                        "description": "Optional list of quantities to search for",
-                        "items": {"type": "string"},
-                    },
-                },
-                "required": ["query_result", "operation"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🌳")],
-        ),
-        Tool(
-            name="help_bulk_api",
-            title="Get Bulk API Help",
-            description=(
-                "Get help and guidance on using the Bulk API for loading timeseries data. "
-                "Use this to understand the 3-step workflow and common patterns."
-            ),
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "topic": {
-                        "type": "string",
-                        "description": (
-                            "Help topic. Options: 3-step-rule, quick-start, bulk-vs-jaquel, "
-                            "patterns, decision-tree, mistakes, step-by-step, "
-                            "response-template, troubleshooting, tool-patterns, all"
-                        ),
-                        "enum": [
-                            "3-step-rule",
-                            "quick-start",
-                            "bulk-vs-jaquel",
-                            "patterns",
-                            "decision-tree",
-                            "mistakes",
-                            "step-by-step",
-                            "response-template",
-                            "troubleshooting",
-                            "tool-patterns",
-                            "all",
-                        ],
-                    },
-                    "tool": {
-                        "type": "string",
-                        "description": (
-                            "Optional: Get contextual help for a specific tool "
-                            "(e.g., data_read_submatrix, ods_connect)"
-                        ),
-                    },
-                },
-                "required": ["topic"],
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="❓")],
-        ),
-        Tool(
-            name="schema_test_to_measurement_hierarchy",
-            title="Get Test to Measurement Hierarchy",
-            description="Get hierarchical entity chain from AoTest to AoMeasurement via 'children' relation",
-            inputSchema={
-                "type": "object",
-                "properties": {},
-            },
-            annotations=ToolAnnotations(readOnlyHint=True),
-            icons=[Icon(src="🔗")],
-        ),
-    ]
-
-
-# ============================================================================
-# MCP PROMPTS
-# ============================================================================
-
-
-@server.list_prompts()
-async def list_prompts() -> list:
-    """List all available starting prompts."""
-    return PromptLibrary.get_all_prompts()
-
-
-@server.get_prompt()
-async def get_prompt(name: str, arguments: dict | None = None) -> GetPromptResult:
-    """Get a specific prompt with optional arguments."""
-    # Find the prompt by name
-    all_prompts = PromptLibrary.get_all_prompts()
-    prompt = next((p for p in all_prompts if p.name == name), None)
-
-    if not prompt:
-        raise ValueError(f"Unknown prompt: {name}")
-
-    # Generate the prompt content
-    content = PromptLibrary.get_prompt_content(name, arguments or {})
-
-    return GetPromptResult(
-        description=prompt.description,
-        messages=[
-            PromptMessage(
-                role="user",
-                content=TextContent(type="text", text=content),
-            )
-        ],
+# Load instructions from markdown file
+_instructions_path = Path(__file__).parent / "server_instructions.md"
+try:
+    _instructions = _instructions_path.read_text(encoding="utf-8")
+except FileNotFoundError:
+    _instructions = (
+        "# ASAM ODS Jaquel MCP Server\n\n" "See documentation at https://github.com/totonga/odsbox-jaquel-mcp"
     )
+
+mcp = FastMCP(
+    name="odsbox-jaquel-mcp",
+    instructions=_instructions,
+    version=__version__,
+)
+
+
+# ============================================================================
+# VALIDATION TOOLS
+# ============================================================================
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"validation"},
+)
+def query_validate(query: dict) -> dict:
+    """Validate a Jaquel query structure for syntax errors and best practices."""
+    return JaquelValidator.query_validate(query)
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"validation"},
+)
+def query_get_operator_docs(operator: str) -> dict:
+    """Get documentation and examples for a Jaquel operator."""
+    if not operator or not isinstance(operator, str) or not operator.strip():
+        raise ValueError("operator must be a non-empty string")
+    return JaquelValidator.get_operator_info(operator)
+
+
+# ============================================================================
+# QUERY PATTERN TOOLS
+# ============================================================================
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"query"},
+)
+def query_get_pattern(
+    pattern: Annotated[
+        str,
+        Field(
+            description=(
+                "Pattern name: get_all_instances, get_by_id, "
+                "get_by_name, case_insensitive_search, time_range, "
+                "inner_join, outer_join, aggregates"
+            )
+        ),
+    ],
+) -> dict:
+    """Get a template for a common Jaquel query pattern."""
+    if not pattern or not isinstance(pattern, str) or not pattern.strip():
+        raise ValueError("pattern must be a non-empty string")
+    return JaquelExamples.get_pattern(pattern)
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"query"},
+)
+def query_list_patterns() -> dict:
+    """List all available Jaquel query patterns and templates."""
+    patterns = JaquelExamples.list_patterns()
+    return {"available_patterns": patterns, "description": "Available query patterns"}
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"query"},
+)
+def query_generate_skeleton(
+    entity_name: str,
+    operation: Annotated[
+        str,
+        Field(
+            default="get_all",
+            description="Type of query: get_all, get_by_id, get_by_name, search_and_select",
+        ),
+    ] = "get_all",
+) -> dict:
+    """Generate a query skeleton for a specific entity and operation."""
+    if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
+        raise ValueError("entity_name must be a non-empty string")
+    return JaquelExamples.query_generate_skeleton(entity_name, operation)
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"query"},
+)
+def query_describe(query: dict) -> str:
+    """Describe what a Jaquel query does."""
+    return JaquelExplain.query_describe(query)
+
+
+# ============================================================================
+# SCHEMA TOOLS
+# ============================================================================
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"schema"},
+)
+def schema_get_entity(
+    entity_name: Annotated[str, Field(description="Entity name (e.g., 'StructureLevel')")],
+) -> dict:
+    """Get available fields for an entity from ODS model."""
+    if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
+        raise ValueError("entity_name must be a non-empty string")
+    return SchemaInspector.get_entity_schema(entity_name)
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"schema"},
+)
+def schema_field_exists(entity_name: str, field_name: str) -> dict:
+    """Check if a field exists in entity schema."""
+    if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
+        raise ValueError("entity_name must be a non-empty string")
+    if not field_name or not isinstance(field_name, str) or not field_name.strip():
+        raise ValueError("field_name must be a non-empty string")
+    return SchemaInspector.schema_field_exists(entity_name, field_name)
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"schema"},
+)
+def schema_list_entities() -> dict:
+    """Return a list of existing entities from the ODS server ModelCache."""
+    return SchemaInspector.schema_list_entities()
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"schema"},
+)
+def schema_test_to_measurement_hierarchy() -> dict:
+    """Get hierarchical entity chain from AoTest to AoMeasurement via 'children' relation."""
+    return SchemaInspector.schema_test_to_measurement_hierarchy()
+
+
+# ============================================================================
+# CONNECTION TOOLS
+# ============================================================================
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"connection"},
+)
+async def ods_connect(
+    url: Annotated[str, Field(description="ODS API URL (e.g., http://localhost:8087/api)")],
+    username: str,
+    password: Annotated[
+        str,
+        Field(
+            json_schema_extra={"format": "password", "x-mcp-secret": True},
+        ),
+    ],
+    verify: Annotated[bool, Field(description="Verify SSL certificates (default: true)")] = True,
+    ctx: Context | None = None,
+) -> dict:
+    """Establish connection to ASAM ODS server for live model inspection."""
+    if not url or not isinstance(url, str) or not url.strip():
+        raise ValueError("url must be a non-empty string")
+    if not username or not isinstance(username, str) or not username.strip():
+        raise ValueError("username must be a non-empty string")
+    if not password or not isinstance(password, str) or not password.strip():
+        raise ValueError("password must be a non-empty string")
+    if ctx:
+        await ctx.info(f"Connecting to ODS server: {url} as user '{username}'")
+    result = ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify)
+    if ctx:
+        await ctx.info("Connection established successfully")
+    return result
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"connection"},
+)
+async def ods_connect_using_env(
+    env_prefix: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description="Optional: override the environment variable prefix (default: ODSBOX_MCP)",
+        ),
+    ] = None,
+    ctx: Context | None = None,
+) -> dict:
+    """Establish connection to ASAM ODS server using environment variables.
+
+    Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix.
+    Falls back to legacy ODS_ prefix variables.
+    """
+    env = os.environ
+    resolved_prefix = env_prefix or env.get("ODSBOX_MCP_ENV_PREFIX") or "ODSBOX_MCP"
+    if ctx:
+        await ctx.info(f"Resolved env prefix: {resolved_prefix}")
+
+    def _env_get(key: str) -> str | None:
+        return env.get(f"{resolved_prefix}_{key}") or env.get(f"ODS_{key}")
+
+    url = _env_get("URL") or _env_get("API_URL")
+    if not url or not isinstance(url, str) or not url.strip():
+        raise ValueError(
+            f"Environment variable {resolved_prefix}_URL (or {resolved_prefix}_API_URL) "
+            "must be set to a non-empty string"
+        )
+
+    username = _env_get("USERNAME") or _env_get("USER")
+    if not username or not isinstance(username, str) or not username.strip():
+        raise ValueError(
+            f"Environment variable {resolved_prefix}_USERNAME (or {resolved_prefix}_USER) "
+            "must be set to a non-empty string"
+        )
+
+    password = _env_get("PASSWORD") or _env_get("PWD")
+    if not password or not isinstance(password, str) or not password.strip():
+        raise ValueError(
+            f"Environment variable {resolved_prefix}_PASSWORD (or {resolved_prefix}_PWD) "
+            "must be set to a non-empty string"
+        )
+    if ctx:
+        await ctx.debug(f"Using URL: {url}, username: {username}")
+
+    verify_str = _env_get("VERIFY")
+    if verify_str is None or str(verify_str).strip() == "":
+        verify_bool = True
+    else:
+        verify_bool = str(verify_str).strip().lower() in ("1", "true", "yes", "y")
+
+    result = ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify_bool)
+    if ctx:
+        await ctx.info("Connection established successfully")
+    return result
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"connection"},
+)
+def ods_disconnect() -> dict:
+    """Close connection to ODS server."""
+    return ODSConnectionManager.disconnect()
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"connection"},
+)
+def ods_get_connection_info() -> dict:
+    """Get current ODS connection information."""
+    return ODSConnectionManager.get_connection_info()
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"connection"},
+)
+async def query_execute(
+    query: Annotated[dict, Field(description="Jaquel query to execute")],
+    ctx: Context | None = None,
+) -> dict:
+    """Execute a Jaquel query directly on connected ODS server."""
+    result = ODSConnectionManager.query(query)
+    # Convert non-serializable objects to strings for JSON serialization
+    if "result" in result and result["result"] is not None:
+        result["result"] = str(result["result"])
+        if ctx:
+            await ctx.warning("Query result serialized to string — use data_read_submatrix for structured data access")
+    return result
+
+
+# ============================================================================
+# SUBMATRIX DATA ACCESS TOOLS
+# ============================================================================
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"data"},
+)
+def data_get_quantities(
+    submatrix_id: Annotated[int, Field(description="ID of the submatrix")],
+) -> dict:
+    """Get available measurement quantities for a submatrix."""
+    if submatrix_id <= 0:
+        raise ValueError("submatrix_id must be a positive integer (> 0)")
+    quantities = SubmatrixDataReader.get_measurement_quantities(submatrix_id)
+    return {"submatrix_id": submatrix_id, "measurement_quantities": quantities}
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"data"},
+)
+async def data_read_submatrix(
+    submatrix_id: Annotated[int, Field(description="ID of the submatrix to read")],
+    measurement_quantity_patterns: Annotated[
+        list[str] | None,
+        Field(default=None, description="List of measurement quantity name patterns to include"),
+    ] = None,
+    case_insensitive: Annotated[
+        bool, Field(default=False, description="Whether pattern matching should be case insensitive")
+    ] = False,
+    date_as_timestamp: Annotated[
+        bool, Field(default=True, description="Convert date columns to pandas timestamps")
+    ] = True,
+    set_independent_as_index: Annotated[
+        bool, Field(default=True, description="Set the independent column as DataFrame index")
+    ] = True,
+    max_preview_size: Annotated[
+        int, Field(default=100, description="Maximum number of rows in data preview (default: 100)")
+    ] = 100,
+    preview_sampling_method: Annotated[
+        Literal["auto", "uniform", "time_aware", "random", "stratified", "minmax"],
+        Field(
+            default="auto",
+            description="Method for resampling preview data: auto, uniform, time_aware, random, stratified, minmax",
+        ),
+    ] = "auto",
+    ctx: Context | None = None,
+) -> dict:
+    """Read timeseries data from a submatrix using bulk data access."""
+    if submatrix_id <= 0:
+        raise ValueError("submatrix_id must be a positive integer (> 0)")
+    if ctx:
+        await ctx.info(f"Reading submatrix {submatrix_id}...")
+    result = SubmatrixDataReader.data_read_submatrix(
+        submatrix_id=submatrix_id,
+        measurement_quantity_patterns=measurement_quantity_patterns or [],
+        case_insensitive=case_insensitive,
+        date_as_timestamp=date_as_timestamp,
+        set_independent_as_index=set_independent_as_index,
+        max_preview_size=max_preview_size,
+        preview_sampling_method=preview_sampling_method,
+    )
+    if ctx:
+        await ctx.info(result["note"])
+    return result
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"data"},
+)
+async def data_generate_fetcher_script(
+    submatrix_id: Annotated[int, Field(description="ID of the submatrix to fetch data from")],
+    script_type: Annotated[
+        Literal["basic", "advanced", "batch", "analysis"],
+        Field(description="Type of script: basic, advanced, batch, analysis"),
+    ],
+    output_format: Annotated[
+        Literal["csv", "json", "parquet", "excel", "dataframe"],
+        Field(default="csv", description="Desired output format for the data"),
+    ] = "csv",
+    measurement_quantity_patterns: Annotated[
+        list[str] | None,
+        Field(default=None, description="List of measurement quantity patterns to include"),
+    ] = None,
+    include_analysis: Annotated[
+        bool, Field(default=False, description="Include basic data analysis examples")
+    ] = False,
+    include_visualization: Annotated[
+        bool, Field(default=False, description="Include matplotlib visualization code")
+    ] = False,
+    ctx: Context | None = None,
+) -> dict:
+    """Generate Python scripts for fetching submatrix data with error handling and data processing."""
+    if submatrix_id <= 0:
+        raise ValueError("submatrix_id must be a positive integer (> 0)")
+
+    # Get available measurement quantities
+    quantities = SubmatrixDataReader.get_measurement_quantities(submatrix_id)
+
+    # Use provided patterns or all quantities
+    if not measurement_quantity_patterns:
+        mq_list = [q["name"] for q in quantities]
+        if ctx:
+            await ctx.warning(f"No patterns specified — including all {len(quantities)} quantities in script")
+    else:
+        mq_list = measurement_quantity_patterns
+
+    # Generate script based on type
+    if script_type == "basic":
+        script = generate_basic_fetcher_script(submatrix_id, mq_list, output_format)
+    elif script_type == "advanced":
+        script = generate_advanced_fetcher_script(
+            submatrix_id, mq_list, output_format, include_visualization, include_analysis
+        )
+    elif script_type == "batch":
+        script = generate_batch_fetcher_script(submatrix_id, mq_list, output_format)
+    elif script_type == "analysis":
+        script = generate_analysis_fetcher_script(submatrix_id, mq_list, output_format, include_visualization)
+    else:
+        raise ValueError(f"Unknown script type: {script_type}")
+
+    return {
+        "submatrix_id": submatrix_id,
+        "script_type": script_type,
+        "output_format": output_format,
+        "script": script,
+        "instructions": [
+            "1. Update the configuration section with your ODS server details",
+            "2. Install required packages: pip install odsbox pandas",
+            f"3. Run the script: python submatrix_{submatrix_id}_fetcher.py",
+            f"4. Check output: submatrix_{submatrix_id}_data.{output_format}",
+        ],
+    }
+
+
+# ============================================================================
+# MEASUREMENT & VISUALIZATION TOOLS
+# ============================================================================
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"measurement", "visualization"},
+)
+def plot_comparison_notebook(
+    measurement_query_conditions: Annotated[dict, Field(description="Filter conditions for measurements")],
+    measurement_quantity_names: Annotated[list[str], Field(description="Names of quantities to plot")],
+    ods_url: Annotated[str, Field(description="ODS server URL")],
+    ods_username: Annotated[str, Field(description="ODS username")],
+    ods_password: Annotated[
+        str,
+        Field(
+            description="ODS password",
+            json_schema_extra={"format": "password", "x-mcp-secret": True},
+        ),
+    ],
+    available_quantities: Annotated[
+        list[str] | None,
+        Field(default=None, description="List of all available quantities (for documentation)"),
+    ] = None,
+    plot_type: Annotated[
+        Literal["scatter", "line", "subplots"],
+        Field(default="scatter", description='Type of plot ("scatter", "line", or "subplots")'),
+    ] = "scatter",
+    title: Annotated[
+        str, Field(default="Measurement Comparison", description="Notebook title")
+    ] = "Measurement Comparison",
+    output_path: Annotated[
+        str | None,
+        Field(default=None, description="Optional path to save notebook (.ipynb file)"),
+    ] = None,
+) -> dict:
+    """Generate a Jupyter notebook for comparing measurements."""
+    notebook = NotebookGenerator.plot_comparison_notebook(
+        measurement_query_conditions=measurement_query_conditions,
+        measurement_quantity_names=measurement_quantity_names,
+        ods_url=ods_url,
+        ods_username=ods_username,
+        ods_password=ods_password,
+        available_quantities=available_quantities,
+        plot_type=plot_type,
+        title=title,
+    )
+
+    result: dict = {
+        "title": title,
+        "plot_type": plot_type,
+        "measurement_quantities": measurement_quantity_names,
+        "num_cells": len(notebook["cells"]),
+    }
+
+    if output_path:
+        NotebookGenerator.save_notebook(notebook, output_path)
+        result["saved_to"] = output_path
+        result["status"] = "Notebook saved successfully"
+    else:
+        result["status"] = "Notebook generated successfully"
+        result["notebook"] = notebook
+
+    return result
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"measurement", "visualization"},
+)
+def plot_generate_code(
+    measurement_quantity_names: Annotated[list[str], Field(description="List of quantity names to plot")],
+    submatrices_count: Annotated[int, Field(description="Number of submatrices to plot")],
+    plot_type: Annotated[
+        Literal["scatter", "line", "subplots"],
+        Field(description='Type of plot ("scatter", "line", or "subplots")'),
+    ],
+) -> dict:
+    """Generate Python plotting code for measurement comparison."""
+    if plot_type == "scatter":
+        if len(measurement_quantity_names) < 2:
+            raise ValueError("Scatter plot requires at least 2 measurement quantities")
+        code = VisualizationTemplateGenerator.generate_scatter_plot_code(
+            measurement_quantity_names=measurement_quantity_names,
+            submatrices_count=submatrices_count,
+        )
+    elif plot_type == "line":
+        code = VisualizationTemplateGenerator.generate_line_plot_code(
+            measurement_quantity_names=measurement_quantity_names,
+            submatrices_count=submatrices_count,
+        )
+    elif plot_type == "subplots":
+        code = VisualizationTemplateGenerator.generate_subplots_per_measurement_code(
+            measurement_quantity_names=measurement_quantity_names,
+            submatrices_count=submatrices_count,
+        )
+    else:
+        raise ValueError(f"Unknown plot type: {plot_type}")
+
+    return {
+        "plot_type": plot_type,
+        "measurement_quantities": measurement_quantity_names,
+        "submatrices_count": submatrices_count,
+        "code": code,
+        "description": (
+            f"Generated {plot_type} plot code for "
+            f"{len(measurement_quantity_names)} quantities and "
+            f"{submatrices_count} submatrices"
+        ),
+    }
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"measurement"},
+)
+async def data_compare_measurements(
+    quantity_name: Annotated[str, Field(description="Name of quantity to compare")],
+    measurement_data: Annotated[dict, Field(description="Dict mapping measurement_id (as string) to list of values")],
+    measurement_names: Annotated[
+        dict | None,
+        Field(default=None, description="Optional dict mapping measurement_id to display names"),
+    ] = None,
+    ctx: Context | None = None,
+) -> dict:
+    """Compare measurements across quantities with statistical analysis."""
+    if not quantity_name or not measurement_data:
+        raise ValueError("quantity_name and measurement_data are required")
+
+    # Convert string keys to integers for measurement_data
+    converted_data: dict[int, list[float]] = {}  # type: ignore
+    for key, values in measurement_data.items():
+        try:
+            meas_id = int(key)
+            converted_data[meas_id] = values  # type: ignore
+        except (ValueError, TypeError):
+            if ctx:
+                await ctx.warning(f"Could not convert measurement key '{key}' to int, using as-is")
+            converted_data[key] = values  # type: ignore
+
+    # Perform multi-measurement comparison
+    comparison_result = MeasurementAnalyzer.compare_multiple_measurements(quantity_name, converted_data)
+
+    # If measurement_names provided, generate summary
+    if measurement_names:
+        quantity_names = [quantity_name]
+        comparison_results = [
+            ComparisonResult(
+                quantity_name=c["quantity_name"],
+                measurement_1_id=c["measurement_1_id"],
+                measurement_2_id=c["measurement_2_id"],
+                measurement_1_mean=c["measurement_1_mean"],
+                measurement_2_mean=c["measurement_2_mean"],
+                mean_difference=c["mean_difference"],
+                mean_difference_percent=c["mean_difference_percent"],
+                correlation=c["correlation"],
+                notes=c["notes"],
+            )
+            for c in comparison_result.get("pairwise_comparisons", [])
+        ]
+
+        summary = MeasurementAnalyzer.generate_comparison_summary(
+            measurement_names, quantity_names, comparison_results
+        )
+        comparison_result["summary"] = summary
+
+    return comparison_result
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"measurement"},
+)
+def data_query_hierarchy(
+    query_result: Annotated[dict, Field(description="ODS query result to explore")],
+    operation: Annotated[
+        Literal[
+            "extract_measurements",
+            "build_hierarchy",
+            "get_unique_tests",
+            "get_unique_quantities",
+            "build_index",
+        ],
+        Field(description="Operation to perform on query result"),
+    ],
+    test_name: Annotated[str | None, Field(default=None, description="Optional test name for filtering")] = None,
+    quantity_names: Annotated[
+        list[str] | None,
+        Field(default=None, description="Optional list of quantities to search for"),
+    ] = None,
+) -> dict:
+    """Query and explore ODS measurement hierarchy and structure."""
+    if operation == "extract_measurements":
+        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+        return {
+            "operation": operation,
+            "num_measurements": len(measurements),
+            "measurements": measurements[:50],  # Limit output
+        }
+
+    elif operation == "build_hierarchy":
+        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
+        return {
+            "operation": operation,
+            "hierarchy_keys": list(hierarchy.keys()),
+            "total_measurements": hierarchy["total_measurements"],
+            "tests": list(hierarchy["by_test"].keys()),
+            "statuses": list(hierarchy["by_status"].keys()),
+        }
+
+    elif operation == "get_unique_tests":
+        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+        tests = MeasurementHierarchyExplorer.get_unique_tests(measurements)
+        return {
+            "operation": operation,
+            "unique_tests": tests,
+            "num_tests": len(tests),
+        }
+
+    elif operation == "get_unique_quantities":
+        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+        unique_quantities: list[str] = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
+        return {
+            "operation": operation,
+            "unique_quantities": unique_quantities,
+            "num_quantities": len(unique_quantities),
+        }
+
+    elif operation == "build_index":
+        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
+        index = MeasurementHierarchyExplorer.build_measurement_index(measurements)
+        return {
+            "operation": operation,
+            "total_measurements": index["total_measurements"],
+            "index_by_id_count": len(index["by_id"]),
+            "index_by_name_count": len(index["by_name"]),
+            "index_by_test_count": len(index["by_test"]),
+            "index_by_status_count": len(index["by_status"]),
+            "available_test_names": list(index["by_test"].keys())[:10],
+        }
+
+    else:
+        raise ValueError(f"Unknown operation: {operation}")
+
+
+# ============================================================================
+# HELP & DOCUMENTATION TOOLS
+# ============================================================================
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True},
+    tags={"help"},
+)
+def help_bulk_api(
+    topic: Annotated[
+        Literal[
+            "3-step-rule",
+            "quick-start",
+            "bulk-vs-jaquel",
+            "patterns",
+            "decision-tree",
+            "mistakes",
+            "step-by-step",
+            "response-template",
+            "troubleshooting",
+            "tool-patterns",
+            "all",
+        ],
+        Field(description="Help topic"),
+    ],
+    tool: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description="Optional: Get contextual help for a specific tool (e.g., data_read_submatrix, ods_connect)",
+        ),
+    ] = None,
+) -> dict:
+    """Get help and guidance on using the Bulk API for loading timeseries data.
+
+    Use this to understand the 3-step workflow and common patterns.
+    """
+    if tool:
+        help_text = BulkAPIGuide.get_contextual_help(tool)
+        return {"topic": "contextual-help", "tool": tool, "help": help_text}
+    elif topic == "all":
+        help_text = BulkAPIGuide.get_all_help()
+        return {"topic": topic, "help": help_text}
+    else:
+        help_text = BulkAPIGuide.get_help(topic)
+        return {"topic": topic, "help": help_text}
 
 
 # ============================================================================
@@ -647,171 +770,112 @@ async def get_prompt(name: str, arguments: dict | None = None) -> GetPromptResul
 # ============================================================================
 
 
-@server.list_resources()
-async def list_resources() -> list[Resource]:
-    """List available reference resources for ODS connection and workflows."""
-    return ResourceLibrary.get_all_resources()
+@mcp.resource("file:///odsbox/ods-connection-guide", name="ODS Connection Setup Guide", mime_type="text/markdown")
+def resource_ods_connection_guide() -> str:
+    """Complete guide for connecting to ASAM ODS servers and managing connections."""
+    return ResourceLibrary.get_resource_content("file:///odsbox/ods-connection-guide")
 
 
-@server.list_resource_templates()
-async def list_resource_templates():
-    """List available resource templates for dynamic content."""
-    return ResourceLibrary.get_all_resource_templates()
+@mcp.resource("file:///odsbox/ods-workflow-reference", name="Common ODS Workflows", mime_type="text/markdown")
+def resource_ods_workflow_reference() -> str:
+    """Step-by-step workflows for typical ODS operations and data access patterns."""
+    return ResourceLibrary.get_resource_content("file:///odsbox/ods-workflow-reference")
 
 
-@server.read_resource()
-async def read_resource(uri: AnyUrl):
-    """Read reference resources about ODS connection and workflows."""
-    content = ResourceLibrary.get_resource_content(str(uri))
-
-    # MCP expects Iterable[ReadResourceContents] where each item has .content and .mime_type
-    class ResourceContent:
-        def __init__(self, content_text: str, mime_type: str):
-            self.content = content_text
-            self.mime_type = mime_type
-
-    return [ResourceContent(content, "text/markdown")]
+@mcp.resource("file:///odsbox/ods-entity-hierarchy", name="ODS Entity Hierarchy Reference", mime_type="text/markdown")
+def resource_ods_entity_hierarchy() -> str:
+    """Understanding ASAM ODS entity relationships (AoTest, AoMeasurement, etc.)."""
+    return ResourceLibrary.get_resource_content("file:///odsbox/ods-entity-hierarchy")
 
 
-@server.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[TextContent]:
-    """Handle MCP tool calls by delegating to appropriate tool handlers."""
-    # ========================================================================
-    # VALIDATION TOOLS
-    # ========================================================================
-    if name == "query_validate":
-        return ValidationToolHandler.query_validate(arguments)
-
-    elif name == "query_get_operator_docs":
-        return ValidationToolHandler.query_get_operator_docs(arguments)
-
-    # ========================================================================
-    # QUERY PATTERN TOOLS
-    # ========================================================================
-    elif name == "query_get_pattern":
-        return QueryToolHandler.query_get_pattern(arguments)
-
-    elif name == "query_list_patterns":
-        return QueryToolHandler.query_list_patterns(arguments)
-
-    elif name == "query_generate_skeleton":
-        return QueryToolHandler.query_generate_skeleton(arguments)
-
-    # ========================================================================
-    # QUERY EXPLANATION & DEBUGGING TOOLS
-    # ========================================================================
-    elif name == "query_describe":
-        return QueryToolHandler.query_describe(arguments)
-
-    # ========================================================================
-    # SCHEMA VALIDATION TOOLS
-    # ========================================================================
-    elif name == "schema_get_entity":
-        return SchemaToolHandler.schema_get_entity(arguments)
-
-    elif name == "schema_field_exists":
-        return SchemaToolHandler.schema_field_exists(arguments)
-
-    # ========================================================================
-    # CONNECTION MANAGEMENT TOOLS
-    # ========================================================================
-    elif name == "ods_connect":
-        return ConnectionToolHandler.ods_connect(arguments)
-
-    elif name == "ods_connect_using_env":
-        return ConnectionToolHandler.ods_connect_using_env(arguments)
-
-    elif name == "ods_disconnect":
-        return ConnectionToolHandler.ods_disconnect(arguments)
-
-    elif name == "ods_get_connection_info":
-        return ConnectionToolHandler.ods_get_connection_info(arguments)
-
-    # ========================================================================
-    # ODS QUERY EXECUTION TOOLS
-    # ========================================================================
-    elif name == "schema_list_entities":
-        return SchemaToolHandler.schema_list_entities(arguments)
-
-    elif name == "query_execute":
-        return ConnectionToolHandler.query_execute(arguments)
-
-    # ========================================================================
-    # SUBMATRIX DATA ACCESS TOOLS
-    # ========================================================================
-    elif name == "data_get_quantities":
-        return SubmatrixToolHandler.data_get_quantities(arguments)
-
-    elif name == "data_read_submatrix":
-        return SubmatrixToolHandler.data_read_submatrix(arguments)
-
-    elif name == "data_generate_fetcher_script":
-        return SubmatrixToolHandler.data_generate_fetcher_script(arguments)
-
-    # ========================================================================
-    # MEASUREMENT & VISUALIZATION TOOLS
-    # ========================================================================
-    elif name == "plot_comparison_notebook":
-        return MeasurementToolHandler.plot_comparison_notebook(arguments)
-
-    elif name == "plot_generate_code":
-        return MeasurementToolHandler.plot_generate_code(arguments)
-
-    elif name == "data_compare_measurements":
-        return MeasurementToolHandler.data_compare_measurements(arguments)
-
-    elif name == "data_query_hierarchy":
-        return MeasurementToolHandler.data_query_hierarchy(arguments)
-
-    # ========================================================================
-    # HELP & DOCUMENTATION TOOLS
-    # ========================================================================
-    elif name == "help_bulk_api":
-        return HelpToolHandler.help_bulk_api(arguments)
-
-    elif name == "schema_test_to_measurement_hierarchy":
-        return SchemaToolHandler.schema_test_to_measurement_hierarchy(arguments)
-
-    else:
-        return [
-            TextContent(
-                type="text",
-                text=json.dumps({"error": f"Unknown tool: {name}"}, indent=2),
-            )
-        ]
+@mcp.resource("file:///odsbox/query-execution-patterns", name="Query Execution Patterns", mime_type="text/markdown")
+def resource_query_execution_patterns() -> str:
+    """Best practices and patterns for executing Jaquel queries against ODS servers."""
+    return ResourceLibrary.get_resource_content("file:///odsbox/query-execution-patterns")
 
 
-async def main():
-    """Run the MCP server."""
-    # Load instructions from markdown file
-    instructions_path = Path(__file__).parent / "server_instructions.md"
-    try:
-        with open(instructions_path, "r", encoding="utf-8") as f:
-            instructions = f.read()
-    except FileNotFoundError:
-        # Fallback if file not found
-        instructions = (
-            "# ASAM ODS Jaquel MCP Server\n\n" "See documentation at https://github.com/totonga/odsbox-jaquel-mcp"
-        )
-
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="odsbox-jaquel-mcp",
-                server_version=__version__,
-                capabilities=ServerCapabilities(
-                    tools=ToolsCapability(listChanged=True),
-                    prompts=PromptsCapability(listChanged=True),
-                    resources=ResourcesCapability(listChanged=True),
-                ),
-                instructions=instructions,
-                website_url="https://github.com/totonga/odsbox-jaquel-mcp/tree/main#readme",
-                icons=[Icon(src="📦")],
-            ),
-        )
+@mcp.resource("file:///odsbox/query-operators-reference", name="Query Operators Reference", mime_type="text/markdown")
+def resource_query_operators_reference() -> str:
+    """Complete reference of all Jaquel query operators with examples and use cases."""
+    return ResourceLibrary.get_resource_content("file:///odsbox/query-operators-reference")
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+@mcp.resource("file:///odsbox/jaquel-syntax-guide", name="Jaquel Syntax Guide", mime_type="text/markdown")
+def resource_jaquel_syntax_guide() -> str:
+    """Complete Jaquel query language syntax reference with examples and best practices."""
+    return ResourceLibrary.get_resource_content("file:///odsbox/jaquel-syntax-guide")
+
+
+@mcp.resource(
+    "file:///odsbox/connection-troubleshooting", name="ODS Connection Troubleshooting", mime_type="text/markdown"
+)
+def resource_connection_troubleshooting() -> str:
+    """Common connection issues and solutions for working with ASAM ODS servers."""
+    return ResourceLibrary.get_resource_content("file:///odsbox/connection-troubleshooting")
+
+
+@mcp.resource(
+    "file:///odsbox/schema/entity/{entity_name}",
+    name="Entity Schema",
+    mime_type="text/markdown",
+)
+def resource_entity_schema(entity_name: str) -> str:
+    """Get detailed schema information for any ODS entity (requires active ODS connection)."""
+    return ResourceLibrary.get_resource_content(f"file:///odsbox/schema/entity/{entity_name}")
+
+
+# ============================================================================
+# MCP PROMPTS
+# ============================================================================
+
+
+@mcp.prompt()
+def prompt_query_validate(query_example: str = "") -> str:
+    """Validate a Jaquel Query.
+
+    Learn how to validate a Jaquel query for syntax errors and best practices.
+    Provides detailed feedback on query structure and suggestions for improvement.
+    """
+    return PromptLibrary.get_prompt_content("query_validate", {"query_example": query_example})
+
+
+@mcp.prompt()
+def explore_patterns(pattern_type: str = "") -> str:
+    """Explore Jaquel Query Patterns.
+
+    Discover common Jaquel query patterns and templates for tasks like:
+    getting all instances, filtering by ID or name, case-insensitive search,
+    time range queries, joins, and aggregations.
+    """
+    return PromptLibrary.get_prompt_content("explore_patterns", {"pattern_type": pattern_type})
+
+
+@mcp.prompt()
+def connect_ods_server(server_details: str = "") -> str:
+    """Set Up ODS Server Connection.
+
+    Learn how to establish a connection to an ASAM ODS server for live model inspection,
+    schema validation, and direct query execution.
+    """
+    return PromptLibrary.get_prompt_content("connect_ods_server", {"server_details": server_details})
+
+
+@mcp.prompt()
+def timeseries_access(use_case: str = "") -> str:
+    """Bulk Data Access & Submatrix Reading.
+
+    Master the 3-step Bulk API workflow for efficient timeseries data access.
+    Learn how to read submatrix data, generate fetcher scripts, and handle large datasets.
+    """
+    return PromptLibrary.get_prompt_content("timeseries_access", {"use_case": use_case})
+
+
+@mcp.prompt()
+def analyze_measurements(analysis_type: str = "") -> str:
+    """Measurement Analysis & Comparison.
+
+    Learn how to analyze and compare measurements across quantities with statistical analysis.
+    Generate Jupyter notebooks for measurement comparison, create visualization code,
+    and explore measurement hierarchies.
+    """
+    return PromptLibrary.get_prompt_content("analyze_measurements", {"analysis_type": analysis_type})

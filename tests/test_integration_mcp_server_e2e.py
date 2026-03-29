@@ -221,23 +221,17 @@ async def test_read_resource_query_operators_reference(mcp_client):
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_read_resource_invalid_uri_graceful_response(mcp_client):
-    """Test that reading invalid resource URI returns graceful response.
+    """Test that reading invalid resource URI returns an error.
 
     This test verifies:
     - Server handles invalid URIs gracefully
-    - Returns content indicating unknown resource
+    - Returns an error for unknown resources
     - Doesn't crash
     """
-    result = await mcp_client.read_resource("file:///odsbox/nonexistent-resource")
+    from mcp.shared.exceptions import McpError
 
-    assert result is not None
-    contents = result.get("contents", [])
-    assert len(contents) > 0
-
-    content = contents[0]
-    text = content["text"]
-    # Server returns helpful message for unknown resources
-    assert "unknown" in text.lower() or "not found" in text.lower(), f"Should indicate unknown resource, got: {text}"
+    with pytest.raises(McpError, match="not found|Unknown resource"):
+        await mcp_client.read_resource("file:///odsbox/nonexistent-resource")
 
 
 @pytest.mark.integration

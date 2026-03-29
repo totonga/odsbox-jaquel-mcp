@@ -37,7 +37,7 @@ classifiers = [
     "Topic :: Database :: Front-Ends",
 ]
 dependencies = [
-    "mcp>=0.1.0",
+    "fastmcp>=3.0.0",
     "odsbox>=1.0.15",
     "pip-system-certs",
     "matplotlib",
