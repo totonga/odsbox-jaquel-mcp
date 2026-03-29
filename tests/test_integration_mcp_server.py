@@ -9,14 +9,11 @@ Run with:
 Mark all tests with @pytest.mark.integration to allow filtering.
 """
 
-import asyncio
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
-
-from odsbox_jaquel_mcp import ODSConnectionManager
 
 
 @pytest.mark.integration
@@ -58,16 +55,16 @@ class TestMCPServerIntegration:
         - Handler delegation works
         - All tools are registered
         """
-        from odsbox_jaquel_mcp.server import list_tools
+        from odsbox_jaquel_mcp.server import mcp
 
-        # Get all registered tools
-        result = await list_tools()
+        # Get all registered tools from FastMCP instance
+        tools = await mcp.list_tools()
 
         # Should have multiple tools
-        assert len(result) > 20
+        assert len(tools) > 20
 
         # Should have connection tools
-        tool_names = [tool.name for tool in result]
+        tool_names = [t.name for t in tools]
         assert "ods_connect" in tool_names
         assert "query_execute" in tool_names
         assert "query_validate" in tool_names

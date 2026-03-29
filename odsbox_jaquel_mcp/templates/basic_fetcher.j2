@@ -7,6 +7,7 @@ Fetches data from submatrix {{ submatrix_id }}
 import pandas as pd
 from odsbox import ConI
 
+
 def main():
     # Connect to ODS server
     with ConI(url="http://localhost:8087/api", auth=("your_username", "your_password")) as con_i:
