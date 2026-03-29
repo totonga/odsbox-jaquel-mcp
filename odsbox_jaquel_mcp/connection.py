@@ -101,7 +101,7 @@ class ODSConnectionManager:
             if instance._con_i:
                 try:
                     instance._con_i.close()
-                except Exception as close_err:
+                except Exception:
                     # Log but don't fail if close has issues
                     pass
 

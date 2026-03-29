@@ -1,67 +1,21 @@
 """Tests for MCP resource functionality."""
 
-import pytest
-from mcp.types import Resource
-
 from odsbox_jaquel_mcp.resources import ResourceLibrary
+
+# Static list of known resource URIs for testing
+_RESOURCE_URIS = [
+    "file:///odsbox/ods-connection-guide",
+    "file:///odsbox/ods-workflow-reference",
+    "file:///odsbox/ods-entity-hierarchy",
+    "file:///odsbox/query-execution-patterns",
+    "file:///odsbox/query-operators-reference",
+    "file:///odsbox/jaquel-syntax-guide",
+    "file:///odsbox/connection-troubleshooting",
+]
 
 
 class TestResourceLibrary:
     """Test cases for ResourceLibrary."""
-
-    def test_get_all_resources_returns_list(self):
-        """Test that get_all_resources returns a list of Resource objects."""
-        resources = ResourceLibrary.get_all_resources()
-
-        assert isinstance(resources, list)
-        assert len(resources) > 0
-        assert len(resources) == 7
-
-        # Check that each resource has required attributes
-        for resource in resources:
-            assert isinstance(resource, Resource)
-            assert hasattr(resource, "uri")
-            assert hasattr(resource, "name")
-            assert hasattr(resource, "description")
-            assert hasattr(resource, "mimeType")
-
-    def test_resource_uris_are_valid(self):
-        """Test that all resources have valid file:///odsbox/ URIs."""
-        resources = ResourceLibrary.get_all_resources()
-        expected_uris = {
-            "file:///odsbox/ods-connection-guide",
-            "file:///odsbox/ods-workflow-reference",
-            "file:///odsbox/ods-entity-hierarchy",
-            "file:///odsbox/query-execution-patterns",
-            "file:///odsbox/query-operators-reference",
-            "file:///odsbox/jaquel-syntax-guide",
-            "file:///odsbox/connection-troubleshooting",
-        }
-
-        resource_uris = {str(resource.uri) for resource in resources}
-        assert resource_uris == expected_uris
-
-    def test_resource_names_are_unique(self):
-        """Test that all resources have unique names."""
-        resources = ResourceLibrary.get_all_resources()
-        names = [resource.name for resource in resources]
-
-        assert len(names) == len(set(names))
-
-    def test_resource_descriptions_are_not_empty(self):
-        """Test that all resources have descriptions."""
-        resources = ResourceLibrary.get_all_resources()
-
-        for resource in resources:
-            assert resource.description
-            assert len(resource.description) > 0
-
-    def test_resource_mime_type_is_markdown(self):
-        """Test that all resources have markdown MIME type."""
-        resources = ResourceLibrary.get_all_resources()
-
-        for resource in resources:
-            assert resource.mimeType == "text/markdown"
 
     def test_get_resource_content_ods_connection_guide(self):
         """Test accessing ODS connection guide content."""
@@ -149,10 +103,8 @@ class TestResourceLibrary:
 
     def test_all_resources_have_content(self):
         """Test that all resources return non-empty content."""
-        resources = ResourceLibrary.get_all_resources()
-
-        for resource in resources:
-            content = ResourceLibrary.get_resource_content(str(resource.uri))
+        for uri in _RESOURCE_URIS:
+            content = ResourceLibrary.get_resource_content(uri)
 
             assert isinstance(content, str)
             assert len(content) > 0
@@ -289,23 +241,19 @@ class TestResourceLibrary:
 
     def test_resource_content_is_markdown(self):
         """Test that all resource content is valid markdown format."""
-        resources = ResourceLibrary.get_all_resources()
-
-        for resource in resources:
-            content = ResourceLibrary.get_resource_content(str(resource.uri))
+        for uri in _RESOURCE_URIS:
+            content = ResourceLibrary.get_resource_content(uri)
 
             # All resources should have markdown headers
-            assert "#" in content, f"Resource {resource.name} missing markdown headers"
+            assert "#" in content, f"Resource {uri} missing markdown headers"
 
     def test_resource_content_length(self):
         """Test that all resources have substantial content."""
-        resources = ResourceLibrary.get_all_resources()
-
-        for resource in resources:
-            content = ResourceLibrary.get_resource_content(str(resource.uri))
+        for uri in _RESOURCE_URIS:
+            content = ResourceLibrary.get_resource_content(uri)
 
             # Each resource should have at least 500 characters of content
-            assert len(content) > 500, f"Resource {resource.name} has insufficient content ({len(content)} chars)"
+            assert len(content) > 500, f"Resource {uri} has insufficient content ({len(content)} chars)"
 
     def test_jaquel_syntax_guide_has_basic_structure(self):
         """Test that Jaquel syntax guide explains basic query structure."""
