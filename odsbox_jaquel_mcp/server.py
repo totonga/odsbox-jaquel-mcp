@@ -22,6 +22,7 @@ from .bulk_api_guide import BulkAPIGuide
 from .connection import ODSConnectionManager
 from .measurement_analysis import ComparisonResult, MeasurementAnalyzer
 from .measurement_queries import MeasurementHierarchyExplorer
+from .monitoring import ToolStatsMiddleware
 from .notebook_generator import NotebookGenerator
 from .prompts import PromptLibrary
 from .queries import JaquelExamples, JaquelExplain
@@ -55,6 +56,8 @@ mcp = FastMCP(
     instructions=_instructions,
     version=__version__,
 )
+
+mcp.add_middleware(ToolStatsMiddleware())
 
 
 # ============================================================================
