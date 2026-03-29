@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 from typing import Annotated, Literal
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
 from pydantic import Field
 
 from . import __version__
@@ -206,7 +206,7 @@ def schema_test_to_measurement_hierarchy() -> dict:
     annotations={"readOnlyHint": True},
     tags={"connection"},
 )
-def ods_connect(
+async def ods_connect(
     url: Annotated[str, Field(description="ODS API URL (e.g., http://localhost:8087/api)")],
     username: str,
     password: Annotated[
@@ -216,6 +216,7 @@ def ods_connect(
         ),
     ],
     verify: Annotated[bool, Field(description="Verify SSL certificates (default: true)")] = True,
+    ctx: Context | None = None,
 ) -> dict:
     """Establish connection to ASAM ODS server for live model inspection."""
     if not url or not isinstance(url, str) or not url.strip():
@@ -224,14 +225,19 @@ def ods_connect(
         raise ValueError("username must be a non-empty string")
     if not password or not isinstance(password, str) or not password.strip():
         raise ValueError("password must be a non-empty string")
-    return ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify)
+    if ctx:
+        await ctx.info(f"Connecting to ODS server: {url} as user '{username}'")
+    result = ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify)
+    if ctx:
+        await ctx.info("Connection established successfully")
+    return result
 
 
 @mcp.tool(
     annotations={"readOnlyHint": True},
     tags={"connection"},
 )
-def ods_connect_using_env(
+async def ods_connect_using_env(
     env_prefix: Annotated[
         str | None,
         Field(
@@ -239,6 +245,7 @@ def ods_connect_using_env(
             description="Optional: override the environment variable prefix (default: ODSBOX_MCP)",
         ),
     ] = None,
+    ctx: Context | None = None,
 ) -> dict:
     """Establish connection to ASAM ODS server using environment variables.
 
@@ -247,6 +254,8 @@ def ods_connect_using_env(
     """
     env = os.environ
     resolved_prefix = env_prefix or env.get("ODSBOX_MCP_ENV_PREFIX") or "ODSBOX_MCP"
+    if ctx:
+        await ctx.info(f"Resolved env prefix: {resolved_prefix}")
 
     def _env_get(key: str) -> str | None:
         return env.get(f"{resolved_prefix}_{key}") or env.get(f"ODS_{key}")
@@ -271,6 +280,8 @@ def ods_connect_using_env(
             f"Environment variable {resolved_prefix}_PASSWORD (or {resolved_prefix}_PWD) "
             "must be set to a non-empty string"
         )
+    if ctx:
+        await ctx.debug(f"Using URL: {url}, username: {username}")
 
     verify_str = _env_get("VERIFY")
     if verify_str is None or str(verify_str).strip() == "":
@@ -278,7 +289,10 @@ def ods_connect_using_env(
     else:
         verify_bool = str(verify_str).strip().lower() in ("1", "true", "yes", "y")
 
-    return ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify_bool)
+    result = ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify_bool)
+    if ctx:
+        await ctx.info("Connection established successfully")
+    return result
 
 
 @mcp.tool(
@@ -303,12 +317,17 @@ def ods_get_connection_info() -> dict:
     annotations={"readOnlyHint": True},
     tags={"connection"},
 )
-def query_execute(query: Annotated[dict, Field(description="Jaquel query to execute")]) -> dict:
+async def query_execute(
+    query: Annotated[dict, Field(description="Jaquel query to execute")],
+    ctx: Context | None = None,
+) -> dict:
     """Execute a Jaquel query directly on connected ODS server."""
     result = ODSConnectionManager.query(query)
     # Convert non-serializable objects to strings for JSON serialization
     if "result" in result and result["result"] is not None:
         result["result"] = str(result["result"])
+        if ctx:
+            await ctx.warning("Query result serialized to string — use data_read_submatrix for structured data access")
     return result
 
 
@@ -335,7 +354,7 @@ def data_get_quantities(
     annotations={"readOnlyHint": True},
     tags={"data"},
 )
-def data_read_submatrix(
+async def data_read_submatrix(
     submatrix_id: Annotated[int, Field(description="ID of the submatrix to read")],
     measurement_quantity_patterns: Annotated[
         list[str] | None,
@@ -360,11 +379,14 @@ def data_read_submatrix(
             description="Method for resampling preview data: auto, uniform, time_aware, random, stratified, minmax",
         ),
     ] = "auto",
+    ctx: Context | None = None,
 ) -> dict:
     """Read timeseries data from a submatrix using bulk data access."""
     if submatrix_id <= 0:
         raise ValueError("submatrix_id must be a positive integer (> 0)")
-    return SubmatrixDataReader.data_read_submatrix(
+    if ctx:
+        await ctx.info(f"Reading submatrix {submatrix_id}...")
+    result = SubmatrixDataReader.data_read_submatrix(
         submatrix_id=submatrix_id,
         measurement_quantity_patterns=measurement_quantity_patterns or [],
         case_insensitive=case_insensitive,
@@ -373,13 +395,16 @@ def data_read_submatrix(
         max_preview_size=max_preview_size,
         preview_sampling_method=preview_sampling_method,
     )
+    if ctx:
+        await ctx.info(result["note"])
+    return result
 
 
 @mcp.tool(
     annotations={"readOnlyHint": True},
     tags={"data"},
 )
-def data_generate_fetcher_script(
+async def data_generate_fetcher_script(
     submatrix_id: Annotated[int, Field(description="ID of the submatrix to fetch data from")],
     script_type: Annotated[
         Literal["basic", "advanced", "batch", "analysis"],
@@ -399,6 +424,7 @@ def data_generate_fetcher_script(
     include_visualization: Annotated[
         bool, Field(default=False, description="Include matplotlib visualization code")
     ] = False,
+    ctx: Context | None = None,
 ) -> dict:
     """Generate Python scripts for fetching submatrix data with error handling and data processing."""
     if submatrix_id <= 0:
@@ -408,7 +434,12 @@ def data_generate_fetcher_script(
     quantities = SubmatrixDataReader.get_measurement_quantities(submatrix_id)
 
     # Use provided patterns or all quantities
-    mq_list = measurement_quantity_patterns if measurement_quantity_patterns else [q["name"] for q in quantities]
+    if not measurement_quantity_patterns:
+        mq_list = [q["name"] for q in quantities]
+        if ctx:
+            await ctx.warning(f"No patterns specified — including all {len(quantities)} quantities in script")
+    else:
+        mq_list = measurement_quantity_patterns
 
     # Generate script based on type
     if script_type == "basic":
@@ -555,13 +586,14 @@ def plot_generate_code(
     annotations={"readOnlyHint": True},
     tags={"measurement"},
 )
-def data_compare_measurements(
+async def data_compare_measurements(
     quantity_name: Annotated[str, Field(description="Name of quantity to compare")],
     measurement_data: Annotated[dict, Field(description="Dict mapping measurement_id (as string) to list of values")],
     measurement_names: Annotated[
         dict | None,
         Field(default=None, description="Optional dict mapping measurement_id to display names"),
     ] = None,
+    ctx: Context | None = None,
 ) -> dict:
     """Compare measurements across quantities with statistical analysis."""
     if not quantity_name or not measurement_data:
@@ -574,6 +606,8 @@ def data_compare_measurements(
             meas_id = int(key)
             converted_data[meas_id] = values  # type: ignore
         except (ValueError, TypeError):
+            if ctx:
+                await ctx.warning(f"Could not convert measurement key '{key}' to int, using as-is")
             converted_data[key] = values  # type: ignore
 
     # Perform multi-measurement comparison

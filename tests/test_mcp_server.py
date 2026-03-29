@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from odsbox_jaquel_mcp.server import (
+    data_compare_measurements,
     data_generate_fetcher_script,
     data_get_quantities,
     data_read_submatrix,
@@ -112,11 +113,12 @@ class TestMCPServer:
         mock_validate.assert_called_once_with("TestEntity", "name")
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
-    def test_call_tool_ods_connect(self, mock_connect):
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect(self, mock_connect):
         """Test calling ods_connect tool."""
         mock_connect.return_value = {"success": True}
 
-        result = ods_connect(url="http://test:8087/api", username="user", password="pass")
+        result = await ods_connect(url="http://test:8087/api", username="user", password="pass")
 
         assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
@@ -124,11 +126,12 @@ class TestMCPServer:
         )
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
-    def test_call_tool_ods_connect_verify_false(self, mock_connect):
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_verify_false(self, mock_connect):
         """Test calling ods_connect tool."""
         mock_connect.return_value = {"success": True}
 
-        result = ods_connect(url="http://test:8087/api", username="user", password="pass", verify=False)
+        result = await ods_connect(url="http://test:8087/api", username="user", password="pass", verify=False)
 
         assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
@@ -136,7 +139,8 @@ class TestMCPServer:
         )
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
-    def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with default prefix (ODSBOX_MCP)."""
         mock_connect.return_value = {"success": True}
 
@@ -145,7 +149,7 @@ class TestMCPServer:
         monkeypatch.setenv("ODSBOX_MCP_PASSWORD", "pass")
         monkeypatch.setenv("ODSBOX_MCP_VERIFY", "false")
 
-        result = ods_connect_using_env()
+        result = await ods_connect_using_env()
 
         assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
@@ -153,7 +157,8 @@ class TestMCPServer:
         )
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
-    def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with an explicit env_prefix."""
         mock_connect.return_value = {"success": True}
 
@@ -162,7 +167,7 @@ class TestMCPServer:
         monkeypatch.setenv("ODS_PASSWORD", "pass")
         monkeypatch.setenv("ODS_VERIFY", "false")
 
-        result = ods_connect_using_env(env_prefix="ODS")
+        result = await ods_connect_using_env(env_prefix="ODS")
 
         assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
@@ -170,7 +175,8 @@ class TestMCPServer:
         )
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
-    def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
         """Test that ods_connect_using_env falls back to legacy ODS_ env vars when ODSBOX_MCP_ vars are absent."""
         mock_connect.return_value = {"success": True}
 
@@ -184,7 +190,7 @@ class TestMCPServer:
         monkeypatch.setenv("ODS_PASSWORD", "pass")
         monkeypatch.setenv("ODS_VERIFY", "true")
 
-        result = ods_connect_using_env()
+        result = await ods_connect_using_env()
 
         assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
@@ -192,7 +198,8 @@ class TestMCPServer:
         )
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
-    def test_call_tool_ods_connect_using_env_missing_required_env_vars(self, mock_connect, monkeypatch):
+    @pytest.mark.asyncio
+    async def test_call_tool_ods_connect_using_env_missing_required_env_vars(self, mock_connect, monkeypatch):
         """Test that missing required env vars raises an error."""
         mock_connect.return_value = {"success": True}
 
@@ -201,7 +208,7 @@ class TestMCPServer:
         monkeypatch.delenv("ODSBOX_MCP_PASSWORD", raising=False)
 
         with pytest.raises(ValueError, match="must be set"):
-            ods_connect_using_env()
+            await ods_connect_using_env()
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.disconnect")
     def test_call_tool_ods_disconnect(self, mock_disconnect):
@@ -248,11 +255,12 @@ class TestMCPServer:
         assert result["entities"][0]["basename"] == "TestBase"
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.query")
-    def test_call_tool_query_execute(self, mock_query):
+    @pytest.mark.asyncio
+    async def test_call_tool_query_execute(self, mock_query):
         """Test calling query_execute tool."""
         mock_query.return_value = {"success": True, "result": "data"}
 
-        result = query_execute(query={"TestEntity": {}})
+        result = await query_execute(query={"TestEntity": {}})
 
         assert isinstance(result, dict)
         assert result["success"] is True
@@ -276,7 +284,8 @@ class TestMCPServer:
         assert "measurement_quantities" in result
 
     @patch("odsbox_jaquel_mcp.server.SubmatrixDataReader.data_read_submatrix")
-    def test_call_tool_data_read_submatrix(self, mock_read_data):
+    @pytest.mark.asyncio
+    async def test_call_tool_data_read_submatrix(self, mock_read_data):
         """Test calling data_read_submatrix tool."""
         mock_read_data.return_value = {
             "submatrix_id": 456,
@@ -288,7 +297,7 @@ class TestMCPServer:
             "note": "Preview resampled from 1000 to 100 rows using 'auto' method",
         }
 
-        result = data_read_submatrix(
+        result = await data_read_submatrix(
             submatrix_id=456,
             measurement_quantity_patterns=["Temp*"],
         )
@@ -299,15 +308,35 @@ class TestMCPServer:
 
     @patch("odsbox_jaquel_mcp.server.SubmatrixDataReader.get_measurement_quantities")
     @patch("odsbox_jaquel_mcp.server.generate_basic_fetcher_script")
-    def test_call_tool_data_generate_fetcher_script(self, mock_generate_script, mock_get_mqs):
+    @pytest.mark.asyncio
+    async def test_call_tool_data_generate_fetcher_script(self, mock_generate_script, mock_get_mqs):
         """Test calling data_generate_fetcher_script tool."""
         mock_get_mqs.return_value = [{"name": "Temperature"}]
         mock_generate_script.return_value = "# Generated script\nprint('Hello')"
 
-        result = data_generate_fetcher_script(
+        result = await data_generate_fetcher_script(
             submatrix_id=789,
             script_type="basic",
             output_format="csv",
         )
 
         assert isinstance(result, dict)
+
+    @patch("odsbox_jaquel_mcp.server.MeasurementAnalyzer.compare_multiple_measurements")
+    @pytest.mark.asyncio
+    async def test_call_tool_data_compare_measurements(self, mock_compare):
+        """Test calling data_compare_measurements tool with non-int key to trigger warning."""
+        mock_compare.return_value = {
+            "quantity_name": "Temperature",
+            "num_measurements": 2,
+            "pairwise_comparisons": [],
+        }
+
+        result = await data_compare_measurements(
+            quantity_name="Temperature",
+            measurement_data={"abc": [1.0, 2.0], "1": [3.0, 4.0]},
+        )
+
+        assert isinstance(result, dict)
+        assert result["quantity_name"] == "Temperature"
+        mock_compare.assert_called_once()
