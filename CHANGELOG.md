@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.4.0 (2026-03-29)
+
+### Features
+
+- Refactor and enhance logging and monitoring features
+  ([#43](https://github.com/totonga/odsbox-jaquel-mcp/pull/43),
+  [`484f79f`](https://github.com/totonga/odsbox-jaquel-mcp/commit/484f79f6ac53c2ee21ca666e45ae461d74a65182))
+
+
 ## v1.3.0 (2026-03-15)
 
 ### Bug Fixes
