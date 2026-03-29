@@ -114,6 +114,50 @@ Or with pipx:
 }
 ```
 
+## Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `ODSBOX_STATS_ENABLED` | not set (disabled) | Set to `1`, `true`, or `yes` to enable tool and resource call monitoring. Statistics are persisted to a SQLite database (`odsbox-jaquel-mcp-stats.db`) for cross-session tracking. |
+| `FASTMCP_LOG_LEVEL` | `INFO` | Controls the server-side log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`). With stdio transport all logs go to stderr, which MCP clients may display as warnings. Set to `WARNING` to reduce noise. |
+| `ODSBOX_MCP_URL` | not set | ODS server URL for `ods_connect_using_env` |
+| `ODSBOX_MCP_USER` | not set | ODS username for `ods_connect_using_env` |
+| `ODSBOX_MCP_PASSWORD` | not set | ODS password for `ods_connect_using_env` |
+
+### Usage Monitoring
+
+When `ODSBOX_STATS_ENABLED=true` is set, the server records tool call and resource read statistics to a local SQLite database:
+
+- **Location**: `~/.local/share/odsbox-jaquel-mcp/odsbox-jaquel-mcp-stats.db` (Linux/macOS) or `%APPDATA%\odsbox-jaquel-mcp\odsbox-jaquel-mcp-stats.db` (Windows), with fallback to the system temp directory.
+- **Tracked per tool**: call count, error count, total execution time (ms), last called timestamp.
+- **Tracked per resource**: read count, error count, total execution time (ms), last read timestamp.
+- **Cross-process safe**: uses SQLite WAL mode, so multiple concurrent MCP sessions can write safely.
+
+You can query the stats database directly:
+
+```bash
+sqlite3 ~/.local/share/odsbox-jaquel-mcp/odsbox-jaquel-mcp-stats.db \
+  "SELECT name, calls, errors, total_ms FROM tool_stats ORDER BY calls DESC"
+```
+
+Example MCP client configuration with monitoring enabled:
+
+```json
+{
+  "mcpServers": {
+    "ods-mcp": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["odsbox-jaquel-mcp@latest"],
+      "env": {
+        "ODSBOX_STATS_ENABLED": "true",
+        "FASTMCP_LOG_LEVEL": "WARNING"
+      }
+    }
+  }
+}
+```
+
 ## Development
 
 ### Setup
