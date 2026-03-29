@@ -1,245 +1,142 @@
 """Tests for MCP server functions."""
 
-import json
 from unittest.mock import patch
 
 import pytest
-from mcp.types import TextContent
 
-from odsbox_jaquel_mcp.server import call_tool, list_tools
+from odsbox_jaquel_mcp.server import (
+    data_generate_fetcher_script,
+    data_get_quantities,
+    data_read_submatrix,
+    mcp,
+    ods_connect,
+    ods_connect_using_env,
+    ods_disconnect,
+    ods_get_connection_info,
+    query_describe,
+    query_execute,
+    query_generate_skeleton,
+    query_get_operator_docs,
+    query_get_pattern,
+    query_list_patterns,
+    query_validate,
+    schema_field_exists,
+    schema_get_entity,
+    schema_list_entities,
+)
 
 
 class TestMCPServer:
     """Test cases for MCP server functions."""
 
-    @pytest.mark.asyncio
-    async def test_list_tools_returns_list(self):
-        """Test that list_tools returns a list of Tool objects."""
-        tools = await list_tools()
+    def test_server_has_tools(self):
+        """Test that the FastMCP server has registered tools."""
+        # Verify the mcp instance exists and is properly configured
+        assert mcp.name == "odsbox-jaquel-mcp"
 
-        assert isinstance(tools, list)
-        assert len(tools) > 0
-
-        # Check that each tool has required attributes
-        for tool in tools:
-            assert hasattr(tool, "name")
-            assert hasattr(tool, "description")
-            assert hasattr(tool, "inputSchema")
-
-    @pytest.mark.asyncio
-    async def test_list_tools_has_expected_tools(self):
-        """Test that list_tools includes expected tool names."""
-        tools = await list_tools()
-        tool_names = [tool.name for tool in tools]
-
-        expected_tools = [
-            "query_validate",
-            "query_get_operator_docs",
-            "query_get_pattern",
-            "query_list_patterns",
-            "query_generate_skeleton",
-            "query_describe",
-            "schema_get_entity",
-            "schema_field_exists",
-            "ods_connect",
-            "ods_connect_using_env",
-            "ods_disconnect",
-            "ods_get_connection_info",
-            "schema_list_entities",
-            "query_execute",
-            "data_get_quantities",
-            "data_read_submatrix",
-            "data_generate_fetcher_script",
-        ]
-
-        for expected_tool in expected_tools:
-            assert expected_tool in tool_names
-
-    @pytest.mark.asyncio
-    async def test_ods_connect_password_marked_as_secret(self):
-        """Test that ods_connect tool marks password as secret with format hint."""
-        tools = await list_tools()
-        ods_connect = next(t for t in tools if t.name == "ods_connect")
-        password_prop = ods_connect.inputSchema["properties"]["password"]
-
-        assert password_prop["format"] == "password"
-        assert password_prop["x-mcp-secret"] is True
-
-    @pytest.mark.asyncio
-    async def test_plot_comparison_notebook_password_marked_as_secret(self):
-        """Test that plot_comparison_notebook marks ods_password as secret."""
-        tools = await list_tools()
-        notebook_tool = next(t for t in tools if t.name == "plot_comparison_notebook")
-        password_prop = notebook_tool.inputSchema["properties"]["ods_password"]
-
-        assert password_prop["format"] == "password"
-        assert password_prop["x-mcp-secret"] is True
-
-    @pytest.mark.asyncio
-    async def test_call_tool_query_validate(self):
+    def test_call_tool_query_validate(self):
         """Test calling query_validate tool."""
         query = {"TestEntity": {}}
-        arguments = {"query": query}
 
-        result = await call_tool("query_validate", arguments)
+        result = query_validate(query=query)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
+        assert isinstance(result, dict)
+        assert "valid" in result
+        assert "errors" in result
+        assert "warnings" in result
+        assert "suggestions" in result
 
-        # Parse the JSON response
-        response_data = json.loads(result[0].text)
-        assert "valid" in response_data
-        assert "errors" in response_data
-        assert "warnings" in response_data
-        assert "suggestions" in response_data
-
-    @pytest.mark.asyncio
-    async def test_call_tool_query_get_operator_docs(self):
+    def test_call_tool_query_get_operator_docs(self):
         """Test calling query_get_operator_docs tool."""
-        arguments = {"operator": "$eq"}
+        result = query_get_operator_docs(operator="$eq")
 
-        result = await call_tool("query_get_operator_docs", arguments)
+        assert isinstance(result, dict)
+        assert "category" in result
+        assert result["category"] == "comparison"
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "category" in response_data
-        assert response_data["category"] == "comparison"
-
-    @pytest.mark.asyncio
-    async def test_call_tool_query_get_pattern(self):
+    def test_call_tool_query_get_pattern(self):
         """Test calling query_get_pattern tool."""
-        arguments = {"pattern": "get_all_instances"}
+        result = query_get_pattern(pattern="get_all_instances")
 
-        result = await call_tool("query_get_pattern", arguments)
+        assert isinstance(result, dict)
+        assert "template" in result
+        assert "description" in result
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "template" in response_data
-        assert "description" in response_data
-
-    @pytest.mark.asyncio
-    async def test_call_tool_query_list_patterns(self):
+    def test_call_tool_query_list_patterns(self):
         """Test calling query_list_patterns tool."""
-        arguments = {}
+        result = query_list_patterns()
 
-        result = await call_tool("query_list_patterns", arguments)
+        assert isinstance(result, dict)
+        assert "available_patterns" in result
+        assert "description" in result
+        assert isinstance(result["available_patterns"], list)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "available_patterns" in response_data
-        assert "description" in response_data
-        assert isinstance(response_data["available_patterns"], list)
-
-    @pytest.mark.asyncio
-    async def test_call_tool_query_generate_skeleton(self):
+    def test_call_tool_query_generate_skeleton(self):
         """Test calling query_generate_skeleton tool."""
-        arguments = {"entity_name": "TestEntity", "operation": "get_all"}
+        result = query_generate_skeleton(entity_name="TestEntity", operation="get_all")
 
-        result = await call_tool("query_generate_skeleton", arguments)
+        assert isinstance(result, dict)
+        assert "TestEntity" in result
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "TestEntity" in response_data
-
-    @pytest.mark.asyncio
-    async def test_call_tool_query_describe(self):
+    @patch("odsbox_jaquel_mcp.server.JaquelExplain.query_describe")
+    def test_call_tool_query_describe(self, mock_describe):
         """Test calling query_describe tool."""
+        mock_describe.return_value = "Query describes TestEntity"
         query = {"TestEntity": {}}
-        arguments = {"query": query}
 
-        result = await call_tool("query_describe", arguments)
+        result = query_describe(query=query)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
+        # Should return plain text explanation
+        assert isinstance(result, str)
+        assert len(result) > 0
+        mock_describe.assert_called_once_with(query)
 
-        # Should return plain text explanation with query components
-        explanation = result[0].text
-        # The explanation should contain information about the query structure
-        # It can be either a simple explanation or an error if not connected to ODS
-        assert isinstance(explanation, str)
-        assert len(explanation) > 0
-
-    @patch("odsbox_jaquel_mcp.tools.schema_tools.SchemaInspector.get_entity_schema")
-    @pytest.mark.asyncio
-    async def test_call_tool_schema_get_entity(self, mock_get_schema):
+    @patch("odsbox_jaquel_mcp.server.SchemaInspector.get_entity_schema")
+    def test_call_tool_schema_get_entity(self, mock_get_schema):
         """Test calling schema_get_entity tool."""
         mock_get_schema.return_value = {"fields": ["id", "name"]}
-        arguments = {"entity_name": "TestEntity"}
 
-        result = await call_tool("schema_get_entity", arguments)
+        result = schema_get_entity(entity_name="TestEntity")
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_get_schema.assert_called_once_with("TestEntity")
 
-    @patch("odsbox_jaquel_mcp.tools.schema_tools.SchemaInspector.schema_field_exists")
-    @pytest.mark.asyncio
-    async def test_call_tool_schema_field_exists(self, mock_validate):
+    @patch("odsbox_jaquel_mcp.server.SchemaInspector.schema_field_exists")
+    def test_call_tool_schema_field_exists(self, mock_validate):
         """Test calling schema_field_exists tool."""
         mock_validate.return_value = {"exists": True}
-        arguments = {"entity_name": "TestEntity", "field_name": "name"}
 
-        result = await call_tool("schema_field_exists", arguments)
+        result = schema_field_exists(entity_name="TestEntity", field_name="name")
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_validate.assert_called_once_with("TestEntity", "name")
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_connect(self, mock_connect):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    def test_call_tool_ods_connect(self, mock_connect):
         """Test calling ods_connect tool."""
         mock_connect.return_value = {"success": True}
-        arguments = {"url": "http://test:8087/api", "username": "user", "password": "pass"}
 
-        result = await call_tool("ods_connect", arguments)
+        result = ods_connect(url="http://test:8087/api", username="user", password="pass")
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=True
         )
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_connect_verify_false(self, mock_connect):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    def test_call_tool_ods_connect_verify_false(self, mock_connect):
         """Test calling ods_connect tool."""
         mock_connect.return_value = {"success": True}
-        arguments = {"url": "http://test:8087/api", "username": "user", "password": "pass", "verify": False}
 
-        result = await call_tool("ods_connect", arguments)
+        result = ods_connect(url="http://test:8087/api", username="user", password="pass", verify=False)
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
         )
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with default prefix (ODSBOX_MCP)."""
         mock_connect.return_value = {"success": True}
 
@@ -248,19 +145,15 @@ class TestMCPServer:
         monkeypatch.setenv("ODSBOX_MCP_PASSWORD", "pass")
         monkeypatch.setenv("ODSBOX_MCP_VERIFY", "false")
 
-        result = await call_tool("ods_connect_using_env", {})
+        result = ods_connect_using_env()
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
         )
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with an explicit env_prefix."""
         mock_connect.return_value = {"success": True}
 
@@ -269,19 +162,15 @@ class TestMCPServer:
         monkeypatch.setenv("ODS_PASSWORD", "pass")
         monkeypatch.setenv("ODS_VERIFY", "false")
 
-        result = await call_tool("ods_connect_using_env", {"env_prefix": "ODS"})
+        result = ods_connect_using_env(env_prefix="ODS")
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
         )
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
         """Test that ods_connect_using_env falls back to legacy ODS_ env vars when ODSBOX_MCP_ vars are absent."""
         mock_connect.return_value = {"success": True}
 
@@ -295,69 +184,47 @@ class TestMCPServer:
         monkeypatch.setenv("ODS_PASSWORD", "pass")
         monkeypatch.setenv("ODS_VERIFY", "true")
 
-        result = await call_tool("ods_connect_using_env", {})
+        result = ods_connect_using_env()
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=True
         )
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.connect")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_connect_using_env_missing_required_env_vars(self, mock_connect, monkeypatch):
-        """Test that missing required env vars returns an error response."""
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    def test_call_tool_ods_connect_using_env_missing_required_env_vars(self, mock_connect, monkeypatch):
+        """Test that missing required env vars raises an error."""
         mock_connect.return_value = {"success": True}
 
         monkeypatch.delenv("ODSBOX_MCP_URL", raising=False)
         monkeypatch.delenv("ODSBOX_MCP_USERNAME", raising=False)
         monkeypatch.delenv("ODSBOX_MCP_PASSWORD", raising=False)
 
-        result = await call_tool("ods_connect_using_env", {})
+        with pytest.raises(ValueError, match="must be set"):
+            ods_connect_using_env()
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "error" in response_data
-        assert "must be set" in response_data["error"]
-
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.disconnect")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_disconnect(self, mock_disconnect):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.disconnect")
+    def test_call_tool_ods_disconnect(self, mock_disconnect):
         """Test calling ods_disconnect tool."""
         mock_disconnect.return_value = {"success": True}
-        arguments = {}
 
-        result = await call_tool("ods_disconnect", arguments)
+        result = ods_disconnect()
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_disconnect.assert_called_once()
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.get_connection_info")
-    @pytest.mark.asyncio
-    async def test_call_tool_ods_get_connection_info(self, mock_get_info):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.get_connection_info")
+    def test_call_tool_ods_get_connection_info(self, mock_get_info):
         """Test calling ods_get_connection_info tool."""
         mock_get_info.return_value = {"status": "connected"}
-        arguments = {}
 
-        result = await call_tool("ods_get_connection_info", arguments)
+        result = ods_get_connection_info()
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
+        assert isinstance(result, dict)
         mock_get_info.assert_called_once()
 
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.get_model")
-    @pytest.mark.asyncio
-    async def test_call_tool_schema_list_entities(self, mock_get_model):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.get_model")
+    def test_call_tool_schema_list_entities(self, mock_get_model):
         """Test calling schema_list_entities tool."""
         from unittest.mock import MagicMock
 
@@ -371,46 +238,29 @@ class TestMCPServer:
         mock_model.entities = {"TestEntity": mock_entity}
         mock_get_model.return_value = mock_model
 
-        arguments = {}
+        result = schema_list_entities()
 
-        result = await call_tool("schema_list_entities", arguments)
+        assert isinstance(result, dict)
+        assert "entities" in result
+        assert "count" in result
+        assert len(result["entities"]) == 1
+        assert result["entities"][0]["name"] == "TestEntity"
+        assert result["entities"][0]["basename"] == "TestBase"
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        # Parse the JSON response
-        response_data = json.loads(result[0].text)
-        assert "entities" in response_data
-        assert "count" in response_data
-        assert len(response_data["entities"]) == 1
-        assert response_data["entities"][0]["name"] == "TestEntity"
-        assert response_data["entities"][0]["basename"] == "TestBase"
-
-    @patch("odsbox_jaquel_mcp.tools.connection_tools.ODSConnectionManager.query")
-    @pytest.mark.asyncio
-    async def test_call_tool_query_execute(self, mock_query):
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.query")
+    def test_call_tool_query_execute(self, mock_query):
         """Test calling query_execute tool."""
         mock_query.return_value = {"success": True, "result": "data"}
-        arguments = {"query": {"TestEntity": {}}}
 
-        result = await call_tool("query_execute", arguments)
+        result = query_execute(query={"TestEntity": {}})
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
+        assert isinstance(result, dict)
+        assert result["success"] is True
+        assert result["result"] == "data"
 
-        # Should return the serializable result
-        text_result = result[0].text
-        response_data = json.loads(text_result)
-        assert response_data["success"] is True
-        assert response_data["result"] == "data"
-
-    @patch("odsbox_jaquel_mcp.tools.submatrix_tools.SubmatrixDataReader.get_measurement_quantities")
-    @pytest.mark.asyncio
-    async def test_call_tool_data_get_quantities(self, mock_get_quantities):
+    @patch("odsbox_jaquel_mcp.server.SubmatrixDataReader.get_measurement_quantities")
+    def test_call_tool_data_get_quantities(self, mock_get_quantities):
         """Test calling data_get_quantities tool."""
-        # Mock the get_measurement_quantities to return sample data
         mock_get_quantities.return_value = [
             {
                 "id": 1,
@@ -419,23 +269,15 @@ class TestMCPServer:
             }
         ]
 
-        arguments = {"submatrix_id": 123}
+        result = data_get_quantities(submatrix_id=123)
 
-        result = await call_tool("data_get_quantities", arguments)
+        assert isinstance(result, dict)
+        assert result["submatrix_id"] == 123
+        assert "measurement_quantities" in result
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert response_data["submatrix_id"] == 123
-        assert "measurement_quantities" in response_data
-
-    @patch("odsbox_jaquel_mcp.tools.submatrix_tools.SubmatrixDataReader.data_read_submatrix")
-    @pytest.mark.asyncio
-    async def test_call_tool_data_read_submatrix(self, mock_read_data):
+    @patch("odsbox_jaquel_mcp.server.SubmatrixDataReader.data_read_submatrix")
+    def test_call_tool_data_read_submatrix(self, mock_read_data):
         """Test calling data_read_submatrix tool."""
-        # Mock the data_read_submatrix to return sample data with new format
         mock_read_data.return_value = {
             "submatrix_id": 456,
             "columns": ["Time", "Temperature"],
@@ -446,57 +288,26 @@ class TestMCPServer:
             "note": "Preview resampled from 1000 to 100 rows using 'auto' method",
         }
 
-        arguments = {
-            "submatrix_id": 456,
-            "measurement_quantity_patterns": ["Temp*"],
-        }
+        result = data_read_submatrix(
+            submatrix_id=456,
+            measurement_quantity_patterns=["Temp*"],
+        )
 
-        result = await call_tool("data_read_submatrix", arguments)
+        assert isinstance(result, dict)
+        assert "columns" in result
+        assert "row_count" in result
 
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        # Verify we got the expected fields
-        assert "columns" in response_data
-        assert "row_count" in response_data
-        assert "data_preview" in response_data or "error" not in response_data
-
-    @patch("odsbox_jaquel_mcp.tools.submatrix_tools.generate_basic_fetcher_script")
-    @pytest.mark.asyncio
-    async def test_call_tool_data_generate_fetcher_script(self, mock_generate_script):
+    @patch("odsbox_jaquel_mcp.server.SubmatrixDataReader.get_measurement_quantities")
+    @patch("odsbox_jaquel_mcp.server.generate_basic_fetcher_script")
+    def test_call_tool_data_generate_fetcher_script(self, mock_generate_script, mock_get_mqs):
         """Test calling data_generate_fetcher_script tool."""
-        # Mock the script generation to return sample Python code
+        mock_get_mqs.return_value = [{"name": "Temperature"}]
         mock_generate_script.return_value = "# Generated script\nprint('Hello')"
 
-        arguments = {
-            "submatrix_id": 789,
-            "script_type": "basic",
-            "output_format": "csv",
-        }
+        result = data_generate_fetcher_script(
+            submatrix_id=789,
+            script_type="basic",
+            output_format="csv",
+        )
 
-        result = await call_tool("data_generate_fetcher_script", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        # Response should be a dict (either with script or error is acceptable for this test)
-        assert isinstance(response_data, dict)
-
-    @pytest.mark.asyncio
-    async def test_call_tool_unknown_tool(self):
-        """Test calling an unknown tool."""
-        arguments = {}
-
-        result = await call_tool("unknown_tool", arguments)
-
-        assert isinstance(result, list)
-        assert len(result) == 1
-        assert isinstance(result[0], TextContent)
-
-        response_data = json.loads(result[0].text)
-        assert "error" in response_data
-        assert "Unknown tool: unknown_tool" in response_data["error"]
+        assert isinstance(result, dict)

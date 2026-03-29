@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 import pandas as pd
 
@@ -51,7 +51,7 @@ def _resample_dataframe_time_aware(df: pd.DataFrame, target_size: int) -> pd.Dat
 
         # Use pandas resample with mean aggregation for numeric columns
         # For string columns, use first value
-        agg_dict = {}
+        agg_dict: dict[str, Any] = {}
         for col in df.columns:
             if pd.api.types.is_numeric_dtype(df[col]):
                 agg_dict[col] = "mean"
@@ -59,10 +59,10 @@ def _resample_dataframe_time_aware(df: pd.DataFrame, target_size: int) -> pd.Dat
                 agg_dict[col] = "first"
 
         try:
-            resampled = df.resample(target_freq).agg(agg_dict)
+            resampled = df.resample(target_freq).agg(cast(Any, agg_dict))
             # Limit to target size
             if len(resampled) > target_size:
-                return resampled.iloc[::len(resampled) // target_size][:target_size]
+                return resampled.iloc[:: len(resampled) // target_size][:target_size]
             return resampled
         except Exception:
             # Fall back to uniform sampling if resample fails
@@ -159,8 +159,8 @@ def _resample_dataframe_minmax(df: pd.DataFrame, target_size: int) -> pd.DataFra
         if pd.api.types.is_numeric_dtype(df[col]) and len(sampled_indices) < target_size:
             # Skip columns with all NaN
             if not df[col].isna().all():
-                sampled_indices.add(df[col].idxmin())
-                sampled_indices.add(df[col].idxmax())
+                sampled_indices.add(int(df[col].idxmin()))
+                sampled_indices.add(int(df[col].idxmax()))
 
     # Fill remaining with uniform sampling
     if len(sampled_indices) < target_size:
@@ -363,7 +363,8 @@ class SubmatrixDataReader:
             if len(df) > max_preview_size:
                 df_preview = _resample_dataframe(df, max_preview_size, preview_sampling_method)
                 preview_note = (
-                    f"Preview resampled from {len(df)} to {len(df_preview)} rows using '{preview_sampling_method}' method"
+                    f"Preview resampled from {len(df)} to {len(df_preview)} rows using"
+                    f" '{preview_sampling_method}' method"
                 )
             else:
                 df_preview = df
