@@ -259,11 +259,7 @@ class MeasurementAnalyzer:
             Summary comparison dictionary
         """
         if not measurement_data:
-            return {
-                "quantity_name": quantity_name,
-                "num_measurements": 0,
-                "error": "No measurement data provided",
-            }
+            raise ValueError(f"No measurement data provided for quantity '{quantity_name}'.")
 
         try:
             stats_by_measurement: dict[int, dict[str, Any]] = {}
@@ -303,10 +299,7 @@ class MeasurementAnalyzer:
             }
 
         except Exception as e:
-            return {
-                "quantity_name": quantity_name,
-                "error": f"Multi-measurement comparison failed: {str(e)}",
-            }
+            raise ValueError(f"Multi-measurement comparison failed for '{quantity_name}': {e}") from e
 
     @staticmethod
     def generate_comparison_summary(
@@ -366,6 +359,4 @@ class MeasurementAnalyzer:
             }
 
         except Exception as e:
-            return {
-                "error": f"Summary generation failed: {str(e)}",
-            }
+            raise ValueError(f"Summary generation failed: {e}") from e

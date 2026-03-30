@@ -2,6 +2,9 @@
 
 from unittest.mock import Mock, patch
 
+import pytest
+from fastmcp.exceptions import ToolError
+
 from odsbox_jaquel_mcp.schemas import EntityDescriptions, SchemaInspector
 
 
@@ -20,11 +23,8 @@ class TestGetTestToMeasurementHierarchy:
 
     def test_hierarchy_no_connection(self):
         """Test hierarchy retrieval without connection."""
-        result = SchemaInspector.schema_test_to_measurement_hierarchy()
-
-        assert "error" in result
-        assert "Model not loaded" in result["error"]
-        assert "Connect to ODS server" in result["hint"]
+        with pytest.raises(ToolError, match="Model not loaded"):
+            SchemaInspector.schema_test_to_measurement_hierarchy()
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_hierarchy_simple_chain(self, mock_coni_class):
@@ -68,7 +68,6 @@ class TestGetTestToMeasurementHierarchy:
         # Get hierarchy
         result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
-        assert result["success"] is True
         assert result["depth"] == 1
         assert len(result["hierarchy_chain"]) == 1
         assert result["hierarchy_chain"][0]["name"] == "Test"
@@ -157,7 +156,6 @@ class TestGetTestToMeasurementHierarchy:
         # Get hierarchy
         result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
-        assert result["success"] is True
         assert result["depth"] == 3
         assert len(result["hierarchy_chain"]) == 3
         assert result["hierarchy_chain"][0]["base_name"] == "AoTest"
@@ -188,13 +186,9 @@ class TestGetTestToMeasurementHierarchy:
         # Connect to establish model cache
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
-        # Get hierarchy
-        result = SchemaInspector.schema_test_to_measurement_hierarchy()
-
-        assert result["success"] is False
-        assert "error" in result
-        assert result["error_type"] == "Exception"
-        assert result["hierarchy_chain"] == []
+        # Get hierarchy — should raise ToolError
+        with pytest.raises(ToolError, match="Hierarchy traversal failed"):
+            SchemaInspector.schema_test_to_measurement_hierarchy()
 
     def test_hierarchy_with_descriptions(self):
         """Test that entity descriptions are included in hierarchy."""

@@ -2,11 +2,7 @@
 
 import pytest
 
-from odsbox_jaquel_mcp.measurement_analysis import (
-    ColumnStatistics,
-    ComparisonResult,
-    MeasurementAnalyzer,
-)
+from odsbox_jaquel_mcp.measurement_analysis import ColumnStatistics, ComparisonResult, MeasurementAnalyzer
 
 
 class TestColumnStatistics:
@@ -292,9 +288,8 @@ class TestMultipleMeasurementComparison:
 
     def test_compare_multiple_measurements_empty(self):
         """Test with empty measurement data."""
-        result = MeasurementAnalyzer.compare_multiple_measurements("Speed", {})
-        assert result["num_measurements"] == 0
-        assert "error" in result
+        with pytest.raises(ValueError, match="No measurement data provided"):
+            MeasurementAnalyzer.compare_multiple_measurements("Speed", {})
 
     def test_compare_multiple_measurements_overall_stats(self):
         """Test that overall statistics are calculated."""

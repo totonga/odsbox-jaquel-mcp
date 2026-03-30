@@ -5,6 +5,7 @@ from __future__ import annotations
 from difflib import get_close_matches
 from typing import Any
 
+from fastmcp.exceptions import ToolError
 from odsbox.model_cache import ModelCache
 from odsbox.proto import ods
 
@@ -39,10 +40,7 @@ class SchemaInspector:
         """List all entities in the ODS model."""
         model = cls._get_model()
         if not model:
-            return {
-                "error": "Model not loaded",
-                "hint": ("Connect to ODS server using 'ods_connect' tool first"),
-            }
+            raise ToolError("Model not loaded. Connect to ODS server using 'ods_connect' tool first.")
 
         entities = []
         for _entity_name, entity in model.entities.items():
@@ -63,10 +61,7 @@ class SchemaInspector:
         """Get schema for an entity from model."""
         model_cache: ModelCache = cls._get_model_cache()
         if not model_cache:
-            return {
-                "error": "Model not loaded",
-                "hint": ("Connect to ODS server using 'ods_connect' tool first"),
-            }
+            raise ToolError("Model not loaded. Connect to ODS server using 'ods_connect' tool first.")
 
         try:
             entity: ods.Model.Entity = model_cache.entity(entity_name)
@@ -110,7 +105,7 @@ class SchemaInspector:
             }
 
         except Exception as e:
-            return {"error": str(e), "entity": entity_name}
+            raise ValueError(f"Schema lookup failed for entity '{entity_name}': {e}") from e
 
     @classmethod
     def format_entity_schema_as_markdown(cls, entity_name: str) -> str:
@@ -123,17 +118,6 @@ class SchemaInspector:
             Markdown-formatted schema documentation
         """
         schema = cls.get_entity_schema(entity_name)
-
-        if "error" in schema:
-            error_msg = schema["error"]
-            available = schema.get("available_entities", [])
-            available_str = f"**Available entities**: {', '.join(available)}" if available else ""
-            return (
-                f"# Entity Schema: {entity_name}\n\n"
-                f"**Error**: {error_msg}\n\n"
-                f"{available_str}\n\n"
-                "Use `schema_list_entities` tool to see all available entities."
-            )
 
         entity = schema.get("entity", entity_name)
         description = schema.get("description", "No description available")
@@ -178,16 +162,11 @@ class SchemaInspector:
         """Check if field exists in entity."""
         model_cache: ModelCache = cls._get_model_cache()
         if not model_cache:
-            return {
-                "error": "Model not loaded",
-                "hint": ("Connect to ODS server using 'ods_connect' tool first"),
-            }
+            raise ToolError("Model not loaded. Connect to ODS server using 'ods_connect' tool first.")
 
         try:
             entity: ods.Model.Entity = model_cache.entity(entity_name)
             schema = cls.get_entity_schema(entity.name)
-            if "error" in schema:
-                return schema
 
             attribute = model_cache.attribute_no_throw(entity, field_name)
             # Check attributes
@@ -208,7 +187,7 @@ class SchemaInspector:
                 "suggestions": __get_suggestion(available, field_name)[:5],
             }
         except Exception as e:
-            return {"error": str(e), "entity": entity_name}
+            raise ValueError(f"Field lookup failed for entity '{entity_name}': {e}") from e
 
     @classmethod
     def schema_test_to_measurement_hierarchy(cls) -> dict[str, Any]:
@@ -222,10 +201,7 @@ class SchemaInspector:
         """
         model_cache: ModelCache = cls._get_model_cache()
         if not model_cache:
-            return {
-                "error": "Model not loaded",
-                "hint": "Connect to ODS server using 'ods_connect' tool first",
-            }
+            raise ToolError("Model not loaded. Connect to ODS server using 'ods_connect' tool first.")
 
         hierarchy_chain = []
         try:
@@ -269,16 +245,10 @@ class SchemaInspector:
                     break
 
             return {
-                "success": True,
                 "hierarchy_chain": hierarchy_chain,
                 "depth": len(hierarchy_chain),
                 "note": "This is the main AoTest to AoMeasurement hierarchy in this ASAM ODS server",
             }
 
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "error_type": type(e).__name__,
-                "hierarchy_chain": hierarchy_chain,
-            }
+            raise ToolError(f"Hierarchy traversal failed: {e}") from e

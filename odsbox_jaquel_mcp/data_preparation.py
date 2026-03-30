@@ -139,7 +139,7 @@ class MeasurementDataPreparator:
     def prepare_submatrix_dataframe(
         submatrix_signals_df: pd.DataFrame,
         measurement_quantity_names: list[str],
-    ) -> tuple[pd.DataFrame | None, str | None]:
+    ) -> pd.DataFrame:
         """
         Prepare a DataFrame from submatrix signals for plotting.
 
@@ -148,11 +148,13 @@ class MeasurementDataPreparator:
             measurement_quantity_names: List of measurement quantity names to include
 
         Returns:
-            Tuple of (DataFrame, error_message). Returns (None, error_message) if preparation fails.
-            The DataFrame has measurement quantities as columns and independent column as index.
+            DataFrame with measurement quantities as columns and independent column as index.
+
+        Raises:
+            ValueError: If signals are empty, columns are missing, or preparation fails.
         """
         if submatrix_signals_df.empty:
-            return None, "No signals provided"
+            raise ValueError("No signals provided")
 
         try:
             # Create DataFrame from signals
@@ -162,7 +164,7 @@ class MeasurementDataPreparator:
             # Check if all required quantities are present
             missing_cols = [col for col in measurement_quantity_names if col not in df.columns]
             if missing_cols:
-                return None, f"Missing required columns: {missing_cols}"
+                raise ValueError(f"Missing required columns: {missing_cols}")
 
             # Set independent column as index
             independent_rows = submatrix_signals_df[submatrix_signals_df["independent"] == 1]
@@ -171,10 +173,12 @@ class MeasurementDataPreparator:
                 if independent_name in df.columns:
                     df.set_index(independent_name, inplace=True)
 
-            return df, None
+            return df
 
+        except ValueError:
+            raise
         except Exception as e:
-            return None, str(e)
+            raise ValueError(f"Data preparation failed: {e}") from e
 
     @staticmethod
     def prepare_measurement_data_items(
@@ -208,9 +212,9 @@ class MeasurementDataPreparator:
         measurement_data_items = []
 
         for submatrix_id, signals_df in submatrix_signals_by_id.items():
-            df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(signals_df, measurement_quantity_names)
-
-            if error:
+            try:
+                df = MeasurementDataPreparator.prepare_submatrix_dataframe(signals_df, measurement_quantity_names)
+            except ValueError:
                 continue
 
             independent_name, independent_unit = MeasurementMetadataExtractor.get_independent_column_info(
