@@ -116,7 +116,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect(self, mock_connect):
         """Test calling ods_connect tool."""
-        mock_connect.return_value = {"success": True}
+        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
 
         result = await ods_connect(url="http://test:8087/api", username="user", password="pass")
 
@@ -129,7 +129,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_verify_false(self, mock_connect):
         """Test calling ods_connect tool."""
-        mock_connect.return_value = {"success": True}
+        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
 
         result = await ods_connect(url="http://test:8087/api", username="user", password="pass", verify=False)
 
@@ -142,7 +142,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with default prefix (ODSBOX_MCP)."""
-        mock_connect.return_value = {"success": True}
+        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
 
         monkeypatch.setenv("ODSBOX_MCP_URL", "http://test:8087/api")
         monkeypatch.setenv("ODSBOX_MCP_USERNAME", "user")
@@ -160,7 +160,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with an explicit env_prefix."""
-        mock_connect.return_value = {"success": True}
+        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
 
         monkeypatch.setenv("ODS_URL", "http://test:8087/api")
         monkeypatch.setenv("ODS_USERNAME", "user")
@@ -178,7 +178,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
         """Test that ods_connect_using_env falls back to legacy ODS_ env vars when ODSBOX_MCP_ vars are absent."""
-        mock_connect.return_value = {"success": True}
+        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
 
         monkeypatch.delenv("ODSBOX_MCP_URL", raising=False)
         monkeypatch.delenv("ODSBOX_MCP_USERNAME", raising=False)
@@ -201,7 +201,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_missing_required_env_vars(self, mock_connect, monkeypatch):
         """Test that missing required env vars raises an error."""
-        mock_connect.return_value = {"success": True}
+        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
 
         monkeypatch.delenv("ODSBOX_MCP_URL", raising=False)
         monkeypatch.delenv("ODSBOX_MCP_USERNAME", raising=False)
@@ -213,7 +213,7 @@ class TestMCPServer:
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.disconnect")
     def test_call_tool_ods_disconnect(self, mock_disconnect):
         """Test calling ods_disconnect tool."""
-        mock_disconnect.return_value = {"success": True}
+        mock_disconnect.return_value = {"message": "Disconnected from ODS server"}
 
         result = ods_disconnect()
 
@@ -258,12 +258,11 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_query_execute(self, mock_query):
         """Test calling query_execute tool."""
-        mock_query.return_value = {"success": True, "result": "data"}
+        mock_query.return_value = {"result": "data", "entity_count": 0}
 
         result = await query_execute(query={"TestEntity": {}})
 
         assert isinstance(result, dict)
-        assert result["success"] is True
         assert result["result"] == "data"
 
     @patch("odsbox_jaquel_mcp.server.SubmatrixDataReader.get_measurement_quantities")

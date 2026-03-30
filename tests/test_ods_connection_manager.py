@@ -51,7 +51,6 @@ class TestODSConnectionManager:
 
         result = ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
-        assert result["success"] is True
         assert "Connected to ODS server" in result["message"]
         assert result["connection"]["url"] == "http://test:8087/api"
         assert result["connection"]["username"] == "user"
@@ -87,7 +86,6 @@ class TestODSConnectionManager:
         # Then disconnect
         result = ODSConnectionManager.disconnect()
 
-        assert result["success"] is True
         assert "Disconnected from ODS server" in result["message"]
         assert not ODSConnectionManager.is_connected()
         mock_coni.close.assert_called_once()
@@ -96,7 +94,6 @@ class TestODSConnectionManager:
         """Test disconnect when not connected."""
         result = ODSConnectionManager.disconnect()
 
-        assert result["success"] is True
         assert "Disconnected from ODS server" in result["message"]
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
@@ -117,7 +114,6 @@ class TestODSConnectionManager:
         # Then disconnect - should succeed despite close error
         result = ODSConnectionManager.disconnect()
 
-        assert result["success"] is True
         assert "Disconnected from ODS server" in result["message"]
         assert not ODSConnectionManager.is_connected()
 
@@ -169,7 +165,6 @@ class TestODSConnectionManager:
         query = {"TestEntity": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert result["result"] is mock_result
         assert result["entity_count"] == 2
         mock_coni.query_data.assert_called_once_with(query)

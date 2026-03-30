@@ -49,7 +49,6 @@ class TestJaquelQueryIntegration:
         query = {"AoMeasurement": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_entity_with_filter(self):
@@ -63,7 +62,6 @@ class TestJaquelQueryIntegration:
         query = {"AoTest": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_entity_with_related_join(self):
@@ -79,7 +77,6 @@ class TestJaquelQueryIntegration:
         }
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_query_with_select(self):
@@ -95,7 +92,6 @@ class TestJaquelQueryIntegration:
         }
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_query_result_has_data_matrices(self):
@@ -108,7 +104,6 @@ class TestJaquelQueryIntegration:
         query = {"AoMeasurement": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
         query_result = result["result"]
@@ -127,7 +122,7 @@ class TestJaquelQueryIntegration:
             query = {"AoMeasurement": {}}
             result = ODSConnectionManager.query(query)
 
-            assert result["success"] is True, f"Query {i} failed"
+            assert "result" in result, f"Query {i} failed"
 
     def test_query_invalid_entity_handles_gracefully(self):
         """Test that querying invalid entities is handled gracefully.

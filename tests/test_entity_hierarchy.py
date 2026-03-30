@@ -68,7 +68,6 @@ class TestGetTestToMeasurementHierarchy:
         # Get hierarchy
         result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
-        assert result["success"] is True
         assert result["depth"] == 1
         assert len(result["hierarchy_chain"]) == 1
         assert result["hierarchy_chain"][0]["name"] == "Test"
@@ -157,7 +156,6 @@ class TestGetTestToMeasurementHierarchy:
         # Get hierarchy
         result = SchemaInspector.schema_test_to_measurement_hierarchy()
 
-        assert result["success"] is True
         assert result["depth"] == 3
         assert len(result["hierarchy_chain"]) == 3
         assert result["hierarchy_chain"][0]["base_name"] == "AoTest"

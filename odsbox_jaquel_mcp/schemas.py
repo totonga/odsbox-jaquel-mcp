@@ -245,7 +245,6 @@ class SchemaInspector:
                     break
 
             return {
-                "success": True,
                 "hierarchy_chain": hierarchy_chain,
                 "depth": len(hierarchy_chain),
                 "note": "This is the main AoTest to AoMeasurement hierarchy in this ASAM ODS server",

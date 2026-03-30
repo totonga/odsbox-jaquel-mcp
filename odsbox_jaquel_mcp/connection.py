@@ -88,7 +88,7 @@ class ODSConnectionManager:
                 "initial_query": initial_query,
             }
 
-            return {"success": True, "message": "Connected to ODS server", "connection": instance._connection_info}
+            return {"message": "Connected to ODS server", "connection": instance._connection_info}
 
         except Exception as e:
             raise ToolError(f"Connection failed: {e}") from e
@@ -112,7 +112,7 @@ class ODSConnectionManager:
             instance._model = None
             instance._connection_info = {}
 
-            return {"success": True, "message": "Disconnected from ODS server"}
+            return {"message": "Disconnected from ODS server"}
         except Exception as e:
             raise ToolError(f"Disconnect failed: {e}") from e
 
@@ -156,8 +156,10 @@ class ODSConnectionManager:
             raise ToolError("Not connected to ODS server. Use 'ods_connect' tool first.")
 
         try:
-            result = instance._con_i.query_data(jaquel_query)
+            result = instance._con_i.query_data(
+                jaquel_query,
+            )
             entity_count = len(result.dataMatrices) if hasattr(result, "dataMatrices") else 0
-            return {"success": True, "result": result, "entity_count": entity_count}
+            return {"result": result, "entity_count": entity_count}
         except Exception as e:
             raise ToolError(f"Query failed: {e}") from e
