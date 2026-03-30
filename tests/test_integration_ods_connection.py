@@ -107,7 +107,6 @@ class TestODSIntegration:
         result = ODSConnectionManager.query(query)
 
         assert "result" in result
-        assert result.get("entity_count", 0) >= 0
 
     def test_disconnect_from_ods_server(self, integration_credentials):
         """Test disconnecting from ODS server.
@@ -136,11 +135,10 @@ class TestODSIntegration:
         - Singleton pattern works correctly
         """
         # First connection
-        result1 = ODSConnectionManager.connect(
+        ODSConnectionManager.connect(
             url=integration_credentials["url"],
             auth=(integration_credentials["username"], integration_credentials["password"]),
         )
-        assert result1["success"] is True
 
         instance1 = ODSConnectionManager.get_instance()
 

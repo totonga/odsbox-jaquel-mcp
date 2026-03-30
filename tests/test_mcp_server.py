@@ -258,7 +258,7 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_query_execute(self, mock_query):
         """Test calling query_execute tool."""
-        mock_query.return_value = {"result": "data", "entity_count": 0}
+        mock_query.return_value = {"result": "data"}
 
         result = await query_execute(query={"TestEntity": {}})
 

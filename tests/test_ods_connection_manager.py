@@ -150,8 +150,8 @@ class TestODSConnectionManager:
         # Setup connection
         mock_coni = Mock()
         mock_result = Mock()
-        mock_result.dataMatrices = [Mock(), Mock()]  # 2 entities
-        mock_coni.query_data.return_value = mock_result
+        mock_result.to_string.return_value = "mocked dataframe string"
+        mock_coni.query.return_value = mock_result
         mock_coni.con_i_url.return_value = "http://test:8087/api"
         mock_coni.mc = Mock()
         mock_model = Mock()
@@ -165,9 +165,8 @@ class TestODSConnectionManager:
         query = {"TestEntity": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["result"] is mock_result
-        assert result["entity_count"] == 2
-        mock_coni.query_data.assert_called_once_with(query)
+        assert result["result"] == "mocked dataframe string"
+        mock_coni.query.assert_called_once_with(query, result_naming_mode="model")
 
     def test_query_not_connected(self):
         """Test query when not connected."""
@@ -181,7 +180,7 @@ class TestODSConnectionManager:
         """Test query execution failure."""
         # Setup connection
         mock_coni = Mock()
-        mock_coni.query_data.side_effect = Exception("Query failed")
+        mock_coni.query.side_effect = Exception("Query failed")
         mock_coni.con_i_url.return_value = "http://test:8087/api"
         mock_coni.mc = Mock()
         mock_model = Mock()

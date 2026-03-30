@@ -406,7 +406,6 @@ else:
 **Output**:
 ```json
 {
-    "success": true,
     "message": "Connected to ODS server",
     "connection": {
         "url": "http://localhost:8087/api",
@@ -428,7 +427,7 @@ else:
 - `ODSBOX_MCP_URL` / `ODSBOX_MCP_API_URL`
 - `ODSBOX_MCP_USERNAME` / `ODSBOX_MCP_USER`
 - `ODSBOX_MCP_PASSWORD` / `ODSBOX_MCP_PWD`
-- `ODSBOX_MCP_VERIFY` (true/false)  
+- `ODSBOX_MCP_VERIFY` (true/false)
 
 You can override the prefix using either:
 - tool argument: `env_prefix`
@@ -442,7 +441,6 @@ You can override the prefix using either:
 **Output**:
 ```json
 {
-    "success": true,
     "message": "Connected to ODS server",
     "connection": {
         "url": "http://localhost:8087/api",
@@ -468,7 +466,6 @@ You can override the prefix using either:
 **Output**:
 ```json
 {
-    "success": true,
     "message": "Disconnected from ODS server"
 }
 ```
@@ -553,7 +550,6 @@ This is the main ASAM ODS hierarchy for accessing test data:
 **Output**:
 ```json
 {
-    "success": true,
     "hierarchy_chain": [
         {
             "name": "Test",
@@ -581,7 +577,7 @@ This is the main ASAM ODS hierarchy for accessing test data:
 
 **Requirements**: Must be connected to ODS server first using `ods_connect`.
 
-**Usage**: 
+**Usage**:
 Use this tool to understand the entity hierarchy for building Jaquel queries that navigate from tests down to measurements. This helps LLMs and users understand the proper entity traversal path.
 
 **Example Query Pattern**:
@@ -592,7 +588,7 @@ query = {
     "AoMeasurement": {
         "name": "MyMeas1",
         "test": {
-            "name": "SubTest1", 
+            "name": "SubTest1",
             "parent_test": {
                 "name" : "MyProject1"
             }
@@ -620,9 +616,7 @@ query = {
 **Output**:
 ```json
 {
-    "success": true,
-    "result": "<DataFrame>",
-    "entity_count": 42
+    "result": "<DataFrame>"
 }
 ```
 
@@ -759,7 +753,7 @@ import pandas as pd
 from odsbox import ConI
 
 def main():
-    
+
     try:
     # Connect to ODS server
         with ConI(url="http://localhost:8087/api",  # Update with your ODS server URL
@@ -772,16 +766,16 @@ def main():
                 date_as_timestamp=True,
                 set_independent_as_index=True
             )
-        
+
         print(f"Loaded data with shape: {{df.shape}}")
         print(f"Columns: {{list(df.columns)}}")
         print("\\nFirst 5 rows:")
         print(df.head())
-        
+
         # Save to file
         df.to_csv("submatrix_123_data.csv", index=True)
         print("\\nData saved successfully!")
-        
+
     except Exception as e:
         print(f"Error fetching data: {{e}}")
 

@@ -156,10 +156,7 @@ class ODSConnectionManager:
             raise ToolError("Not connected to ODS server. Use 'ods_connect' tool first.")
 
         try:
-            result = instance._con_i.query_data(
-                jaquel_query,
-            )
-            entity_count = len(result.dataMatrices) if hasattr(result, "dataMatrices") else 0
-            return {"result": result, "entity_count": entity_count}
+            result = instance._con_i.query(jaquel_query, result_naming_mode="model")
+            return {"result": result.to_string(max_rows=None)}
         except Exception as e:
             raise ToolError(f"Query failed: {e}") from e

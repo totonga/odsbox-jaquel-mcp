@@ -6,7 +6,6 @@ These tests require a live ODS server connection. Run with:
 Mark all tests with @pytest.mark.integration to allow filtering.
 """
 
-import pandas as pd
 import pytest
 from fastmcp.exceptions import ToolError
 
@@ -107,7 +106,7 @@ class TestJaquelQueryIntegration:
         assert "result" in result
 
         query_result = result["result"]
-        assert isinstance(query_result, pd.DataFrame), "is no pd.DataFrame"
+        assert isinstance(query_result, str), "should be serialized"
 
     def test_connection_state_during_queries(self):
         """Test that connection remains active during multiple queries.
