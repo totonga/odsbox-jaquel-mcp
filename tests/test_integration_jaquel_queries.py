@@ -8,6 +8,7 @@ Mark all tests with @pytest.mark.integration to allow filtering.
 
 import pandas as pd
 import pytest
+from fastmcp.exceptions import ToolError
 
 from odsbox_jaquel_mcp import ODSConnectionManager
 from odsbox_jaquel_mcp.queries import JaquelExplain
@@ -27,13 +28,10 @@ class TestJaquelQueryIntegration:
         ODSConnectionManager._connection_info = {}
 
         # Connect
-        result = ODSConnectionManager.connect(
+        ODSConnectionManager.connect(
             url=integration_credentials["url"],
             auth=(integration_credentials["username"], integration_credentials["password"]),
         )
-
-        if not result["success"]:
-            pytest.skip(f"Could not connect to ODS server: {result.get('error', 'Unknown error')}")
 
         yield
 
@@ -139,10 +137,10 @@ class TestJaquelQueryIntegration:
         - Error is properly reported
         """
         query = {"NonExistentEntity123": {}}
-        result = ODSConnectionManager.query(query)
 
-        # Should either return error or empty results, not crash
-        assert "error" in result or ("success" in result and "result" in result)
+        # Should raise ToolError for invalid entity
+        with pytest.raises(ToolError):
+            ODSConnectionManager.query(query)
 
     def test_query_explain_functionality(self):
         """Test the query explain functionality.

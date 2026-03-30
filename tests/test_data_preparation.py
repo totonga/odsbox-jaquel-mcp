@@ -4,10 +4,7 @@ import unittest
 
 import pandas as pd
 
-from odsbox_jaquel_mcp.data_preparation import (
-    MeasurementDataPreparator,
-    MeasurementMetadataExtractor,
-)
+from odsbox_jaquel_mcp.data_preparation import MeasurementDataPreparator, MeasurementMetadataExtractor
 
 
 class TestMeasurementMetadataExtractor(unittest.TestCase):
@@ -167,9 +164,8 @@ class TestMeasurementDataPreparator(unittest.TestCase):
     def test_prepare_submatrix_dataframe_empty(self):
         """Test with empty DataFrame."""
         df = pd.DataFrame()
-        result_df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed"])
-        self.assertIsNone(result_df)
-        self.assertIsNotNone(error)
+        with self.assertRaises(ValueError):
+            MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed"])
 
     def test_prepare_submatrix_dataframe_valid(self):
         """Test with valid data."""
@@ -184,8 +180,7 @@ class TestMeasurementDataPreparator(unittest.TestCase):
                 "independent": [1, 0, 0],
             }
         )
-        result_df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed", "Torque"])
-        self.assertIsNone(error)
+        result_df = MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed", "Torque"])
         self.assertIsNotNone(result_df)
         self.assertIn("Speed", result_df.columns)
         self.assertIn("Torque", result_df.columns)
@@ -200,11 +195,9 @@ class TestMeasurementDataPreparator(unittest.TestCase):
                 "independent": [1, 0],
             }
         )
-        result_df, error = MeasurementDataPreparator.prepare_submatrix_dataframe(
-            df, ["Speed", "Torque"]  # Torque missing
-        )
-        self.assertIsNone(result_df)
-        self.assertIn("Missing", error)
+        with self.assertRaises(ValueError) as ctx:
+            MeasurementDataPreparator.prepare_submatrix_dataframe(df, ["Speed", "Torque"])  # Torque missing
+        self.assertIn("Missing", str(ctx.exception))
 
     def test_prepare_measurement_data_items_empty(self):
         """Test with empty inputs."""

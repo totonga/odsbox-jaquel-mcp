@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from fastmcp.exceptions import ToolError
 from odsbox import ConI
 from odsbox.model_cache import ModelCache
 from odsbox.proto import ods
@@ -90,7 +91,7 @@ class ODSConnectionManager:
             return {"success": True, "message": "Connected to ODS server", "connection": instance._connection_info}
 
         except Exception as e:
-            return {"success": False, "error": str(e), "error_type": type(e).__name__}
+            raise ToolError(f"Connection failed: {e}") from e
 
     @classmethod
     def disconnect(cls) -> dict[str, Any]:
@@ -113,7 +114,7 @@ class ODSConnectionManager:
 
             return {"success": True, "message": "Disconnected from ODS server"}
         except Exception as e:
-            return {"success": False, "error": str(e)}
+            raise ToolError(f"Disconnect failed: {e}") from e
 
     @classmethod
     def is_connected(cls) -> bool:
@@ -152,11 +153,11 @@ class ODSConnectionManager:
         instance = cls.get_instance()
 
         if not instance._con_i:
-            return {"error": "Not connected to ODS server", "hint": "Use 'ods_connect' tool first"}
+            raise ToolError("Not connected to ODS server. Use 'ods_connect' tool first.")
 
         try:
             result = instance._con_i.query_data(jaquel_query)
             entity_count = len(result.dataMatrices) if hasattr(result, "dataMatrices") else 0
             return {"success": True, "result": result, "entity_count": entity_count}
         except Exception as e:
-            return {"error": str(e), "error_type": type(e).__name__, "query": jaquel_query}
+            raise ToolError(f"Query failed: {e}") from e

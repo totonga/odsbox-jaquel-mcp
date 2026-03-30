@@ -115,7 +115,10 @@ class JaquelValidator:
             return {"valid": False, "errors": errors, "warnings": warnings, "suggestions": suggestions}
 
         if len(non_dollar_keys) > 1:
-            msg = f"Query is only allowed to contain a single non-$ element which is the entity to look for, but found: {', '.join(non_dollar_keys)}"
+            msg = (
+                "Query is only allowed to contain a single non-$ element"
+                f" which is the entity to look for, but found: {', '.join(non_dollar_keys)}"
+            )
             errors.append(msg)
             return {"valid": False, "errors": errors, "warnings": warnings, "suggestions": suggestions}
 
@@ -270,6 +273,6 @@ class JaquelValidator:
         }
 
         if operator not in operator_docs:
-            return {"error": f"Unknown operator: {operator}"}
+            raise ValueError(f"Unknown operator: {operator}")
 
         return operator_docs[operator]

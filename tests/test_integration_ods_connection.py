@@ -41,7 +41,7 @@ class TestODSIntegration:
             auth=(integration_credentials["username"], integration_credentials["password"]),
         )
 
-        assert result["success"] is True, f"Connection failed: {result.get('error', 'Unknown error')}"
+        assert result["success"] is True
         assert ODSConnectionManager.is_connected()
         assert result["connection"]["status"] == "connected"
         assert result["connection"]["url"] == integration_credentials["url"]
@@ -107,7 +107,7 @@ class TestODSIntegration:
 
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True, f"Query failed: {result.get('error', 'Unknown error')}"
+        assert result["success"] is True
         assert "result" in result
         assert result.get("entity_count", 0) >= 0
 

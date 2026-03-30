@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from fastmcp.exceptions import ToolError
 from odsbox.jaquel import Jaquel
 from odsbox.proto import ods
 
@@ -116,7 +117,7 @@ class JaquelExamples:
     def get_pattern(pattern_name: str) -> dict[str, Any]:
         """Get a specific query pattern."""
         if pattern_name not in JaquelExamples.BASIC_PATTERNS:
-            return {"error": f"Unknown pattern: {pattern_name}"}
+            raise ValueError(f"Unknown pattern: {pattern_name}")
         return JaquelExamples.BASIC_PATTERNS[pattern_name]
 
     @staticmethod
@@ -144,7 +145,9 @@ class JaquelExamples:
             },
         }
 
-        return skeletons.get(operation, {"error": f"Unknown operation: {operation}"})
+        if operation not in skeletons:
+            raise ValueError(f"Unknown operation: {operation}")
+        return skeletons[operation]
 
 
 class JaquelExplain:
@@ -197,7 +200,8 @@ class JaquelExplain:
                 if join_type == "DEFAULT":
                     join_type = "INNER"
                 sql_lines.append(
-                    f"{join_type} JOIN {right_entity.name} ON {left_entity.name}.{join_rel.name} = {right_entity.name}.{join_id.name}"
+                    f"{join_type} JOIN {right_entity.name}"
+                    f" ON {left_entity.name}.{join_rel.name} = {right_entity.name}.{join_id.name}"
                 )
 
         # WHERE clause
@@ -275,19 +279,19 @@ class JaquelExplain:
         # Get model cache from ODS connection
         connection = ODSConnectionManager.get_instance()
         if not connection or not connection.is_connected():
-            raise RuntimeError("Not connected to ODS server. Cannot access model cache.")
+            raise ToolError("Not connected to ODS server. Use 'ods_connect' tool first.")
 
         mc = connection.get_model_cache()
         if not mc:
-            raise RuntimeError("Model cache not available. Ensure connection is properly established.")
+            raise ToolError("Model cache not available. Ensure connection is properly established.")
 
         select_statement = None
         try:
             select_statement = Jaquel(model=mc.model(), jaquel_query=query).select_statement
         except Exception as e:
-            raise RuntimeError(f"Failed to parse query: {str(e)}")
+            raise ToolError(f"Failed to parse query: {e}") from e
         if select_statement is None:
-            raise RuntimeError("Failed to generate SelectStatement from query.")
+            raise ToolError("Failed to generate SelectStatement from query.")
 
         if select_statement.columns:
             explanation_parts.append("Select Statement Columns:")
