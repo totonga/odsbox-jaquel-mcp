@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.5.0 (2026-03-31)
+
+### Features
+
+- Enhance error handling and serialization in query execution
+  ([#45](https://github.com/totonga/odsbox-jaquel-mcp/pull/45),
+  [`dcbd23b`](https://github.com/totonga/odsbox-jaquel-mcp/commit/dcbd23bd72898b16b3b3df4cd712ffba75c4728b))
+
+
 ## v1.4.0 (2026-03-29)
 
 ### Features
