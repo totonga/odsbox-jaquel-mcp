@@ -6,8 +6,8 @@ These tests require a live ODS server connection. Run with:
 Mark all tests with @pytest.mark.integration to allow filtering.
 """
 
-import pandas as pd
 import pytest
+from fastmcp.exceptions import ToolError
 
 from odsbox_jaquel_mcp import ODSConnectionManager
 from odsbox_jaquel_mcp.queries import JaquelExplain
@@ -27,13 +27,10 @@ class TestJaquelQueryIntegration:
         ODSConnectionManager._connection_info = {}
 
         # Connect
-        result = ODSConnectionManager.connect(
+        ODSConnectionManager.connect(
             url=integration_credentials["url"],
             auth=(integration_credentials["username"], integration_credentials["password"]),
         )
-
-        if not result["success"]:
-            pytest.skip(f"Could not connect to ODS server: {result.get('error', 'Unknown error')}")
 
         yield
 
@@ -51,7 +48,6 @@ class TestJaquelQueryIntegration:
         query = {"AoMeasurement": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_entity_with_filter(self):
@@ -65,7 +61,6 @@ class TestJaquelQueryIntegration:
         query = {"AoTest": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_entity_with_related_join(self):
@@ -81,7 +76,6 @@ class TestJaquelQueryIntegration:
         }
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_query_with_select(self):
@@ -97,7 +91,6 @@ class TestJaquelQueryIntegration:
         }
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
     def test_query_result_has_data_matrices(self):
@@ -110,11 +103,10 @@ class TestJaquelQueryIntegration:
         query = {"AoMeasurement": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
         assert "result" in result
 
         query_result = result["result"]
-        assert isinstance(query_result, pd.DataFrame), "is no pd.DataFrame"
+        assert isinstance(query_result, str), "should be serialized"
 
     def test_connection_state_during_queries(self):
         """Test that connection remains active during multiple queries.
@@ -129,7 +121,7 @@ class TestJaquelQueryIntegration:
             query = {"AoMeasurement": {}}
             result = ODSConnectionManager.query(query)
 
-            assert result["success"] is True, f"Query {i} failed"
+            assert "result" in result, f"Query {i} failed"
 
     def test_query_invalid_entity_handles_gracefully(self):
         """Test that querying invalid entities is handled gracefully.
@@ -139,10 +131,10 @@ class TestJaquelQueryIntegration:
         - Error is properly reported
         """
         query = {"NonExistentEntity123": {}}
-        result = ODSConnectionManager.query(query)
 
-        # Should either return error or empty results, not crash
-        assert "error" in result or ("success" in result and "result" in result)
+        # Should raise ToolError for invalid entity
+        with pytest.raises(ToolError):
+            ODSConnectionManager.query(query)
 
     def test_query_explain_functionality(self):
         """Test the query explain functionality.

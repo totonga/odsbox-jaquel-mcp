@@ -1,5 +1,7 @@
 """Tests for JaquelValidator."""
 
+import pytest
+
 from odsbox_jaquel_mcp import JaquelValidator
 
 
@@ -191,10 +193,8 @@ class TestJaquelValidator:
 
     def test_get_operator_info_unknown_operator(self):
         """Test getting info for unknown operator."""
-        result = JaquelValidator.get_operator_info("$unknown")
-
-        assert "error" in result
-        assert "Unknown operator: $unknown" in result["error"]
+        with pytest.raises(ValueError, match="Unknown operator: \\$unknown"):
+            JaquelValidator.get_operator_info("$unknown")
 
     def test_get_operator_info_like_with_options(self):
         """Test getting info for $like operator with options."""

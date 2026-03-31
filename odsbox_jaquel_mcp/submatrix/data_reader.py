@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Literal, cast
 
 import pandas as pd
+from fastmcp.exceptions import ToolError
 
 from ..connection import ODSConnectionManager
 
@@ -251,7 +252,7 @@ class SubmatrixDataReader:
         instance = ODSConnectionManager.get_instance()
 
         if not instance._con_i:
-            raise ConnectionError("Not connected to ODS server")
+            raise ToolError("Not connected to ODS server. Use 'ods_connect' tool first.")
 
         try:
             # Query for local columns in the submatrix
@@ -347,7 +348,7 @@ class SubmatrixDataReader:
         instance = ODSConnectionManager.get_instance()
 
         if not instance._con_i:
-            raise ConnectionError("Not connected to ODS server")
+            raise ToolError("Not connected to ODS server. Use 'ods_connect' tool first.")
 
         try:
             # Use bulk.data_read to get the data

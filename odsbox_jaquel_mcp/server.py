@@ -325,13 +325,7 @@ async def query_execute(
     ctx: Context | None = None,
 ) -> dict:
     """Execute a Jaquel query directly on connected ODS server."""
-    result = ODSConnectionManager.query(query)
-    # Convert non-serializable objects to strings for JSON serialization
-    if "result" in result and result["result"] is not None:
-        result["result"] = str(result["result"])
-        if ctx:
-            await ctx.warning("Query result serialized to string — use data_read_submatrix for structured data access")
-    return result
+    return ODSConnectionManager.query(query)
 
 
 # ============================================================================

@@ -2,6 +2,9 @@
 
 from unittest.mock import Mock, patch
 
+import pytest
+from fastmcp.exceptions import ToolError
+
 from odsbox_jaquel_mcp import ODSConnectionManager
 
 
@@ -48,7 +51,6 @@ class TestODSConnectionManager:
 
         result = ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
-        assert result["success"] is True
         assert "Connected to ODS server" in result["message"]
         assert result["connection"]["url"] == "http://test:8087/api"
         assert result["connection"]["username"] == "user"
@@ -61,11 +63,9 @@ class TestODSConnectionManager:
         """Test connection failure."""
         mock_coni_class.side_effect = Exception("Connection failed")
 
-        result = ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
+        with pytest.raises(ToolError, match="Connection failed"):
+            ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
-        assert result["success"] is False
-        assert result["error"] == "Connection failed"
-        assert result["error_type"] == "Exception"
         assert not ODSConnectionManager.is_connected()
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
@@ -74,6 +74,11 @@ class TestODSConnectionManager:
         # First connect
         mock_coni = Mock()
         mock_coni.close.return_value = None
+        mock_coni.con_i_url.return_value = "http://test:8087/api"
+        mock_coni.mc = Mock()
+        mock_model = Mock()
+        mock_model.entities = {}
+        mock_coni.model.return_value = mock_model
         mock_coni_class.return_value = mock_coni
 
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
@@ -81,7 +86,6 @@ class TestODSConnectionManager:
         # Then disconnect
         result = ODSConnectionManager.disconnect()
 
-        assert result["success"] is True
         assert "Disconnected from ODS server" in result["message"]
         assert not ODSConnectionManager.is_connected()
         mock_coni.close.assert_called_once()
@@ -90,7 +94,6 @@ class TestODSConnectionManager:
         """Test disconnect when not connected."""
         result = ODSConnectionManager.disconnect()
 
-        assert result["success"] is True
         assert "Disconnected from ODS server" in result["message"]
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
@@ -99,6 +102,11 @@ class TestODSConnectionManager:
         # First connect
         mock_coni = Mock()
         mock_coni.close.side_effect = Exception("Close failed")
+        mock_coni.con_i_url.return_value = "http://test:8087/api"
+        mock_coni.mc = Mock()
+        mock_model = Mock()
+        mock_model.entities = {}
+        mock_coni.model.return_value = mock_model
         mock_coni_class.return_value = mock_coni
 
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
@@ -106,7 +114,6 @@ class TestODSConnectionManager:
         # Then disconnect - should succeed despite close error
         result = ODSConnectionManager.disconnect()
 
-        assert result["success"] is True
         assert "Disconnected from ODS server" in result["message"]
         assert not ODSConnectionManager.is_connected()
 
@@ -143,8 +150,13 @@ class TestODSConnectionManager:
         # Setup connection
         mock_coni = Mock()
         mock_result = Mock()
-        mock_result.dataMatrices = [Mock(), Mock()]  # 2 entities
-        mock_coni.query_data.return_value = mock_result
+        mock_result.to_string.return_value = "mocked dataframe string"
+        mock_coni.query.return_value = mock_result
+        mock_coni.con_i_url.return_value = "http://test:8087/api"
+        mock_coni.mc = Mock()
+        mock_model = Mock()
+        mock_model.entities = {}
+        mock_coni.model.return_value = mock_model
         mock_coni_class.return_value = mock_coni
 
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
@@ -153,33 +165,33 @@ class TestODSConnectionManager:
         query = {"TestEntity": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["success"] is True
-        assert result["result"] is mock_result
-        assert result["entity_count"] == 2
-        mock_coni.query_data.assert_called_once_with(query)
+        assert result["result"] == "mocked dataframe string"
+        mock_coni.query.assert_called_once_with(query, result_naming_mode="model")
 
     def test_query_not_connected(self):
         """Test query when not connected."""
         query = {"TestEntity": {}}
-        result = ODSConnectionManager.query(query)
 
-        assert "error" in result
-        assert "Not connected to ODS server" in result["error"]
+        with pytest.raises(ToolError, match="Not connected to ODS server"):
+            ODSConnectionManager.query(query)
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_query_failure(self, mock_coni_class):
         """Test query execution failure."""
         # Setup connection
         mock_coni = Mock()
-        mock_coni.query_data.side_effect = Exception("Query failed")
+        mock_coni.query.side_effect = Exception("Query failed")
+        mock_coni.con_i_url.return_value = "http://test:8087/api"
+        mock_coni.mc = Mock()
+        mock_model = Mock()
+        mock_model.entities = {}
+        mock_coni.model.return_value = mock_model
         mock_coni_class.return_value = mock_coni
 
         ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
         # Execute query
         query = {"TestEntity": {}}
-        result = ODSConnectionManager.query(query)
 
-        assert "error" in result
-        assert result["error"] == "Query failed"
-        assert result["error_type"] == "Exception"
+        with pytest.raises(ToolError, match="Query failed"):
+            ODSConnectionManager.query(query)

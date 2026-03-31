@@ -1,5 +1,7 @@
 """Tests for JaquelExamples."""
 
+import pytest
+
 from odsbox_jaquel_mcp import JaquelExamples
 
 
@@ -17,10 +19,8 @@ class TestJaquelExamples:
 
     def test_get_pattern_unknown_pattern(self):
         """Test getting an unknown pattern."""
-        result = JaquelExamples.get_pattern("unknown_pattern")
-
-        assert "error" in result
-        assert "Unknown pattern: unknown_pattern" in result["error"]
+        with pytest.raises(ValueError, match="Unknown pattern: unknown_pattern"):
+            JaquelExamples.get_pattern("unknown_pattern")
 
     def test_list_patterns(self):
         """Test listing all patterns."""
@@ -74,10 +74,8 @@ class TestJaquelExamples:
 
     def test_query_generate_skeleton_unknown_operation(self):
         """Test generating skeleton with unknown operation."""
-        result = JaquelExamples.query_generate_skeleton("TestEntity", "unknown_op")
-
-        assert "error" in result
-        assert "Unknown operation: unknown_op" in result["error"]
+        with pytest.raises(ValueError, match="Unknown operation: unknown_op"):
+            JaquelExamples.query_generate_skeleton("TestEntity", "unknown_op")
 
     def test_query_generate_skeleton_default_operation(self):
         """Test generating skeleton with default operation."""
