@@ -6,6 +6,7 @@ from typing import Any
 
 from fastmcp.exceptions import ToolError
 from odsbox import ConI
+from odsbox.con_i_factory import ConIFactory
 from odsbox.model_cache import ModelCache
 from odsbox.proto import ods
 
@@ -39,6 +40,50 @@ class ODSConnectionManager:
         return cls._instance
 
     @classmethod
+    def _init_from_con_i(cls, con_i: ConI, display_username: str) -> dict[str, Any]:
+        """Initialize connection state from an already-created ConI instance.
+
+        Shared helper used by both ``connect()`` and ``connect_with_factory()``.
+        Loads the model, populates ``_connection_info``, and returns the status dict.
+        """
+        instance = cls.get_instance()
+
+        # Close existing connection if any
+        if instance._con_i:
+            try:
+                instance._con_i.close()
+            except Exception:
+                pass
+
+        instance._con_i = con_i
+        instance._model_cache = con_i.mc
+        instance._model = con_i.model()
+
+        ao_test_entity_name = "AoTest"
+        if instance._model is not None and instance._model.entities is not None:
+            for _e_name, e in instance._model.entities.items():
+                if e.base_name.lower() == "aotest":
+                    ao_test_entity_name = e.name
+                    break
+
+        initial_query = {
+            ao_test_entity_name: {"name": {"$like": "*"}},
+            "$attributes": {"id": 1, "name": 1},
+            "$options": {"$rowlimit": 100},
+        }
+
+        instance._connection_info = {
+            "url": con_i.con_i_url(),
+            "username": display_username,
+            "con_i_url": con_i.con_i_url(),
+            "status": "connected",
+            "available_entities": list(instance._model.entities.keys()) if instance._model else [],
+            "initial_query": initial_query,
+        }
+
+        return {"message": "Connected to ODS server", "connection": instance._connection_info}
+
+    @classmethod
     def connect(cls, url: str, auth: tuple, **kwargs) -> dict[str, Any]:
         """Establish connection to ODS server.
 
@@ -51,47 +96,69 @@ class ODSConnectionManager:
             Connection status dict
         """
         try:
-            instance = cls.get_instance()
-            # Close existing connection if any
-            if instance._con_i:
-                try:
-                    instance._con_i.close()
-                except Exception:
-                    pass
-
-            # Establish new connection
-            instance._con_i = ConI(url=url, auth=auth, load_model=True, **kwargs)
-
-            # Load model
-            instance._model_cache = instance._con_i.mc
-            instance._model = instance._con_i.model()
-
-            ao_test_entity_name = "AoTest"
-            if instance._model is not None and instance._model.entities is not None:
-                for _e_name, e in instance._model.entities.items():
-                    if e.base_name.lower() == "aotest":
-                        ao_test_entity_name = e.name
-                        break
-
-            initial_query = {
-                ao_test_entity_name: {"name": {"$like": "*"}},
-                "$attributes": {"id": 1, "name": 1},
-                "$options": {"$rowlimit": 100},
-            }
-
-            instance._connection_info = {
-                "url": url,
-                "username": auth[0] if isinstance(auth, tuple) else "unknown",
-                "con_i_url": instance._con_i.con_i_url(),
-                "status": "connected",
-                "available_entities": list(instance._model.entities.keys()) if instance._model else [],
-                "initial_query": initial_query,
-            }
-
-            return {"message": "Connected to ODS server", "connection": instance._connection_info}
-
+            con_i = ConI(url=url, auth=auth, load_model=True, **kwargs)
+            display_username = auth[0] if isinstance(auth, tuple) else "unknown"
+            return cls._init_from_con_i(con_i, display_username)
         except Exception as e:
             raise ToolError(f"Connection failed: {e}") from e
+
+    @classmethod
+    def connect_with_factory(cls, auth_args: dict[str, Any]) -> dict[str, Any]:
+        """Establish connection using ConIFactory based on authentication mode.
+
+        Args:
+            auth_args: Dict from ``auth_factory.resolve_auth_args_from_env()`` containing
+                       ``mode`` plus all mode-specific parameters.
+
+        Returns:
+            Connection status dict
+        """
+        mode = auth_args["mode"]
+
+        try:
+            if mode == "basic":
+                con_i = ConIFactory.basic(
+                    url=auth_args["url"],
+                    username=auth_args["username"],
+                    password=auth_args["password"],
+                    verify_certificate=auth_args.get("verify_certificate", True),
+                )
+                display_username = auth_args["username"]
+
+            elif mode == "m2m":
+                con_i = ConIFactory.m2m(
+                    url=auth_args["url"],
+                    token_endpoint=auth_args["token_endpoint"],
+                    client_id=auth_args["client_id"],
+                    client_secret=auth_args["client_secret"],
+                    scope=auth_args.get("scope"),
+                    verify_certificate=auth_args.get("verify_certificate", True),
+                )
+                display_username = auth_args["client_id"]
+
+            elif mode == "oidc":
+                con_i = ConIFactory.oidc(
+                    url=auth_args["url"],
+                    client_id=auth_args["client_id"],
+                    redirect_uri=auth_args["redirect_uri"],
+                    redirect_url_allow_insecure=auth_args.get("redirect_url_allow_insecure", False),
+                    client_secret=auth_args.get("client_secret"),
+                    scope=auth_args.get("scope"),
+                    authorization_endpoint=auth_args.get("authorization_endpoint"),
+                    token_endpoint=auth_args.get("token_endpoint"),
+                    login_timeout=auth_args.get("login_timeout", 60),
+                    verify_certificate=auth_args.get("verify_certificate", True),
+                    webfinger_path_prefix=auth_args.get("webfinger_path_prefix", ""),
+                )
+                display_username = auth_args["client_id"]
+
+            else:
+                raise ValueError(f"Unknown authentication mode: {mode!r}")
+
+            return cls._init_from_con_i(con_i, display_username)
+
+        except Exception as e:
+            raise ToolError(f"Connection failed ({mode} mode): {e}") from e
 
     @classmethod
     def disconnect(cls) -> dict[str, Any]:

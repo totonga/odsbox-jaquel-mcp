@@ -423,15 +423,57 @@ else:
 
 **Purpose**: Establish connection to ASAM ODS server using environment variables.
 
-**Supported environment variables (default prefix `ODSBOX_MCP`)**:
-- `ODSBOX_MCP_URL` / `ODSBOX_MCP_API_URL`
-- `ODSBOX_MCP_USERNAME` / `ODSBOX_MCP_USER`
-- `ODSBOX_MCP_PASSWORD` / `ODSBOX_MCP_PWD`
-- `ODSBOX_MCP_VERIFY` (true/false)
+Supports three authentication modes controlled by `{PREFIX}_MODE` (default: `basic`). The default prefix is `ODSBOX_MCP`; all variables also fall back to the `ODS_` legacy prefix.
 
 You can override the prefix using either:
 - tool argument: `env_prefix`
 - environment variable: `ODSBOX_MCP_ENV_PREFIX`
+
+#### Mode: basic (default)
+
+| Variable | Required | Description |
+|---|---|---|
+| `{PREFIX}_URL` / `{PREFIX}_API_URL` | Yes | ODS server API URL |
+| `{PREFIX}_USERNAME` / `{PREFIX}_USER` | Yes | Username |
+| `{PREFIX}_PASSWORD` / `{PREFIX}_PWD` | Yes* | Password |
+| `{PREFIX}_VERIFY` | No | TLS verification (`true`/`false`, default `true`) |
+
+#### Mode: m2m (machine-to-machine)
+
+Set `{PREFIX}_MODE=m2m`.
+
+| Variable | Required | Description |
+|---|---|---|
+| `{PREFIX}_URL` | Yes | ODS server API URL |
+| `{PREFIX}_M2M_TOKEN_ENDPOINT` | Yes | OAuth2 token endpoint URL |
+| `{PREFIX}_M2M_CLIENT_ID` | Yes | Client ID |
+| `{PREFIX}_M2M_CLIENT_SECRET` | Yes* | Client secret |
+| `{PREFIX}_M2M_SCOPE` | No | Comma-separated scopes |
+| `{PREFIX}_VERIFY` | No | TLS verification |
+
+#### Mode: oidc (interactive browser login)
+
+Set `{PREFIX}_MODE=oidc`.
+
+| Variable | Required | Description |
+|---|---|---|
+| `{PREFIX}_URL` | Yes | ODS server API URL |
+| `{PREFIX}_OIDC_CLIENT_ID` | Yes | Client ID |
+| `{PREFIX}_OIDC_REDIRECT_URI` | Yes | Redirect URI (e.g., `http://127.0.0.1:1234`) |
+| `{PREFIX}_OIDC_CLIENT_SECRET` | No | Client secret (not needed for public clients) |
+| `{PREFIX}_OIDC_AUTHORIZATION_ENDPOINT` | No | Explicit authorization URL (skips WebFinger) |
+| `{PREFIX}_OIDC_TOKEN_ENDPOINT` | No | Explicit token URL (skips WebFinger) |
+| `{PREFIX}_OIDC_WEBFINGER_PATH_PREFIX` | No | WebFinger path prefix |
+| `{PREFIX}_OIDC_REDIRECT_INSECURE` | No | Allow HTTP redirect (`true`/`false`) |
+| `{PREFIX}_OIDC_LOGIN_TIMEOUT` | No | Browser login timeout in seconds (default `60`) |
+| `{PREFIX}_OIDC_SCOPE` | No | Comma-separated scopes |
+| `{PREFIX}_VERIFY` | No | TLS verification |
+
+> **Keyring fallback**: Secrets marked with \* fall back to the system keyring when the env var is absent.
+> Store secrets with `keyring set '<service>' '<username>'`:
+> - Basic: `keyring set '<URL>' '<username>'`
+> - M2M: `keyring set '<token_endpoint>' '<client_id>'`
+> - OIDC: `keyring set '<URL>' '<client_id>'` (optional for public clients)
 
 **Input**:
 ```json
