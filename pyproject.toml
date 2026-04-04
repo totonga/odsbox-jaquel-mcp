@@ -38,10 +38,11 @@ classifiers = [
 ]
 dependencies = [
     "fastmcp>=3.0.0",
-    "odsbox>=1.0.15",
+    "odsbox[oidc]>=1.2.0",
     "pip-system-certs",
     "matplotlib",
     "Jinja2>=3.0",
+    "keyring>=25.7.0",
 ]
 
 [project.optional-dependencies]

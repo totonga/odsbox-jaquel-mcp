@@ -138,7 +138,7 @@ class TestMCPServer:
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
         )
 
-    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect_with_factory")
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with default prefix (ODSBOX_MCP)."""
@@ -152,11 +152,15 @@ class TestMCPServer:
         result = await ods_connect_using_env()
 
         assert isinstance(result, dict)
-        mock_connect.assert_called_once_with(
-            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
-        )
+        mock_connect.assert_called_once()
+        auth_args = mock_connect.call_args[0][0]
+        assert auth_args["mode"] == "basic"
+        assert auth_args["url"] == "http://test:8087/api"
+        assert auth_args["username"] == "user"
+        assert auth_args["password"] == "pass"
+        assert auth_args["verify_certificate"] is False
 
-    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect_with_factory")
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with an explicit env_prefix."""
@@ -170,11 +174,15 @@ class TestMCPServer:
         result = await ods_connect_using_env(env_prefix="ODS")
 
         assert isinstance(result, dict)
-        mock_connect.assert_called_once_with(
-            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
-        )
+        mock_connect.assert_called_once()
+        auth_args = mock_connect.call_args[0][0]
+        assert auth_args["mode"] == "basic"
+        assert auth_args["url"] == "http://test:8087/api"
+        assert auth_args["username"] == "user"
+        assert auth_args["password"] == "pass"
+        assert auth_args["verify_certificate"] is False
 
-    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect_with_factory")
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
         """Test that ods_connect_using_env falls back to legacy ODS_ env vars when ODSBOX_MCP_ vars are absent."""
@@ -193,11 +201,15 @@ class TestMCPServer:
         result = await ods_connect_using_env()
 
         assert isinstance(result, dict)
-        mock_connect.assert_called_once_with(
-            url="http://test:8087/api", auth=("user", "pass"), verify_certificate=True
-        )
+        mock_connect.assert_called_once()
+        auth_args = mock_connect.call_args[0][0]
+        assert auth_args["mode"] == "basic"
+        assert auth_args["url"] == "http://test:8087/api"
+        assert auth_args["username"] == "user"
+        assert auth_args["password"] == "pass"
+        assert auth_args["verify_certificate"] is True
 
-    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect")
+    @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.connect_with_factory")
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_missing_required_env_vars(self, mock_connect, monkeypatch):
         """Test that missing required env vars raises an error."""
