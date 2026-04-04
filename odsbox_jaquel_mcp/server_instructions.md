@@ -72,6 +72,7 @@ This MCP server helps you work with ASAM ODS data using odsbox Jaquel queries.
 - **Connection State**: Connection persists across tool calls. Call `ods_disconnect` when done.
 - **Bulk API**: For large timeseries data (submatrices), prefer `data_read_submatrix` over `query_execute`
 - **Pattern Matching**: `data_read_submatrix` supports wildcards for efficient data filtering (e.g., "Temp*", "*Speed")
+- **Authentication Modes**: `ods_connect_using_env` supports `basic` (default), `m2m`, and `oidc` modes via `{PREFIX}_MODE`.
 
 ## ❓ WHEN TO USE WHICH TOOL
 

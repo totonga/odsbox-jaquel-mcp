@@ -1879,17 +1879,32 @@ wheels = [
 ]
 
 [[package]]
+name = "oauthlib"
+version = "3.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0b/5f/19930f824ffeb0ad4372da4812c50edbd1434f678c90c2733e1188edfc63/oauthlib-3.3.1.tar.gz", hash = "sha256:0f0f8aa759826a193cf66c12ea1af1637f87b9b4622d46e866952bb022e538c9", size = 185918, upload-time = "2025-06-19T22:48:08.269Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/be/9c/92789c596b8df838baa98fa71844d84283302f7604ed565dafe5a6b5041a/oauthlib-3.3.1-py3-none-any.whl", hash = "sha256:88119c938d2b8fb88561af5f6ee0eec8cc8d552b7bb1f712743136eb7523b7a1", size = 160065, upload-time = "2025-06-19T22:48:06.508Z" },
+]
+
+[[package]]
 name = "odsbox"
-version = "1.0.17"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pandas" },
     { name = "protobuf" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e7/7f/1f09927c1045cb709b3dc4426a91624292a94b1efa36587778f0071a9b87/odsbox-1.0.17.tar.gz", hash = "sha256:5f37df3a0ff4f163b06f11903cfed50b48aa428bd7d4dc170469006171f88bf7", size = 1315399, upload-time = "2026-02-05T15:09:22.428Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/78/380ebb4829a4bccc988a1cfb74259fd60add9c73149f5f316d9a989e3a6f/odsbox-1.2.0.tar.gz", hash = "sha256:185dd490f688e5e539a52980dd55123f9f3481ab322ae7e13a224103ba458ab5", size = 1330864, upload-time = "2026-04-03T21:09:41.717Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d6/b4/3db9837a1211bc2e14ee778b0fefe1b65909f5fade40819062212e36ca00/odsbox-1.0.17-py3-none-any.whl", hash = "sha256:0cb0946cadd8b68795efdc1e79a120ed881dcfa44289a566748de7aef26e73cb", size = 61980, upload-time = "2026-02-05T15:09:20.732Z" },
+    { url = "https://files.pythonhosted.org/packages/81/1e/3a61cf841229f32c45b23bab431c6e02c128f7eab2aa9f6764854bd1e4da/odsbox-1.2.0-py3-none-any.whl", hash = "sha256:5814de744855357a2cc80fd3ae89ef2a9b24fb61e8a065fae1c3052a08edbb78", size = 68073, upload-time = "2026-04-03T21:09:39.919Z" },
+]
+
+[package.optional-dependencies]
+oidc = [
+    { name = "pip-system-certs" },
+    { name = "requests-oauthlib" },
 ]
 
 [[package]]
@@ -1898,8 +1913,9 @@ source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },
     { name = "jinja2" },
+    { name = "keyring" },
     { name = "matplotlib" },
-    { name = "odsbox" },
+    { name = "odsbox", extra = ["oidc"] },
     { name = "pip-system-certs" },
 ]
 
@@ -1938,9 +1954,10 @@ requires-dist = [
     { name = "isort", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "jinja2", specifier = ">=3.0" },
     { name = "jupyter", marker = "extra == 'play'" },
+    { name = "keyring", specifier = ">=25.7.0" },
     { name = "matplotlib" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0" },
-    { name = "odsbox", specifier = ">=1.0.15" },
+    { name = "odsbox", extras = ["oidc"], specifier = ">=1.2.0" },
     { name = "pandas-stubs", marker = "extra == 'dev'", specifier = ">=2.3" },
     { name = "pip-system-certs" },
     { name = "plotly", marker = "extra == 'play'" },
@@ -2777,6 +2794,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c9/74/b3ff8e6c8446842c3f5c837e9c3dfcfe2018ea6ecef224c710c85ef728f4/requests-2.32.5.tar.gz", hash = "sha256:dbba0bac56e100853db0ea71b82b4dfd5fe2bf6d3754a8893c3af500cec7d7cf", size = 134517, upload-time = "2025-08-18T20:46:02.573Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1e/db/4254e3eabe8020b458f1a747140d32277ec7a271daf1d235b70dc0b4e6e3/requests-2.32.5-py3-none-any.whl", hash = "sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6", size = 64738, upload-time = "2025-08-18T20:46:00.542Z" },
+]
+
+[[package]]
+name = "requests-oauthlib"
+version = "2.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "oauthlib" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/42/f2/05f29bc3913aea15eb670be136045bf5c5bbf4b99ecb839da9b422bb2c85/requests-oauthlib-2.0.0.tar.gz", hash = "sha256:b3dffaebd884d8cd778494369603a9e7b58d29111bf6b41bdc2dcd87203af4e9", size = 55650, upload-time = "2024-03-22T20:32:29.939Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3b/5d/63d4ae3b9daea098d5d6f5da83984853c1bbacd5dc826764b249fe119d24/requests_oauthlib-2.0.0-py2.py3-none-any.whl", hash = "sha256:7dd8a5c40426b779b0868c404bdef9768deccf22749cde15852df527e6269b36", size = 24179, upload-time = "2024-03-22T20:32:28.055Z" },
 ]
 
 [[package]]

@@ -18,6 +18,7 @@ from fastmcp import Context, FastMCP
 from pydantic import Field
 
 from . import __version__
+from .auth_factory import resolve_auth_args_from_env
 from .bulk_api_guide import BulkAPIGuide
 from .connection import ODSConnectionManager
 from .measurement_analysis import ComparisonResult, MeasurementAnalyzer
@@ -254,45 +255,30 @@ async def ods_connect_using_env(
 
     Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix.
     Falls back to legacy ODS_ prefix variables.
+
+    Supports three authentication modes via {prefix}_MODE:
+    - basic (default): Username/password. Vars: URL, USERNAME, PASSWORD, VERIFY.
+    - m2m: OAuth2 client credentials. Vars: URL, M2M_TOKEN_ENDPOINT, M2M_CLIENT_ID,
+      M2M_CLIENT_SECRET, M2M_SCOPE (optional, comma-separated), VERIFY.
+    - oidc: OpenID Connect browser login. Vars: URL, OIDC_CLIENT_ID, OIDC_REDIRECT_URI,
+      OIDC_CLIENT_SECRET (optional), OIDC_WEBFINGER_PATH_PREFIX, OIDC_AUTHORIZATION_ENDPOINT,
+      OIDC_TOKEN_ENDPOINT, OIDC_LOGIN_TIMEOUT, OIDC_REDIRECT_INSECURE, OIDC_SCOPE, VERIFY.
+
+    Secrets (passwords, client_secrets) fall back to keyring when not in env.
     """
     env = os.environ
     resolved_prefix = env_prefix or env.get("ODSBOX_MCP_ENV_PREFIX") or "ODSBOX_MCP"
     if ctx:
         await ctx.info(f"Resolved env prefix: {resolved_prefix}")
 
-    def _env_get(key: str) -> str | None:
-        return env.get(f"{resolved_prefix}_{key}") or env.get(f"ODS_{key}")
+    auth_args = resolve_auth_args_from_env(resolved_prefix)
+    mode = auth_args["mode"]
 
-    url = _env_get("URL") or _env_get("API_URL")
-    if not url or not isinstance(url, str) or not url.strip():
-        raise ValueError(
-            f"Environment variable {resolved_prefix}_URL (or {resolved_prefix}_API_URL) "
-            "must be set to a non-empty string"
-        )
-
-    username = _env_get("USERNAME") or _env_get("USER")
-    if not username or not isinstance(username, str) or not username.strip():
-        raise ValueError(
-            f"Environment variable {resolved_prefix}_USERNAME (or {resolved_prefix}_USER) "
-            "must be set to a non-empty string"
-        )
-
-    password = _env_get("PASSWORD") or _env_get("PWD")
-    if not password or not isinstance(password, str) or not password.strip():
-        raise ValueError(
-            f"Environment variable {resolved_prefix}_PASSWORD (or {resolved_prefix}_PWD) "
-            "must be set to a non-empty string"
-        )
     if ctx:
-        await ctx.debug(f"Using URL: {url}, username: {username}")
+        await ctx.info(f"Authentication mode: {mode}")
 
-    verify_str = _env_get("VERIFY")
-    if verify_str is None or str(verify_str).strip() == "":
-        verify_bool = True
-    else:
-        verify_bool = str(verify_str).strip().lower() in ("1", "true", "yes", "y")
+    result = ODSConnectionManager.connect_with_factory(auth_args)
 
-    result = ODSConnectionManager.connect(url=url, auth=(username, password), verify_certificate=verify_bool)
     if ctx:
         await ctx.info("Connection established successfully")
     return result

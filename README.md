@@ -120,9 +120,18 @@ Or with pipx:
 |---|---|---|
 | `ODSBOX_STATS_ENABLED` | not set (disabled) | Set to `1`, `true`, or `yes` to enable tool and resource call monitoring. Statistics are persisted to a SQLite database (`odsbox-jaquel-mcp-stats.db`) for cross-session tracking. |
 | `FASTMCP_LOG_LEVEL` | `INFO` | Controls the server-side log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`). With stdio transport all logs go to stderr, which MCP clients may display as warnings. Set to `WARNING` to reduce noise. |
+| `ODSBOX_MCP_MODE` | `basic` | Authentication mode for `ods_connect_using_env`: `basic`, `m2m`, or `oidc` |
 | `ODSBOX_MCP_URL` | not set | ODS server URL for `ods_connect_using_env` |
-| `ODSBOX_MCP_USER` | not set | ODS username for `ods_connect_using_env` |
-| `ODSBOX_MCP_PASSWORD` | not set | ODS password for `ods_connect_using_env` |
+| `ODSBOX_MCP_USER` | not set | ODS username (basic mode) |
+| `ODSBOX_MCP_PASSWORD` | not set | ODS password (basic mode; falls back to keyring) |
+| `ODSBOX_MCP_M2M_TOKEN_ENDPOINT` | not set | OAuth2 token endpoint (m2m mode) |
+| `ODSBOX_MCP_M2M_CLIENT_ID` | not set | Client ID (m2m mode) |
+| `ODSBOX_MCP_M2M_CLIENT_SECRET` | not set | Client secret (m2m mode; falls back to keyring) |
+| `ODSBOX_MCP_OIDC_CLIENT_ID` | not set | Client ID (oidc mode) |
+| `ODSBOX_MCP_OIDC_REDIRECT_URI` | not set | Redirect URI (oidc mode, e.g. `http://127.0.0.1:1234`) |
+| `ODSBOX_MCP_VERIFY` | `true` | TLS certificate verification (`true`/`false`) |
+
+See [TOOLS_GUIDE.md](TOOLS_GUIDE.md#ods_connect_using_env) for the full list of authentication variables and keyring fallback details.
 
 ### Usage Monitoring
 
@@ -334,7 +343,7 @@ Solution: Check URL, server availability, firewall
 
 ![install in VSCode](https://github.com/totonga/odsbox-jaquel-mcp/blob/main/docs/install_in_vscode.gif){width=300px}
 
-Try with example server configuration:
+Try with example server configuration using all three authentication modes via different env prefixes:
 
 ```json
 {
@@ -348,7 +357,15 @@ Try with example server configuration:
 			"env": {
 				"ODSBOX_MCP_URL": "https://docker.peak-solution.de:10032/api",
 				"ODSBOX_MCP_USER": "Demo",
-				"ODSBOX_MCP_PASSWORD": "mdm"
+				"ODSBOX_MCP_PASSWORD": "mdm",
+				"ODSBOX_MCP2_MODE": "m2m",
+				"ODSBOX_MCP2_URL": "https://ods.example.com/api",
+				"ODSBOX_MCP2_M2M_TOKEN_ENDPOINT": "https://auth.example.com/realms/myrealm/protocol/openid-connect/token",
+				"ODSBOX_MCP2_M2M_CLIENT_ID": "my-service-client",
+				"ODSBOX_MCP3_MODE": "oidc",
+				"ODSBOX_MCP3_URL": "https://ods.example.com/api",
+				"ODSBOX_MCP3_OIDC_CLIENT_ID": "my-oidc-client",
+				"ODSBOX_MCP3_OIDC_REDIRECT_URI": "http://127.0.0.1:1234"
 			}
 		}
 	},
