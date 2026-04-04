@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.0 (2026-04-04)
+
+### Features
+
+- Add OIDC login (#46) ([#47](https://github.com/totonga/odsbox-jaquel-mcp/pull/47),
+  [`8dd340c`](https://github.com/totonga/odsbox-jaquel-mcp/commit/8dd340c1e2f469fb44b9f1c89f3e1b6bc9b490ea))
+
+
 ## v1.5.0 (2026-03-31)
 
 ### Features
