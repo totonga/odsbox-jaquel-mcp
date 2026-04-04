@@ -203,7 +203,7 @@ def _resolve_oidc_auth(env: os._Environ, prefix: str) -> dict[str, Any]:  # type
             login_timeout = int(login_timeout_str.strip())
         except ValueError:
             raise ValueError(
-                f"Environment variable {prefix}_OIDC_LOGIN_TIMEOUT must be an integer, " f"got: {login_timeout_str!r}"
+                f"Environment variable {prefix}_OIDC_LOGIN_TIMEOUT must be an integer, got: {login_timeout_str!r}"
             )
 
     # Optional: scope
