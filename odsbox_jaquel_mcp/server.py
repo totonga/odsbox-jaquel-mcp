@@ -65,7 +65,7 @@ mcp.add_middleware(ToolStatsMiddleware())
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"validation"},
 )
 def query_validate(
@@ -87,7 +87,7 @@ def query_validate(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"validation"},
 )
 def query_get_operator_docs(
@@ -105,7 +105,7 @@ def query_get_operator_docs(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
 def query_get_pattern(
@@ -127,7 +127,7 @@ def query_get_pattern(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
 def query_list_patterns() -> dict:
@@ -137,7 +137,7 @@ def query_list_patterns() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
 def query_generate_skeleton(
@@ -157,7 +157,7 @@ def query_generate_skeleton(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
 def query_describe(
@@ -182,7 +182,7 @@ def query_describe(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
 def schema_get_entity(
@@ -195,7 +195,7 @@ def schema_get_entity(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
 def schema_field_exists(
@@ -211,7 +211,7 @@ def schema_field_exists(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
 def schema_list_entities() -> dict:
@@ -220,7 +220,7 @@ def schema_list_entities() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
 def schema_test_to_measurement_hierarchy() -> dict:
@@ -234,7 +234,7 @@ def schema_test_to_measurement_hierarchy() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "openWorldHint": True},
     tags={"connection"},
 )
 async def ods_connect(
@@ -265,7 +265,7 @@ async def ods_connect(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "openWorldHint": True},
     tags={"connection"},
 )
 async def ods_connect_using_env(
@@ -312,7 +312,7 @@ async def ods_connect_using_env(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True},
     tags={"connection"},
 )
 def ods_disconnect() -> dict:
@@ -321,7 +321,7 @@ def ods_disconnect() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"connection"},
 )
 def ods_get_connection_info() -> dict:
@@ -495,7 +495,7 @@ async def data_generate_fetcher_script(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "openWorldHint": True},
     tags={"measurement", "visualization"},
 )
 def plot_comparison_notebook(
@@ -567,7 +567,7 @@ def plot_comparison_notebook(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"measurement", "visualization"},
 )
 def plot_generate_code(
@@ -618,7 +618,7 @@ def plot_generate_code(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"help"},
 )
 def help_bulk_api(
