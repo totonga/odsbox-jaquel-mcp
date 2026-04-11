@@ -57,13 +57,6 @@ The MCP Server provides tools for working with ASAM ODS servers using queries an
 | [plot_comparison_notebook](#plot_comparison_notebook) | Generate Jupyter notebook | Query, quantities, ODS credentials | Notebook or .ipynb file |
 | [plot_generate_code](#plot_generate_code) | Generate matplotlib code | Quantities, count, plot type | Python code string |
 
-### Measurement Analysis & Query Tools
-| Tool | Purpose | Input | Output |
-|------|---------|-------|--------|
-| [data_compare_measurements](#data_compare_measurements) | Statistical comparison of measurements | Quantity, measurement data | Comparison statistics |
-| [data_query_hierarchy](#data_query_hierarchy) | Explore measurement structure | Query result, operation | Hierarchy info |
-
-
 ---
 
 ## Tool Reference
@@ -1292,218 +1285,6 @@ Assistant uses tools:
 
 ---
 
-## Measurement Analysis & Query Tools (NEW)
-
-### data_compare_measurements
-
-**Purpose**: Compare measurements across quantities with statistical analysis.
-
-**Input**:
-```json
-{
-    "quantity_name": "Motor_speed",
-    "measurement_data": {
-        "1": [50, 55, 52, 51, 54],
-        "2": [52, 56, 53, 52, 55],
-        "3": [48, 50, 49, 51, 47]
-    },
-    "measurement_names": {
-        "1": "Campaign_A",
-        "2": "Campaign_B",
-        "3": "Campaign_C"
-    }
-}
-```
-
-**Output**:
-```json
-{
-    "quantity_name": "Motor_speed",
-    "num_measurements": 3,
-    "measurement_ids": [1, 2, 3],
-    "statistics_by_measurement": {
-        "1": {
-            "name": "Motor_speed",
-            "count": 5,
-            "mean": 52.4,
-            "median": 52.0,
-            "stdev": 1.67,
-            "min": 50.0,
-            "max": 55.0,
-            "range": 5.0
-        }
-    },
-    "overall_statistics": {
-        "mean": 51.73,
-        "median": 51.5,
-        "stdev": 2.14
-    },
-    "pairwise_comparisons": [
-        {
-            "quantity_name": "Motor_speed",
-            "measurement_1_id": 1,
-            "measurement_2_id": 2,
-            "measurement_1_mean": 52.4,
-            "measurement_2_mean": 52.6,
-            "mean_difference": 0.2,
-            "mean_difference_percent": 0.38,
-            "correlation": 0.98,
-            "notes": ["Strong positive correlation detected"]
-        }
-    ],
-    "summary": {
-        "significant_differences_found": 0,
-        "strong_correlations_found": 2
-    }
-}
-```
-
-**Features**:
-- ✓ Calculate statistics per measurement (mean, median, stdev, range)
-- ✓ Pairwise comparisons between measurements
-- ✓ Correlation coefficient calculation
-- ✓ Detect significant differences (>10%)
-- ✓ Identify strong correlations (>0.95)
-- ✓ Generate comparison summary
-
-**Parameters**:
-- `quantity_name` (required): Name of quantity to compare
-- `measurement_data` (required): Dict mapping measurement_id to list of values
-- `measurement_names` (optional): Dict mapping measurement_id to display names
-
-**Use Cases**:
-- Compare engine performance across multiple test runs
-- Analyze consistency of measurements across campaigns
-- Detect correlations between measurements
-- Identify outliers or anomalies
-
----
-
-### data_query_hierarchy
-
-**Purpose**: Query and explore ODS measurement hierarchy and structure.
-
-**Input** (Extract Measurements):
-```json
-{
-    "query_result": {
-        "AoMeasurement": [
-            {"Id": 1, "Name": "Meas_001", "TestName": "Test1"},
-            {"Id": 2, "Name": "Meas_002", "TestName": "Test1"}
-        ]
-    },
-    "operation": "extract_measurements"
-}
-```
-
-**Output** (Extract Measurements):
-```json
-{
-    "operation": "extract_measurements",
-    "num_measurements": 2,
-    "measurements": [
-        {"Id": 1, "Name": "Meas_001", "TestName": "Test1"},
-        {"Id": 2, "Name": "Meas_002", "TestName": "Test1"}
-    ]
-}
-```
-
-**Input** (Build Hierarchy):
-```json
-{
-    "query_result": {...},
-    "operation": "build_hierarchy"
-}
-```
-
-**Output** (Build Hierarchy):
-```json
-{
-    "operation": "build_hierarchy",
-    "hierarchy_keys": ["by_test", "by_date_range", "by_status", "total_measurements"],
-    "total_measurements": 42,
-    "tests": ["ProfileTest", "AccelerationTest", "BrakingTest"],
-    "statuses": ["Complete", "Incomplete", "Failed"]
-}
-```
-
-**Input** (Get Unique Tests):
-```json
-{
-    "query_result": {...},
-    "operation": "get_unique_tests"
-}
-```
-
-**Output** (Get Unique Tests):
-```json
-{
-    "operation": "get_unique_tests",
-    "unique_tests": ["AccelerationTest", "BrakingTest", "ProfileTest"],
-    "num_tests": 3
-}
-```
-
-**Input** (Get Unique Quantities):
-```json
-{
-    "query_result": {...},
-    "operation": "get_unique_quantities"
-}
-```
-
-**Output** (Get Unique Quantities):
-```json
-{
-    "operation": "get_unique_quantities",
-    "unique_quantities": ["Current", "Speed", "Temperature", "Torque"],
-    "num_quantities": 4
-}
-```
-
-**Input** (Build Index):
-```json
-{
-    "query_result": {...},
-    "operation": "build_index"
-}
-```
-
-**Output** (Build Index):
-```json
-{
-    "operation": "build_index",
-    "total_measurements": 42,
-    "index_by_id_count": 42,
-    "index_by_name_count": 40,
-    "index_by_test_count": 3,
-    "index_by_status_count": 2,
-    "available_test_names": ["AccelerationTest", "BrakingTest", "ProfileTest"]
-}
-```
-
-**Operations**:
-- `extract_measurements`: Extract measurement objects from query result
-- `build_hierarchy`: Organize measurements by test, status, etc.
-- `get_unique_tests`: List all unique test names
-- `get_unique_quantities`: List all unique measurement quantities
-- `build_index`: Create fast lookup index by multiple keys
-
-**Parameters**:
-- `query_result` (required): ODS query result to explore
-- `operation` (required): Operation to perform (see list above)
-- `test_name` (optional): Filter by test name
-- `quantity_names` (optional): Filter by quantities
-
-**Use Cases**:
-- Discover available tests and measurements
-- Explore what quantities are available
-- Find measurements by test type
-- Build quick lookup structures
-- Understand measurement organization
-
----
-
 ## AI Guidance Tools
 
 ### help_bulk_api
@@ -1513,7 +1294,7 @@ Assistant uses tools:
 **Input**:
 ```json
 {
-    "topic": "the_3_step_rule",
+    "topic": "3-step-rule",
     "tool": "data_read_submatrix"
 }
 ```
@@ -1521,8 +1302,8 @@ Assistant uses tools:
 **Output**:
 ```json
 {
-    "topic": "the_3_step_rule",
-    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with ods_connect\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with query_execute\n   - Get quantities with data_get_quantities\n   - Explore hierarchy with data_query_hierarchy\n\n3. LOAD: Read timeseries data efficiently\n   - Use data_read_submatrix for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
+    "topic": "3-step-rule",
+    "help_text": "The bulk API follows a 3-step workflow:\n\n1. CONNECT: Establish ODS connection with ods_connect\n   - URL: ODS server API endpoint\n   - Credentials: username/password for authentication\n\n2. DISCOVER: Find submatrix IDs and quantities\n   - List measurements with query_execute\n   - Get quantities with data_get_quantities\n\n3. LOAD: Read timeseries data efficiently\n   - Use data_read_submatrix for bulk data access\n   - Specify column patterns for filtering\n   - Get DataFrame with all rows instantly\n\nKey Benefits:\n- No pagination loops needed - all data loaded at once\n- Column filtering reduces memory usage\n- Pattern matching for flexible column selection\n- Automatic format conversion (dates, etc.)",
     "examples_count": 3,
     "related_tools": ["ods_connect", "data_get_quantities", "data_read_submatrix"]
 }
@@ -1530,97 +1311,88 @@ Assistant uses tools:
 
 **Available Topics**:
 
-1. **the_3_step_rule** - Core workflow: CONNECT → DISCOVER → LOAD
+1. **3-step-rule** - Core workflow: CONNECT → DISCOVER → LOAD
    - Explains fundamental pattern
    - Shows when to use each step
    - Includes decision points
 
-2. **bulk_vs_jaquel** - When to use bulk API vs Jaquel queries
+2. **quick-start** - Getting started guide
+   - Import statements
+   - Connection code
+   - Discovery code
+   - Data loading code
+
+3. **bulk-vs-jaquel** - When to use bulk API vs Jaquel queries
    - Bulk: Fast for known measurements, loads all data at once
    - Jaquel: For discovery, filtering, complex queries
    - Decision tree for tool selection
 
-3. **pattern_syntax** - Column matching patterns
+4. **patterns** - Column matching patterns
    - Wildcard patterns: `"Time*"`, `"*Temp*"`, `"*Speed"`
    - Exact match: `"Temperature"`
    - Multiple patterns: `["Time", "Motor_*", "*Pressure"]`
    - Case sensitivity options
 
-4. **common_mistakes** - Top 5 AI mistakes and fixes
-   - Trying to query metadata with bulk API
-   - Forgetting to connect first
-   - Using wrong column names
-   - Not using pattern matching for flexibility
-
-5. **decision_tree** - How to choose the right approach
+5. **decision-tree** - How to choose the right approach
    - "I know measurement IDs" → Use bulk API
    - "I need to search" → Use Jaquel query first
    - "I want timeseries data" → Bulk API after discovery
    - "I need to filter" → Combine Jaquel query + bulk
 
-6. **quick_start** - 5-minute getting started guide
-   - Import statements
-   - Connection code
-   - Discovery code
-   - Data loading code
-   - Basic error handling
+6. **mistakes** - Top AI mistakes and fixes
+   - Trying to query metadata with bulk API
+   - Forgetting to connect first
+   - Using wrong column names
+   - Not using pattern matching for flexibility
 
-7. **column_patterns** - Advanced pattern matching
-   - Wildcard examples
-   - Regular expressions (if supported)
-   - Case-insensitive matching
-   - Filtering for performance
+7. **step-by-step** - Detailed step-by-step workflow walkthrough
+   - Full annotated walkthrough of the 3-step process
+   - Includes intermediate results at each step
 
-8. **error_handling** - Common errors and recovery
+8. **response-template** - Template for structuring AI responses
+   - Structured response format for bulk API interactions
+   - How to present results to users
+
+9. **troubleshooting** - Common errors and recovery
    - "Submatrix not found" - Check measurement IDs
    - "No quantities available" - Verify connected and ID is valid
    - "Pattern matches nothing" - Review available quantity names
    - Timeout issues and workarounds
 
-9. **performance_tips** - Optimize data loading
-   - Use patterns to filter columns
-   - Index selection for faster access
-   - Batch processing for multiple measurements
-   - Memory management
-
-10. **tool_comparison** - Bulk API vs odsbox library
+10. **tool-patterns** - Tool-specific usage patterns
     - When to use MCP tools vs direct library
     - Integration patterns
     - Trade-offs and benefits
 
-11. **workflow_examples** - Complete workflows
-    - Find and load a measurement
-    - Compare multiple measurements
-    - Process measurement hierarchy
-    - Generate analysis notebook
+11. **all** - Returns all help topics combined
 
 **Parameters**:
 
 - `topic` (required): Help topic to retrieve. One of:
-  - `"the_3_step_rule"` - Core workflow
-  - `"bulk_vs_jaquel"` - Tool selection
-  - `"pattern_syntax"` - Column patterns
-  - `"common_mistakes"` - Error avoidance
-  - `"decision_tree"` - Decision making
-  - `"quick_start"` - Getting started
-  - `"column_patterns"` - Advanced patterns
-  - `"error_handling"` - Error recovery
-  - `"performance_tips"` - Optimization
-  - `"tool_comparison"` - MCP vs library
-  - `"workflow_examples"` - Complete workflows
+  - `"3-step-rule"` - Core workflow
+  - `"quick-start"` - Getting started
+  - `"bulk-vs-jaquel"` - Tool selection
+  - `"patterns"` - Column patterns
+  - `"decision-tree"` - Decision making
+  - `"mistakes"` - Error avoidance
+  - `"step-by-step"` - Detailed walkthrough
+  - `"response-template"` - Response formatting
+  - `"troubleshooting"` - Error recovery
+  - `"tool-patterns"` - Tool usage patterns
+  - `"all"` - All topics combined
 
 - `tool` (optional): Get contextual help for a specific tool:
   - `"ods_connect"` - Connection help
-  - `"data_read_submatrix"` - Data loading help
   - `"data_get_quantities"` - Discovery help
+  - `"data_read_submatrix"` - Data loading help
   - `"data_generate_fetcher_script"` - Script generation help
-  - `"data_query_hierarchy"` - Hierarchy exploration help
+  - `"plot_comparison_notebook"` - Notebook generation help
 
 **Examples**:
 
 ### Get fundamental workflow:
 ```python
-result = help_bulk_api(topic="the_3_step_rule")
+result = help_bulk_api(topic="3-step-rule")
 print(result["help_text"])
 # Returns: CONNECT → DISCOVER → LOAD workflow with benefits
 ```
@@ -1628,7 +1400,7 @@ print(result["help_text"])
 ### Get contextual help for specific tool:
 ```python
 result = help_bulk_api(
-    topic="quick_start",
+    topic="quick-start",
     tool="data_read_submatrix"
 )
 # Returns: Quick start guide with data loading focus
@@ -1636,37 +1408,37 @@ result = help_bulk_api(
 
 ### Decide between tools:
 ```python
-result = help_bulk_api(topic="decision_tree")
+result = help_bulk_api(topic="decision-tree")
 # Returns: Decision tree for tool selection
 ```
 
 ### Learn error recovery:
 ```python
-result = help_bulk_api(topic="error_handling")
+result = help_bulk_api(topic="troubleshooting")
 # Returns: Common errors and how to fix them
 ```
 
 **Use Cases**:
 
 1. **AI Learning**: When AI model encounters bulk API for first time
-   - Call: `help_bulk_api(topic="the_3_step_rule")`
+   - Call: `help_bulk_api(topic="3-step-rule")`
    - Then: Follow the 3-step pattern
 
 2. **Tool Selection**: Unsure whether to use bulk or Jaquel
-   - Call: `help_bulk_api(topic="decision_tree")`
+   - Call: `help_bulk_api(topic="decision-tree")`
    - Then: Choose appropriate approach
 
 3. **Error Recovery**: Data loading failed
-   - Call: `help_bulk_api(topic="error_handling")`
+   - Call: `help_bulk_api(topic="troubleshooting")`
    - Then: Apply suggested fix
 
 4. **Pattern Matching**: Unsure about column selection
-   - Call: `help_bulk_api(topic="column_patterns")`
+   - Call: `help_bulk_api(topic="patterns")`
    - Then: Use correct pattern syntax
 
-5. **Performance**: Need to optimize data loading
-   - Call: `help_bulk_api(topic="performance_tips")`
-   - Then: Apply optimization
+5. **Step-by-Step**: Need detailed guidance
+   - Call: `help_bulk_api(topic="step-by-step")`
+   - Then: Follow annotated walkthrough
 
 ---
 

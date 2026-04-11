@@ -72,30 +72,6 @@ Master the **3-step Bulk API workflow** for efficient timeseries data access:
 
 ---
 
-### 📌 Measurement Analysis & Comparison
-**Name:** `analyze_measurements`
-
-Learn how to analyze and compare measurements across quantities with:
-- Statistical analysis
-- Jupyter notebook generation
-- Matplotlib visualization code
-- Measurement hierarchy exploration
-
-**Related Tools:**
-- `data_compare_measurements` - Statistical comparison
-- `data_query_hierarchy` - Explore structure
-- `plot_comparison_notebook` - Create notebooks
-- `plot_generate_code` - Generate visualization code
-
-**Hierarchy Operations:**
-- `extract_measurements` - Get from query results
-- `build_hierarchy` - Create hierarchical structure
-- `get_unique_tests` - Find test names
-- `get_unique_quantities` - List quantities
-- `build_index` - Create searchable index
-
----
-
 ## How to Use Starting Prompts
 
 ### With Claude (GitHub Copilot)

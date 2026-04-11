@@ -1,8 +1,4 @@
 import pandas as pd
-from odsbox_jaquel_mcp.data_preparation import (
-    MeasurementMetadataExtractor,
-    MeasurementDataPreparator,
-)
 
 # lookup for units of local columns
 local_column_unit_lookup = dict({row["id"]: row["measurement_quantity.unit:OUTER.name"]
@@ -21,15 +17,32 @@ for submatrix_id in submatrix_ids:
     else:
         submatrix_title_lookup[submatrix_id] = f"Submatrix {submatrix_id}"
 
-# Prepare measurement data items using helper functions
-submatrix_signals_by_id = local_columns_signals.groupby("submatrix")
-measurement_data_items = MeasurementDataPreparator.prepare_measurement_data_items(
-    submatrix_signals_by_id=submatrix_signals_by_id,
-    submatrices_df=submatrices,
-    measurements_df=measurements,
-    local_columns_df=local_columns,
-    measurement_quantity_names=mq_names,
-    unit_lookup=local_column_unit_lookup,
-)
+# Create dataframes for each measurement to compare
+measurement_data_items = []
+for submatrix_id, df in local_columns_signals.groupby("submatrix"):
+    # Create dataframe using name as column names and values as column data
+    data_dict = {row['name']: row['values'] for _, row in df.iterrows()}
+    sub_df = pd.DataFrame(data_dict)
+    if not all(col in sub_df.columns for col in mq_names):
+        print(f"Skipping submatrix {submatrix_id} as it lacks required columns.")
+        continue
 
-print(f"Prepared {len(measurement_data_items)} measurement data items for plotting")
+    independent_rows = df[df['independent'] == 1]
+    independent_name = "Index"
+    independent_unit = "-"
+    # Set the independent column as the index
+    if not independent_rows.empty:
+        independent_name = independent_rows['name'].iloc[0]
+        sub_df.set_index(independent_name, inplace=True)
+        independent_unit = local_column_unit_lookup.get(independent_rows['id'].iloc[0], '-')
+    # create axis labels from name and unit
+    label_dict = {name: f"{name} [{local_column_unit_lookup.get(id, '-')}]"
+                  for name, id in zip(df['name'], df['id'])}
+    # information to be plotted
+    measurement_data_items.append({
+        "title": f"{submatrix_title_lookup.get(submatrix_id, 'Unknown')} \n(Color: {independent_name} [{independent_unit}])",
+        "data": sub_df,
+        "labels": label_dict })
+
+# Sort measurement_data_items by title (moved outside the loop)
+measurement_data_items.sort(key=lambda x: x["title"])

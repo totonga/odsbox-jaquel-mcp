@@ -118,35 +118,5 @@ class PromptLibrary:
                 content += f"**Your use case:** {use_case}\n"
             return content
 
-        elif prompt_name == "analyze_measurements":
-            analysis_type = arguments.get("analysis_type", "")
-            content = (
-                "# Measurement Analysis & Comparison\n\n"
-                "Analyze and compare measurements with statistical analysis and visualization.\n\n"
-                "## Analysis Tools:\n"
-                "- `data_compare_measurements` - Statistical comparison across quantities\n"
-                "- `data_query_hierarchy` - Explore measurement structure\n"
-                "- `plot_comparison_notebook` - Create Jupyter notebooks\n"
-                "- `plot_generate_code` - Generate matplotlib visualization code\n\n"
-                "## Hierarchy Operations:\n"
-                "- `extract_measurements` - Get measurements from query results\n"
-                "- `build_hierarchy` - Create hierarchical structure\n"
-                "- `get_unique_tests` - Find all unique test names\n"
-                "- `get_unique_quantities` - List available quantities\n"
-                "- `build_index` - Create searchable measurement index\n\n"
-                "## Plot Types:\n"
-                "- `scatter` - Scatter plot for 2+ quantities\n"
-                "- `line` - Line plot for trends\n"
-                "- `subplots` - Individual subplot per measurement\n\n"
-                "## Workflow:\n"
-                "1. Execute a query to get measurements\n"
-                "2. Use `data_query_hierarchy` to explore\n"
-                "3. Generate notebooks or plots\n"
-                "4. Perform statistical comparisons\n\n"
-            )
-            if analysis_type:
-                content += f"**Analysis type:** {analysis_type}\n"
-            return content
-
         else:
             return f"Prompt '{prompt_name}' not found."
