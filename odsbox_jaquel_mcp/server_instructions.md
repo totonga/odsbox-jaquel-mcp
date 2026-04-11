@@ -25,8 +25,6 @@ Most tools require an active ODS connection. Always establish one first:
 | List quantities in a submatrix | `data_get_quantities` |
 | Read timeseries / bulk data | `data_read_submatrix` |
 | Generate a Python fetcher script | `data_generate_fetcher_script` |
-| Navigate measurement hierarchy | `data_query_hierarchy` |
-| Compare measurements statistically | `data_compare_measurements` |
 | Generate a Jupyter notebook | `plot_comparison_notebook` |
 | Generate matplotlib code | `plot_generate_code` |
 | Learn the Bulk API | `help_bulk_api` |
@@ -37,10 +35,10 @@ Most tools require an active ODS connection. Always establish one first:
 
 **Timeseries workflow**: `ods_connect` → `data_get_quantities` → `data_read_submatrix`
 
-**Analysis workflow**: `query_execute` → `data_query_hierarchy` → `data_compare_measurements` → `plot_comparison_notebook`
+**Analysis workflow**: `query_execute` → `data_get_quantities` → `data_read_submatrix` → `plot_comparison_notebook`
 
 ## Key behaviour notes
 
 - `data_read_submatrix` supports wildcard column patterns (`"Temp*"`, `"*Speed"`); prefer it over `query_execute` for large timeseries.
 - `ods_connect_using_env` supports auth modes `basic` (default), `m2m`, and `oidc` via `{PREFIX}_MODE`.
-- Use starting prompts (`connect_ods_server`, `timeseries_access`, `analyze_measurements`, etc.) to guide users through multi-step workflows.
+- Use starting prompts (`connect_ods_server`, `timeseries_access`, etc.) to guide users through multi-step workflows.

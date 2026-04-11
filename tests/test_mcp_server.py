@@ -5,7 +5,6 @@ from unittest.mock import patch
 import pytest
 
 from odsbox_jaquel_mcp.server import (
-    data_compare_measurements,
     data_generate_fetcher_script,
     data_get_quantities,
     data_read_submatrix,
@@ -332,22 +331,3 @@ class TestMCPServer:
         )
 
         assert isinstance(result, dict)
-
-    @patch("odsbox_jaquel_mcp.server.MeasurementAnalyzer.compare_multiple_measurements")
-    @pytest.mark.asyncio
-    async def test_call_tool_data_compare_measurements(self, mock_compare):
-        """Test calling data_compare_measurements tool with non-int key to trigger warning."""
-        mock_compare.return_value = {
-            "quantity_name": "Temperature",
-            "num_measurements": 2,
-            "pairwise_comparisons": [],
-        }
-
-        result = await data_compare_measurements(
-            quantity_name="Temperature",
-            measurement_data={"abc": [1.0, 2.0], "1": [3.0, 4.0]},
-        )
-
-        assert isinstance(result, dict)
-        assert result["quantity_name"] == "Temperature"
-        mock_compare.assert_called_once()

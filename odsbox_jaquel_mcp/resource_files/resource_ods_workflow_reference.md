@@ -40,11 +40,8 @@
 **Goal**: Compare measurements across different runs/conditions
 
 1. `query_execute` - Get measurements
-2. `data_query_hierarchy` - Explore measurement structure
-   - extract_measurements: Get all measurements
-   - get_unique_quantities: See available quantities
-   - get_unique_tests: See all test types
-3. `data_compare_measurements` - Statistical analysis
+2. `data_get_quantities` - List available quantities per submatrix
+3. `data_read_submatrix` - Load timeseries data for comparison
 4. `plot_comparison_notebook` - Create Jupyter notebook
 
 **Output**: Analysis report with statistics and visualizations

@@ -65,7 +65,6 @@ class NotebookGenerator:
         measurement_quantity_names: list[str],
         ods_url: str,
         ods_username: str,
-        ods_password: str,
         available_quantities: list[str] | None = None,
         plot_type: str = "scatter",
         title: str = "Measurement Comparison",
@@ -78,7 +77,6 @@ class NotebookGenerator:
             measurement_quantity_names: Names of quantities to plot
             ods_url: ODS server URL
             ods_username: ODS username
-            ods_password: ODS password
             available_quantities: List of all available quantities (for documentation)
             plot_type: Type of plot ("scatter", "line", or "subplots")
             title: Notebook title
@@ -127,7 +125,6 @@ class NotebookGenerator:
         retrieval_code = retrieval_template.render(
             ods_url=ods_url,
             ods_username=ods_username,
-            ods_password=ods_password,
         )
         cells.append(NotebookGenerator.create_code_cell(retrieval_code))
 

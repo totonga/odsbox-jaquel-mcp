@@ -54,7 +54,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             available_quantities=["Speed", "Torque", "Temperature"],
             plot_type="scatter",
             title="Test Notebook",
@@ -73,7 +72,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
         )
 
         cells = notebook["cells"]
@@ -99,7 +97,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="https://my-ods.example.com/api",
             ods_username="testuser",
-            ods_password="testpass",
         )
 
         all_text = "\n".join("\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list))
@@ -115,7 +112,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=quantities,
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
         )
 
         all_text = "\n".join("\n".join(c["source"]) for c in notebook["cells"] if isinstance(c["source"], list))
@@ -130,7 +126,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="scatter",
         )
 
@@ -146,7 +141,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="line",
         )
 
@@ -163,7 +157,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             title=title,
         )
 
@@ -177,7 +170,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
         )
 
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -201,7 +193,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             title="Test Title",
         )
 
@@ -231,7 +222,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             available_quantities=available,
         )
 
@@ -247,7 +237,6 @@ class TestNotebookGenerator(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
         )
 
         metadata = notebook["metadata"]
@@ -291,7 +280,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="testuser",
-            ods_password="testpass",
         )
 
         # Find the retrieval code cell (second code cell after query definition)
@@ -313,7 +301,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="testuser",
-            ods_password="testpass",
         )
 
         code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
@@ -334,7 +321,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
             ods_username="testuser",
-            ods_password="testpass",
             plot_type="scatter",
         )
 
@@ -356,7 +342,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=["Speed", "Torque"],
             ods_url="http://localhost:8087/api",
             ods_username="testuser",
-            ods_password="testpass",
             plot_type="line",
         )
 
@@ -379,7 +364,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url=ods_url,
             ods_username="user",
-            ods_password="pass",
         )
 
         code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
@@ -388,23 +372,22 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
         self.assertIn(ods_url, retrieval_code)
 
     def test_retrieval_template_includes_credentials(self):
-        """Test that retrieval template properly renders ODS credentials."""
+        """Test that retrieval template renders ODS username and references env var for password."""
         username = "testuser123"
-        password = "testpass456"
 
         notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username=username,
-            ods_password=password,
         )
 
         code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
         retrieval_code = "\n".join(code_cells[1]["source"])
 
         self.assertIn(username, retrieval_code)
-        self.assertIn(password, retrieval_code)
+        # Password must NOT be embedded; instead an env var reference is expected
+        self.assertIn("ODS_PASSWORD", retrieval_code)
 
     def test_scatter_plot_template_uses_first_two_quantities(self):
         """Test that scatter plot template correctly uses first two quantities."""
@@ -414,7 +397,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=quantities,
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="scatter",
         )
 
@@ -433,7 +415,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=quantities,
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="line",
         )
 
@@ -451,7 +432,6 @@ class TestNotebookGeneratorTemplateRendering(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="scatter",  # Requires at least 2 quantities
         )
 
@@ -473,7 +453,6 @@ class TestNotebookGeneratorEdgeCases(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url=ods_url,
             ods_username="user",
-            ods_password="pass",
         )
 
         code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
@@ -488,26 +467,24 @@ class TestNotebookGeneratorEdgeCases(unittest.TestCase):
             self.fail(f"URL with special characters caused syntax error: {e}")
 
     def test_special_characters_in_credentials(self):
-        """Test handling of special characters in credentials."""
-        password = "p@ssw0rd!#$%&*()"
+        """Test handling of special characters in username."""
+        username = "user@domain.example"
         notebook = NotebookGenerator.plot_comparison_notebook(
             measurement_query_conditions={},
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
-            ods_username="user",
-            ods_password=password,
+            ods_username=username,
         )
 
         code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
         retrieval_code = "\n".join(code_cells[1]["source"])
 
-        # Should handle special characters correctly
-        self.assertIn(password, retrieval_code)
+        self.assertIn(username, retrieval_code)
         # Should still be valid Python
         try:
             ast.parse(retrieval_code)
         except SyntaxError as e:
-            self.fail(f"Special characters in password caused syntax error: {e}")
+            self.fail(f"Special characters in username caused syntax error: {e}")
 
     def test_many_measurement_quantities(self):
         """Test handling of many measurement quantities."""
@@ -517,7 +494,6 @@ class TestNotebookGeneratorEdgeCases(unittest.TestCase):
             measurement_quantity_names=quantities,
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="line",
         )
 
@@ -542,7 +518,6 @@ class TestNotebookGeneratorEdgeCases(unittest.TestCase):
             measurement_quantity_names=quantities,
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="line",
         )
 
@@ -566,7 +541,6 @@ class TestNotebookGeneratorEdgeCases(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             available_quantities=[],
         )
 
@@ -581,7 +555,6 @@ class TestNotebookGeneratorEdgeCases(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
             plot_type="unknown_type",
         )
 
@@ -606,7 +579,6 @@ class TestNotebookGeneratorEdgeCases(unittest.TestCase):
             measurement_quantity_names=["Speed"],
             ods_url="http://localhost:8087/api",
             ods_username="user",
-            ods_password="pass",
         )
 
         code_cells = [c for c in notebook["cells"] if c["cell_type"] == "code"]
