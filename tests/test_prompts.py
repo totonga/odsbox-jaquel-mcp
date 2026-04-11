@@ -10,7 +10,6 @@ _PROMPT_NAMES = [
     "explore_patterns",
     "connect_ods_server",
     "timeseries_access",
-    "analyze_measurements",
 ]
 
 
@@ -49,11 +48,6 @@ class TestPromptLibrary:
         assert "3-step" in content or "Bulk API" in content
         assert "data_read_submatrix" in content
 
-    def test_analyze_measurements_prompt(self):
-        """Test the analyze_measurements prompt."""
-        content = PromptLibrary.get_prompt_content("analyze_measurements", {})
-        assert "data_compare_measurements" in content or "measurement" in content.lower()
-
     def test_prompt_content_with_arguments(self):
         """Test that prompt content respects arguments."""
         args = {"query_example": '{"TestEntity": {}}'}
@@ -78,7 +72,6 @@ class TestPromptIntegration:
     def test_prompt_functions_exist(self):
         """Test that prompt functions are available in server."""
         from odsbox_jaquel_mcp.server import (
-            analyze_measurements,
             connect_ods_server,
             explore_patterns,
             prompt_query_validate,
@@ -89,4 +82,3 @@ class TestPromptIntegration:
         assert callable(explore_patterns)
         assert callable(connect_ods_server)
         assert callable(timeseries_access)
-        assert callable(analyze_measurements)

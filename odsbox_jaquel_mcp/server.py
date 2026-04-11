@@ -21,8 +21,6 @@ from . import __version__
 from .auth_factory import resolve_auth_args_from_env
 from .bulk_api_guide import BulkAPIGuide
 from .connection import ODSConnectionManager
-from .measurement_analysis import ComparisonResult, MeasurementAnalyzer
-from .measurement_queries import MeasurementHierarchyExplorer
 from .monitoring import ToolStatsMiddleware
 from .notebook_generator import NotebookGenerator
 from .prompts import PromptLibrary
@@ -67,19 +65,34 @@ mcp.add_middleware(ToolStatsMiddleware())
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"validation"},
 )
-def query_validate(query: dict) -> dict:
+def query_validate(
+    query: Annotated[
+        dict,
+        Field(
+            description=(
+                "Jaquel query dict to validate. Top-level key is the entity name "
+                "(e.g. 'AoTest'), value is a filter/attribute object. "
+                'Example: {"AoTest": {"name": {"$like": "*"}}, '
+                '"$attributes": {"id": 1, "name": 1}, '
+                '"$options": {"$rowlimit": 100}}'
+            )
+        ),
+    ],
+) -> dict:
     """Validate a Jaquel query structure for syntax errors and best practices."""
     return JaquelValidator.query_validate(query)
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"validation"},
 )
-def query_get_operator_docs(operator: str) -> dict:
+def query_get_operator_docs(
+    operator: Annotated[str, Field(description="Jaquel operator name, e.g. '$like', '$gt', '$in', '$between'")],
+) -> dict:
     """Get documentation and examples for a Jaquel operator."""
     if not operator or not isinstance(operator, str) or not operator.strip():
         raise ValueError("operator must be a non-empty string")
@@ -92,7 +105,7 @@ def query_get_operator_docs(operator: str) -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
 def query_get_pattern(
@@ -114,7 +127,7 @@ def query_get_pattern(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
 def query_list_patterns() -> dict:
@@ -124,11 +137,11 @@ def query_list_patterns() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
 def query_generate_skeleton(
-    entity_name: str,
+    entity_name: Annotated[str, Field(description="ODS entity name (e.g. 'AoTest', 'AoMeasurement', 'AoSubMatrix')")],
     operation: Annotated[
         str,
         Field(
@@ -144,10 +157,21 @@ def query_generate_skeleton(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"query"},
 )
-def query_describe(query: dict) -> str:
+def query_describe(
+    query: Annotated[
+        dict,
+        Field(
+            description=(
+                "Jaquel query dict to describe. Top-level key is entity name, value is filter/attribute object. "
+                'Example: {"AoTest": {"name": {"$like": "*"}}, '
+                '"$attributes": {"id": 1, "name": 1}}'
+            )
+        ),
+    ],
+) -> str:
     """Describe what a Jaquel query does."""
     return JaquelExplain.query_describe(query)
 
@@ -158,7 +182,7 @@ def query_describe(query: dict) -> str:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
 def schema_get_entity(
@@ -171,10 +195,13 @@ def schema_get_entity(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
-def schema_field_exists(entity_name: str, field_name: str) -> dict:
+def schema_field_exists(
+    entity_name: Annotated[str, Field(description="ODS entity name (e.g. 'AoTest', 'AoMeasurement')")],
+    field_name: Annotated[str, Field(description="Field/attribute name to check (e.g. 'name', 'id', 'version')")],
+) -> dict:
     """Check if a field exists in entity schema."""
     if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
         raise ValueError("entity_name must be a non-empty string")
@@ -184,7 +211,7 @@ def schema_field_exists(entity_name: str, field_name: str) -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
 def schema_list_entities() -> dict:
@@ -193,7 +220,7 @@ def schema_list_entities() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"schema"},
 )
 def schema_test_to_measurement_hierarchy() -> dict:
@@ -207,12 +234,12 @@ def schema_test_to_measurement_hierarchy() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "openWorldHint": True},
     tags={"connection"},
 )
 async def ods_connect(
     url: Annotated[str, Field(description="ODS API URL (e.g., http://localhost:8087/api)")],
-    username: str,
+    username: Annotated[str, Field(description="ODS username for authentication")],
     password: Annotated[
         str,
         Field(
@@ -238,7 +265,7 @@ async def ods_connect(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "openWorldHint": True},
     tags={"connection"},
 )
 async def ods_connect_using_env(
@@ -285,7 +312,7 @@ async def ods_connect_using_env(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "idempotentHint": True},
     tags={"connection"},
 )
 def ods_disconnect() -> dict:
@@ -294,7 +321,7 @@ def ods_disconnect() -> dict:
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"connection"},
 )
 def ods_get_connection_info() -> dict:
@@ -307,7 +334,17 @@ def ods_get_connection_info() -> dict:
     tags={"connection"},
 )
 async def query_execute(
-    query: Annotated[dict, Field(description="Jaquel query to execute")],
+    query: Annotated[
+        dict,
+        Field(
+            description=(
+                "Jaquel query dict to execute. Top-level key is entity name, value is filter/attribute object. "
+                'Example: {"AoTest": {"name": {"$like": "*"}}, '
+                '"$attributes": {"id": 1, "name": 1}, '
+                '"$options": {"$rowlimit": 100}}'
+            )
+        ),
+    ],
     ctx: Context | None = None,
 ) -> dict:
     """Execute a Jaquel query directly on connected ODS server."""
@@ -458,21 +495,21 @@ async def data_generate_fetcher_script(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": False, "destructiveHint": False, "openWorldHint": True},
     tags={"measurement", "visualization"},
 )
 def plot_comparison_notebook(
-    measurement_query_conditions: Annotated[dict, Field(description="Filter conditions for measurements")],
-    measurement_quantity_names: Annotated[list[str], Field(description="Names of quantities to plot")],
-    ods_url: Annotated[str, Field(description="ODS server URL")],
-    ods_username: Annotated[str, Field(description="ODS username")],
-    ods_password: Annotated[
-        str,
+    measurement_query_conditions: Annotated[
+        dict,
         Field(
-            description="ODS password",
-            json_schema_extra={"format": "password", "x-mcp-secret": True},
+            description=(
+                "Filter conditions for measurements (MeaResult attributes). "
+                'Example: {"Name": {"$like": "Profile_*"}} or '
+                '{"TestStep.Test.Name": {"$eq": "MyTest"}}'
+            )
         ),
     ],
+    measurement_quantity_names: Annotated[list[str], Field(description="Names of quantities to plot")],
     available_quantities: Annotated[
         list[str] | None,
         Field(default=None, description="List of all available quantities (for documentation)"),
@@ -489,13 +526,23 @@ def plot_comparison_notebook(
         Field(default=None, description="Optional path to save notebook (.ipynb file)"),
     ] = None,
 ) -> dict:
-    """Generate a Jupyter notebook for comparing measurements."""
+    """Generate a Jupyter notebook for comparing measurements.
+
+    Uses the active ODS connection (established via ods_connect or ods_connect_using_env).
+    The generated notebook reads the password from the ODS_PASSWORD environment variable
+    at runtime so no credentials are embedded in the notebook file.
+    """
+    connection_info = ODSConnectionManager.get_connection_info()
+    if not connection_info.get("url"):
+        raise ValueError("No active ODS connection. Use ods_connect or ods_connect_using_env first.")
+    ods_url = connection_info["url"]
+    ods_username = connection_info.get("username", "")
+
     notebook = NotebookGenerator.plot_comparison_notebook(
         measurement_query_conditions=measurement_query_conditions,
         measurement_quantity_names=measurement_quantity_names,
         ods_url=ods_url,
         ods_username=ods_username,
-        ods_password=ods_password,
         available_quantities=available_quantities,
         plot_type=plot_type,
         title=title,
@@ -520,7 +567,7 @@ def plot_comparison_notebook(
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"measurement", "visualization"},
 )
 def plot_generate_code(
@@ -565,147 +612,13 @@ def plot_generate_code(
     }
 
 
-@mcp.tool(
-    annotations={"readOnlyHint": True},
-    tags={"measurement"},
-)
-async def data_compare_measurements(
-    quantity_name: Annotated[str, Field(description="Name of quantity to compare")],
-    measurement_data: Annotated[dict, Field(description="Dict mapping measurement_id (as string) to list of values")],
-    measurement_names: Annotated[
-        dict | None,
-        Field(default=None, description="Optional dict mapping measurement_id to display names"),
-    ] = None,
-    ctx: Context | None = None,
-) -> dict:
-    """Compare measurements across quantities with statistical analysis."""
-    if not quantity_name or not measurement_data:
-        raise ValueError("quantity_name and measurement_data are required")
-
-    # Convert string keys to integers for measurement_data
-    converted_data: dict[int, list[float]] = {}  # type: ignore
-    for key, values in measurement_data.items():
-        try:
-            meas_id = int(key)
-            converted_data[meas_id] = values  # type: ignore
-        except (ValueError, TypeError):
-            if ctx:
-                await ctx.warning(f"Could not convert measurement key '{key}' to int, using as-is")
-            converted_data[key] = values  # type: ignore
-
-    # Perform multi-measurement comparison
-    comparison_result = MeasurementAnalyzer.compare_multiple_measurements(quantity_name, converted_data)
-
-    # If measurement_names provided, generate summary
-    if measurement_names:
-        quantity_names = [quantity_name]
-        comparison_results = [
-            ComparisonResult(
-                quantity_name=c["quantity_name"],
-                measurement_1_id=c["measurement_1_id"],
-                measurement_2_id=c["measurement_2_id"],
-                measurement_1_mean=c["measurement_1_mean"],
-                measurement_2_mean=c["measurement_2_mean"],
-                mean_difference=c["mean_difference"],
-                mean_difference_percent=c["mean_difference_percent"],
-                correlation=c["correlation"],
-                notes=c["notes"],
-            )
-            for c in comparison_result.get("pairwise_comparisons", [])
-        ]
-
-        summary = MeasurementAnalyzer.generate_comparison_summary(
-            measurement_names, quantity_names, comparison_results
-        )
-        comparison_result["summary"] = summary
-
-    return comparison_result
-
-
-@mcp.tool(
-    annotations={"readOnlyHint": True},
-    tags={"measurement"},
-)
-def data_query_hierarchy(
-    query_result: Annotated[dict, Field(description="ODS query result to explore")],
-    operation: Annotated[
-        Literal[
-            "extract_measurements",
-            "build_hierarchy",
-            "get_unique_tests",
-            "get_unique_quantities",
-            "build_index",
-        ],
-        Field(description="Operation to perform on query result"),
-    ],
-    test_name: Annotated[str | None, Field(default=None, description="Optional test name for filtering")] = None,
-    quantity_names: Annotated[
-        list[str] | None,
-        Field(default=None, description="Optional list of quantities to search for"),
-    ] = None,
-) -> dict:
-    """Query and explore ODS measurement hierarchy and structure."""
-    if operation == "extract_measurements":
-        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-        return {
-            "operation": operation,
-            "num_measurements": len(measurements),
-            "measurements": measurements[:50],  # Limit output
-        }
-
-    elif operation == "build_hierarchy":
-        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-        hierarchy = MeasurementHierarchyExplorer.build_measurement_hierarchy(measurements)
-        return {
-            "operation": operation,
-            "hierarchy_keys": list(hierarchy.keys()),
-            "total_measurements": hierarchy["total_measurements"],
-            "tests": list(hierarchy["by_test"].keys()),
-            "statuses": list(hierarchy["by_status"].keys()),
-        }
-
-    elif operation == "get_unique_tests":
-        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-        tests = MeasurementHierarchyExplorer.get_unique_tests(measurements)
-        return {
-            "operation": operation,
-            "unique_tests": tests,
-            "num_tests": len(tests),
-        }
-
-    elif operation == "get_unique_quantities":
-        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-        unique_quantities: list[str] = MeasurementHierarchyExplorer.get_unique_quantities(measurements)
-        return {
-            "operation": operation,
-            "unique_quantities": unique_quantities,
-            "num_quantities": len(unique_quantities),
-        }
-
-    elif operation == "build_index":
-        measurements = MeasurementHierarchyExplorer.extract_measurements_from_query_result(query_result)
-        index = MeasurementHierarchyExplorer.build_measurement_index(measurements)
-        return {
-            "operation": operation,
-            "total_measurements": index["total_measurements"],
-            "index_by_id_count": len(index["by_id"]),
-            "index_by_name_count": len(index["by_name"]),
-            "index_by_test_count": len(index["by_test"]),
-            "index_by_status_count": len(index["by_status"]),
-            "available_test_names": list(index["by_test"].keys())[:10],
-        }
-
-    else:
-        raise ValueError(f"Unknown operation: {operation}")
-
-
 # ============================================================================
 # HELP & DOCUMENTATION TOOLS
 # ============================================================================
 
 
 @mcp.tool(
-    annotations={"readOnlyHint": True},
+    annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"help"},
 )
 def help_bulk_api(
@@ -851,14 +764,3 @@ def timeseries_access(use_case: str = "") -> str:
     Learn how to read submatrix data, generate fetcher scripts, and handle large datasets.
     """
     return PromptLibrary.get_prompt_content("timeseries_access", {"use_case": use_case})
-
-
-@mcp.prompt()
-def analyze_measurements(analysis_type: str = "") -> str:
-    """Measurement Analysis & Comparison.
-
-    Learn how to analyze and compare measurements across quantities with statistical analysis.
-    Generate Jupyter notebooks for measurement comparison, create visualization code,
-    and explore measurement hierarchies.
-    """
-    return PromptLibrary.get_prompt_content("analyze_measurements", {"analysis_type": analysis_type})

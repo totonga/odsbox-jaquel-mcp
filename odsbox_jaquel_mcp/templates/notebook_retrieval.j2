@@ -1,6 +1,13 @@
+import os
+
 from odsbox import ConI
 
-with ConI(url="{{ ods_url }}", auth=("{{ ods_username }}", "{{ ods_password }}")) as con_i:
+ods_url = "{{ ods_url }}"
+ods_username = "{{ ods_username }}"
+# Set ODS_PASSWORD (or the env variable used during ods_connect) before running
+ods_password = os.environ.get("ODS_PASSWORD", "")
+
+with ConI(url=ods_url, auth=(ods_username, ods_password)) as con_i:
     # Query measurements to compare
     measurements = con_i.query_data({
             "MeaResult": mea_result_conditions,
