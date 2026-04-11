@@ -72,10 +72,9 @@
 ```jaquel
 {
   "AoMeasurement": {
-      "measurement_begin": {
-        "$gte": "2024-01-01",
-        "$lte": "2024-01-31"
-      }
+    "measurement_begin": {
+      "$gte": "2024-01-01",
+      "$lte": "2024-01-31"
     }
   }
 }

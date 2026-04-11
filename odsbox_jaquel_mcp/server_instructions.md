@@ -42,3 +42,17 @@ Most tools require an active ODS connection. Always establish one first:
 - `data_read_submatrix` supports wildcard column patterns (`"Temp*"`, `"*Speed"`); prefer it over `query_execute` for large timeseries.
 - `ods_connect_using_env` supports auth modes `basic` (default), `m2m`, and `oidc` via `{PREFIX}_MODE`.
 - Use starting prompts (`connect_ods_server`, `timeseries_access`, etc.) to guide users through multi-step workflows.
+
+## Reference resources
+
+The server exposes these readable reference documents. Suggest them when relevant:
+
+| Resource URI | When to suggest |
+|---|---|
+| `file:///odsbox/ods-connection-guide` | User is setting up a connection for the first time |
+| `file:///odsbox/ods-entity-hierarchy` | User is unfamiliar with the AoTest → AoSubMatrix hierarchy |
+| `file:///odsbox/ods-workflow-reference` | User asks "what are typical workflows?" |
+| `file:///odsbox/jaquel-syntax-guide` | User is learning Jaquel query syntax |
+| `file:///odsbox/query-operators-reference` | User needs an operator they can't find via `query_get_operator_docs` |
+| `file:///odsbox/query-execution-patterns` | User wants ready-made query patterns |
+| `file:///odsbox/connection-troubleshooting` | User hits a connection error |
