@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.6.1 (2026-04-11)
+
+### Bug Fixes
+
+- Cleanup tools (#48) ([#49](https://github.com/totonga/odsbox-jaquel-mcp/pull/49),
+  [`b815e4e`](https://github.com/totonga/odsbox-jaquel-mcp/commit/b815e4e27c90ab284089182bfc09cc2148eb0e32))
+
+
 ## v1.6.0 (2026-04-04)
 
 ### Features
