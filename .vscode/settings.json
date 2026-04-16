@@ -50,6 +50,7 @@
         "source.organizeImports": "explicit",
         "source.fixAll.ruff": "explicit"
     },
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
     "python.testing.pytestArgs": [
         "tests"
     ],

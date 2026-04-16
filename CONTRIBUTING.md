@@ -7,7 +7,7 @@ This guide explains how to set up your development environment for contributing 
 ### 1. Install Dependencies
 
 ```bash
-pip install -e '.[dev]'
+uv sync --all-extras --group dev
 ```
 
 ### 2. Setup Git Hooks (Recommended)

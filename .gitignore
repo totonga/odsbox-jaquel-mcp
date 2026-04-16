@@ -49,7 +49,7 @@ Desktop.ini
 .mcpregistry_github_token
 
 # Testing
-.pytest_cache/
+.*_cache/
 .coverage
 htmlcov/
 coverage.xml

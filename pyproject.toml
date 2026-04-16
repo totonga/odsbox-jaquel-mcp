@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=45", "wheel", "setuptools-scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.27.0", "hatch-vcs>=0.4.0"]
+build-backend = "hatchling.build"
 
 [project]
 name = "odsbox-jaquel-mcp"
@@ -38,6 +38,7 @@ classifiers = [
 ]
 dependencies = [
     "fastmcp>=3.0.0",
+    "beartype<0.22",
     "odsbox[oidc]>=1.2.0",
     "pip-system-certs",
     "matplotlib",
@@ -45,7 +46,7 @@ dependencies = [
     "keyring>=25.7.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=1.2.0",
@@ -55,16 +56,6 @@ dev = [
     "pandas-stubs>=2.3",
     "python-semantic-release>=10.5.3",
     "pre-commit>=3.0",
-]
-lint = [
-    "commitlint>=1.13.3",
-]
-play = [
-    "flask",
-    "plotly",
-    "seaborn",
-    "scipy",
-    "jupyter",
 ]
 
 [project.scripts]
@@ -89,8 +80,8 @@ ignore = ["E203"]
 quote-style = "double"
 indent-style = "space"
 
-[tool.setuptools_scm]
-tag_regex = "^v(?P<version>[0-9]+\\.[0-9]+\\.[0-9]+)$"
+[tool.hatch.version]
+source = "vcs"
 
 [tool.mypy]
 python_version = "3.13"
@@ -98,6 +89,10 @@ warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
 ignore_missing_imports = true
+follow_imports = "skip"
+no_site_packages = true
+files = ["odsbox_jaquel_mcp", "tests", "run_tests.py"]
+exclude = "(^build/|^dist/|^.*\\.egg-info/|^\\.venv/|^\\.git/|^\\.mypy_cache/|^\\.pytest_cache/|^\\.ruff_cache/)"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -111,19 +106,14 @@ markers = [
 ]
 asyncio_mode = "auto"
 
-[tool.setuptools.package-data]
-odsbox_jaquel_mcp = [
-    "server_instructions.md",
-    "py.typed",
-    "templates/*.j2",
-    "resource_files/*",
-]
+[tool.hatch.build.targets.wheel]
+packages = ["odsbox_jaquel_mcp"]
 
 [tool.semantic_release]
 version_variables = ["server.json:version"]
 version_pattern = "v{version}"
-build_command = "pip install build && python -m build"
-publish_cmd = "pip install twine && twine upload dist/* --skip-existing"
+build_command = "uv build"
+publish_cmd = "uv pip install twine && uv run twine upload dist/* --skip-existing"
 changelog_file = "CHANGELOG.md"
 branch = "main"
 hvcs = "github"

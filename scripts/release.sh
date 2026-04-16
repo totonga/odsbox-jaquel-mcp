@@ -34,12 +34,12 @@ git pull origin main
 
 # Run tests
 echo "🧪 Running tests..."
-python -m pytest tests/ -v --tb=short || exit 1
+uv run pytest tests/ -v --tb=short || exit 1
 
 # Install semantic-release if not available
 if ! command -v semantic-release &> /dev/null; then
-    echo "📦 Installing python-semantic-release..."
-    pip install python-semantic-release
+    echo "📦 Installing python-semantic-release with uv..."
+    uv tool install python-semantic-release
 fi
 
 # Create release

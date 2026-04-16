@@ -104,9 +104,9 @@ class TestJaquelQueryIntegration:
         result = ODSConnectionManager.query(query)
 
         assert "result" in result
-
         query_result = result["result"]
-        assert isinstance(query_result, str), "should be serialized"
+        assert isinstance(query_result["columns"], list), "should be list"
+        assert isinstance(query_result["data"], list), "should be list"
 
     def test_connection_state_during_queries(self):
         """Test that connection remains active during multiple queries.

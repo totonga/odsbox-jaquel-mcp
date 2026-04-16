@@ -51,21 +51,21 @@ uvx odsbox-jaquel-mcp@latest
 
 This automatically installs and runs the server without managing virtual environments.
 
-#### Using pipx
+#### Using uv tool (persistent install)
 
 For a persistent installation:
 
 ```bash
-pipx install odsbox-jaquel-mcp
+uv tool install odsbox-jaquel-mcp
 odsbox-jaquel-mcp
 ```
 
-#### Traditional pip Installation
+#### Using project virtual environment
 
 ```bash
-python -m venv .venv
+uv venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install odsbox-jaquel-mcp[play]
+uv pip install odsbox-jaquel-mcp[play]
 ```
 
 > **Note:** The `[play]` extra includes optional data analysis and visualization dependencies (pandas, matplotlib, scipy) for working with Jupyter notebooks and data analysis.
@@ -78,11 +78,11 @@ The server runs on stdin/stdout and waits for MCP messages from an MCP client:
 # With uvx (auto-installs and runs)
 uvx odsbox-jaquel-mcp@latest
 
-# With pipx (if installed)
+# With uv tool (if installed)
 odsbox-jaquel-mcp
 
-# With pip in virtual environment
-python -m odsbox_jaquel_mcp
+# With project environment
+uv run python -m odsbox_jaquel_mcp
 ```
 
 ### Configuration for MCP Clients
@@ -101,7 +101,7 @@ Add to your MCP client configuration (e.g., Claude Desktop, VS Code):
 }
 ```
 
-Or with pipx:
+Or with uv tool:
 
 ```json
 {
@@ -174,19 +174,19 @@ Example MCP client configuration with monitoring enabled:
 ```bash
 git clone https://github.com/totonga/odsbox-jaquel-mcp.git
 cd odsbox-jaquel-mcp
-python -m venv .venv
+uv venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
+uv sync --all-extras --group dev
 ```
 
 ### Common Tasks
 
 ```bash
 # Run server locally
-python -m odsbox_jaquel_mcp
+uv run python -m odsbox_jaquel_mcp
 
 # Run tests
-pytest tests/
+uv run pytest tests/
 # or
 python run_tests.py
 
@@ -195,7 +195,7 @@ ruff check .
 ruff format .
 
 # Build package
-python -m build
+uv build
 
 # Test with MCP Inspector
 npx @modelcontextprotocol/inspector uvx odsbox-jaquel-mcp@latest

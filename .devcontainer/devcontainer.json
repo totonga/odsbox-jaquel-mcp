@@ -34,6 +34,6 @@
       }
     }
   },
-  "postCreateCommand": "pip install -e . && pip install -e '.[dev]' && pre-commit install --install-hooks && pre-commit install --hook-type commit-msg",
+  "postCreateCommand": "command -v uv >/dev/null || (curl -LsSf https://astral.sh/uv/install.sh | sh); export PATH=\"$HOME/.local/bin:$PATH\"; uv sync --all-extras --group dev && uv run pre-commit install --install-hooks && uv run pre-commit install --hook-type commit-msg",
   "remoteUser": "vscode"
 }

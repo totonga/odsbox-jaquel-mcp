@@ -2,8 +2,9 @@
 	"servers": {
 		"ods": {
 			"type": "stdio",
-			"command": ".venv/Scripts/python.exe",
+			"command": "uv",
 			"args": [
+				"run",
 				"-m",
 				"odsbox_jaquel_mcp"
 			],

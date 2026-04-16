@@ -333,6 +333,11 @@ class JaquelExplain:
                 left_entity = mc.entity_by_aid(join.aid_from)
                 right_entity = mc.entity_by_aid(join.aid_to)
                 join_rel = mc.relation_no_throw(left_entity, join.relation)
+                if join_rel is None:
+                    explanation_parts.append(
+                        f"  - Join relation '{join.relation}' not found on entity {left_entity.name}"
+                    )
+                    continue
                 right_id = mc.attribute_by_base_name(right_entity, "id")
                 join_type = ods.SelectStatement.JoinItem.JoinTypeEnum.Name(join.join_type).replace("JT_", "")
                 explanation_parts.append(

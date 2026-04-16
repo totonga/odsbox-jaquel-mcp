@@ -26,12 +26,12 @@ class SchemaInspector:
     """Inspect ODS model schema via ConI/ModelCache."""
 
     @classmethod
-    def _get_model(cls) -> ods.Model:
+    def _get_model(cls) -> ods.Model | None:
         """Get model cache from connection manager."""
         return ODSConnectionManager.get_model()
 
     @classmethod
-    def _get_model_cache(cls) -> ModelCache:
+    def _get_model_cache(cls) -> ModelCache | None:
         """Get model cache from connection manager."""
         return ODSConnectionManager.get_model_cache()
 
@@ -59,7 +59,7 @@ class SchemaInspector:
     @classmethod
     def get_entity_schema(cls, entity_name: str) -> dict[str, Any]:
         """Get schema for an entity from model."""
-        model_cache: ModelCache = cls._get_model_cache()
+        model_cache = cls._get_model_cache()
         if not model_cache:
             raise ToolError("Model not loaded. Connect to ODS server using 'ods_connect' tool first.")
 
@@ -160,7 +160,7 @@ class SchemaInspector:
     @classmethod
     def schema_field_exists(cls, entity_name: str, field_name: str) -> dict[str, Any]:
         """Check if field exists in entity."""
-        model_cache: ModelCache = cls._get_model_cache()
+        model_cache = cls._get_model_cache()
         if not model_cache:
             raise ToolError("Model not loaded. Connect to ODS server using 'ods_connect' tool first.")
 
@@ -199,7 +199,7 @@ class SchemaInspector:
         Returns:
             Dict containing hierarchy chain and relationships
         """
-        model_cache: ModelCache = cls._get_model_cache()
+        model_cache = cls._get_model_cache()
         if not model_cache:
             raise ToolError("Model not loaded. Connect to ODS server using 'ods_connect' tool first.")
 
