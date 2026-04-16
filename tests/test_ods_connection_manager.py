@@ -150,7 +150,14 @@ class TestODSConnectionManager:
         # Setup connection
         mock_coni = Mock()
         mock_result = Mock()
-        mock_result.to_string.return_value = "mocked dataframe string"
+        mock_result.__len__ = Mock(return_value=3)
+        mock_result.columns = ["id", "name"]
+        mock_result.head.return_value = mock_result
+        mock_result.to_dict.return_value = {
+            "columns": ["id", "name"],
+            "index": [0, 1, 2],
+            "data": [[1, "a"], [2, "b"], [3, "c"]],
+        }
         mock_coni.query.return_value = mock_result
         mock_coni.con_i_url.return_value = "http://test:8087/api"
         mock_coni.mc = Mock()
@@ -165,7 +172,10 @@ class TestODSConnectionManager:
         query = {"TestEntity": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["result"] == "mocked dataframe string"
+        assert result["result"] == mock_result.to_dict.return_value
+        assert result["total_rows"] == 3
+        assert result["returned_rows"] == 3
+        assert result["truncated"] is False
         mock_coni.query.assert_called_once_with(query, result_naming_mode="model")
 
     def test_query_not_connected(self):

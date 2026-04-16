@@ -345,10 +345,48 @@ async def query_execute(
             )
         ),
     ],
+    result_format: Annotated[
+        Literal["split", "records"],
+        Field(
+            default="split",
+            description=(
+                'Result serialisation format: "split" (default) encodes column names once '
+                '— {"columns": [...], "index": [...], "data": [...]}; '
+                '"records" repeats all keys per row — [{"col": val, ...}, ...]. '
+                '"split" is more token-efficient for wide results.'
+            ),
+        ),
+    ] = "split",
+    max_rows: Annotated[
+        int,
+        Field(
+            default=100,
+            ge=1,
+            le=10000,
+            description=(
+                "Maximum number of rows to return (default: 100). "
+                "Also capped adaptively by max_cells to protect LLM context size. "
+                "Use a small value like 10-20 for wide results (many columns)."
+            ),
+        ),
+    ] = 100,
+    max_cells: Annotated[
+        int,
+        Field(
+            default=10000,
+            ge=100,
+            le=100000,
+            description=(
+                "Adaptive cell budget: effective_rows = min(max_rows, max_cells // col_count). "
+                "Default 10 000 ≈ 6 000 LLM tokens for double data. "
+                "Increase only if you need more data and understand the context cost."
+            ),
+        ),
+    ] = 10000,
     ctx: Context | None = None,
 ) -> dict:
     """Execute a Jaquel query directly on connected ODS server."""
-    return ODSConnectionManager.query(query)
+    return ODSConnectionManager.query(query, result_format=result_format, max_rows=max_rows, max_cells=max_cells)
 
 
 # ============================================================================

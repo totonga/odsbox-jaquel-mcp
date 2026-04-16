@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from fastmcp.exceptions import ToolError
 from odsbox import ConI
@@ -210,14 +210,45 @@ class ODSConnectionManager:
         return instance._connection_info.copy()
 
     @classmethod
-    def query(cls, jaquel_query: dict) -> dict[str, Any]:
+    def query(
+        cls,
+        jaquel_query: dict[str, Any],
+        result_format: Literal["split", "records"] = "split",
+        max_rows: int = 100,
+        max_cells: int = 10_000,
+    ) -> dict[str, Any]:
         """Execute Jaquel query on connected ODS server.
 
         Args:
             jaquel_query: Jaquel query as dict
+            result_format: DataFrame.to_dict() orient — "split" (default) or "records".
+                "split" encodes column names once; "records" repeats all keys per row.
+            max_rows: Hard row cap applied before serialisation (default: 100).
+            max_cells: Adaptive cell cap; effective rows = min(max_rows,
+                max_cells // max(1, col_count)) (default: 10 000).
 
         Returns:
-            Query results as dict/DataFrame compatible format
+            Query results as dict with keys: result, total_rows, returned_rows, truncated.
+
+        Token cost model (MCP context injection):
+        -----------------------------------------
+        IEEE 754 double as JSON string: worst-case ~20 chars, e.g. 3.141592653589793
+        LLM tokenizers ≈ 4 chars/token  →  ~5 tokens per double value
+
+        Example: 1 000 rows * 10 columns = 10 000 values
+          Data tokens:       10 000 * 5             =  50 000 tokens  ← context-killing
+          "split" overhead:  col names once          ~      50 tokens
+          "records" overhead: keys * every row       ~  10 000 tokens extra
+
+        Default caps (max_rows=100, max_cells=10_000):
+          100 rows * 10 cols = 1 000 values  →  ~5 000 data tokens
+          + ~20 % structure overhead          →  ~6 000 tokens total  ← safe
+
+        Effective rows formula:
+          effective_rows = min(max_rows, max_cells // max(1, col_count))
+          e.g.  10 columns: min(100, 10_000 //  10) = min(100, 1000) = 100
+          e.g.  50 columns: min(100, 10_000 //  50) = min(100,  200) = 100
+          e.g. 200 columns: min(100, 10_000 // 200) = min(100,   50) =  50  ← auto-caps wide results
         """
         instance = cls.get_instance()
 
@@ -226,6 +257,17 @@ class ODSConnectionManager:
 
         try:
             result = instance._con_i.query(jaquel_query, result_naming_mode="model")
-            return {"result": result.to_string(max_rows=None)}
+
+            total_rows = len(result)
+            col_count = len(result.columns)
+            effective_rows = min(max_rows, max_cells // max(1, col_count))
+            df = result.head(effective_rows)
+
+            return {
+                "result": df.to_dict(orient=result_format),
+                "total_rows": total_rows,
+                "returned_rows": len(df),
+                "truncated": total_rows > len(df),
+            }
         except Exception as e:
             raise ToolError(f"Query failed: {e}") from e
