@@ -156,9 +156,9 @@ async def test_read_resource_jaquel_syntax_guide(mcp_client):
     text = content["text"]
     assert len(text) > 0
     # Verify it's actual documentation content
-    assert any(
-        keyword in text.lower() for keyword in ["jaquel", "query", "syntax", "operator"]
-    ), "Resource should contain Jaquel-related documentation"
+    assert any(keyword in text.lower() for keyword in ["jaquel", "query", "syntax", "operator"]), (
+        "Resource should contain Jaquel-related documentation"
+    )
 
 
 @pytest.mark.integration
@@ -213,9 +213,9 @@ async def test_read_resource_query_operators_reference(mcp_client):
     text = content["text"]
     assert len(text) > 0
     # Verify it contains operator documentation (check for markdown headers/operators)
-    assert (
-        "#" in text or "$eq" in text or "operator" in text.lower()
-    ), "Operators reference should contain operator documentation"
+    assert "#" in text or "$eq" in text or "operator" in text.lower(), (
+        "Operators reference should contain operator documentation"
+    )
 
 
 @pytest.mark.integration

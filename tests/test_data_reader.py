@@ -1,7 +1,6 @@
 """Tests for submatrix data reader with resampling functionality."""
 
 import pandas as pd
-import pytest
 
 from odsbox_jaquel_mcp.submatrix.data_reader import (
     _resample_dataframe,

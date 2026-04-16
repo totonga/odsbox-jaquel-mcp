@@ -23,7 +23,7 @@ class JaquelExamples:
     }
 }""",
             "description": "Get all instances (limited to 5)",
-            "explanation": ("Empty {} means no filter. " "$rowlimit prevents large result sets."),
+            "explanation": ("Empty {} means no filter. $rowlimit prevents large result sets."),
         },
         "get_by_id": {
             "template": '{"EntityName": 123}',
@@ -53,7 +53,7 @@ class JaquelExamples:
     }
 }""",
             "description": "Case-insensitive wildcard search",
-            "explanation": ("$like uses * and ? wildcards. " "$options: 'i' = case-insensitive"),
+            "explanation": ("$like uses * and ? wildcards. $options: 'i' = case-insensitive"),
         },
         "time_range": {
             "template": """{
@@ -109,7 +109,7 @@ class JaquelExamples:
     }
 }""",
             "description": "Aggregate functions",
-            "explanation": ("$min/$max/$avg for numeric. " "$distinct for unique values."),
+            "explanation": ("$min/$max/$avg for numeric. $distinct for unique values."),
         },
     }
 
@@ -336,8 +336,7 @@ class JaquelExplain:
                 right_id = mc.attribute_by_base_name(right_entity, "id")
                 join_type = ods.SelectStatement.JoinItem.JoinTypeEnum.Name(join.join_type).replace("JT_", "")
                 explanation_parts.append(
-                    f"  - {join_type} Join: {left_entity.name}.{join_rel.name} "
-                    f"= {right_entity.name}.{right_id.name}"
+                    f"  - {join_type} Join: {left_entity.name}.{join_rel.name} = {right_entity.name}.{right_id.name}"
                 )
         if select_statement.order_by:
             explanation_parts.append("Order By:")
@@ -358,7 +357,7 @@ class JaquelExplain:
             )
         if select_statement.values_limit > 0 or select_statement.values_start > 0:
             explanation_parts.append(
-                f"Values Limit: {select_statement.values_limit}, " f"Values Offset: {select_statement.values_start}"
+                f"Values Limit: {select_statement.values_limit}, Values Offset: {select_statement.values_start}"
             )
 
         explanation_parts.append("\n" + "=" * 50)

@@ -456,5 +456,5 @@ This is more efficient than manually loading multiple submatrices!
 
         return contextual_tips.get(
             current_tool,
-            f"No specific help for {current_tool}. " "See 'get help bulk-api' for general guidance.",
+            f"No specific help for {current_tool}. See 'get help bulk-api' for general guidance.",
         )

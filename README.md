@@ -191,9 +191,8 @@ pytest tests/
 python run_tests.py
 
 # Code formatting and linting
-black .
-isort .
-flake8 .
+ruff check .
+ruff format .
 
 # Build package
 python -m build

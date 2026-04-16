@@ -46,9 +46,7 @@ _instructions_path = Path(__file__).parent / "server_instructions.md"
 try:
     _instructions = _instructions_path.read_text(encoding="utf-8")
 except FileNotFoundError:
-    _instructions = (
-        "# ASAM ODS Jaquel MCP Server\n\n" "See documentation at https://github.com/totonga/odsbox-jaquel-mcp"
-    )
+    _instructions = "# ASAM ODS Jaquel MCP Server\n\nSee documentation at https://github.com/totonga/odsbox-jaquel-mcp"
 
 mcp = FastMCP(
     name="odsbox-jaquel-mcp",
