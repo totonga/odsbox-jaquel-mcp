@@ -171,7 +171,7 @@ class TestConnectWithFactory:
     @patch("odsbox_jaquel_mcp.connection.ConIFactory")
     def test_unknown_mode_raises_tool_error(self, mock_factory):
         """Unknown mode raises ToolError via ValueError."""
-        auth_args = {"mode": "unknown_mode"}
+        auth_args = {"mode": "unknown_mode", "url": "http://test:8087/api"}
 
         with pytest.raises(ToolError, match="Unknown authentication mode"):
             ODSConnectionManager.connect_with_factory(auth_args)

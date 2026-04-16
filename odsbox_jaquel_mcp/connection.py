@@ -40,7 +40,7 @@ class ODSConnectionManager:
         return cls._instance
 
     @classmethod
-    def _init_from_con_i(cls, con_i: ConI, display_username: str) -> dict[str, Any]:
+    def _init_from_con_i(cls, con_i: ConI, base_url: str, display_username: str) -> dict[str, Any]:
         """Initialize connection state from an already-created ConI instance.
 
         Shared helper used by both ``connect()`` and ``connect_with_factory()``.
@@ -73,7 +73,7 @@ class ODSConnectionManager:
         }
 
         instance._connection_info = {
-            "url": con_i.con_i_url(),
+            "url": base_url,
             "username": display_username,
             "con_i_url": con_i.con_i_url(),
             "status": "connected",
@@ -98,7 +98,7 @@ class ODSConnectionManager:
         try:
             con_i = ConI(url=url, auth=auth, load_model=True, **kwargs)
             display_username = auth[0] if isinstance(auth, tuple) else "unknown"
-            return cls._init_from_con_i(con_i, display_username)
+            return cls._init_from_con_i(con_i=con_i, base_url=url, display_username=display_username)
         except Exception as e:
             raise ToolError(f"Connection failed: {e}") from e
 
@@ -114,31 +114,33 @@ class ODSConnectionManager:
             Connection status dict
         """
         mode = auth_args["mode"]
+        url = auth_args["url"]
+        verify_certificate = auth_args.get("verify_certificate", True)
 
         try:
             if mode == "basic":
                 con_i = ConIFactory.basic(
-                    url=auth_args["url"],
+                    url=url,
                     username=auth_args["username"],
                     password=auth_args["password"],
-                    verify_certificate=auth_args.get("verify_certificate", True),
+                    verify_certificate=verify_certificate,
                 )
                 display_username = auth_args["username"]
 
             elif mode == "m2m":
                 con_i = ConIFactory.m2m(
-                    url=auth_args["url"],
+                    url=url,
                     token_endpoint=auth_args["token_endpoint"],
                     client_id=auth_args["client_id"],
                     client_secret=auth_args["client_secret"],
                     scope=auth_args.get("scope"),
-                    verify_certificate=auth_args.get("verify_certificate", True),
+                    verify_certificate=verify_certificate,
                 )
                 display_username = auth_args["client_id"]
 
             elif mode == "oidc":
                 con_i = ConIFactory.oidc(
-                    url=auth_args["url"],
+                    url=url,
                     client_id=auth_args["client_id"],
                     redirect_uri=auth_args["redirect_uri"],
                     redirect_url_allow_insecure=auth_args.get("redirect_url_allow_insecure", False),
@@ -147,7 +149,7 @@ class ODSConnectionManager:
                     authorization_endpoint=auth_args.get("authorization_endpoint"),
                     token_endpoint=auth_args.get("token_endpoint"),
                     login_timeout=auth_args.get("login_timeout", 60),
-                    verify_certificate=auth_args.get("verify_certificate", True),
+                    verify_certificate=verify_certificate,
                     webfinger_path_prefix=auth_args.get("webfinger_path_prefix", ""),
                 )
                 display_username = auth_args["client_id"]
@@ -155,7 +157,7 @@ class ODSConnectionManager:
             else:
                 raise ValueError(f"Unknown authentication mode: {mode!r}")
 
-            return cls._init_from_con_i(con_i, display_username)
+            return cls._init_from_con_i(con_i=con_i, base_url=url, display_username=display_username)
 
         except Exception as e:
             raise ToolError(f"Connection failed ({mode} mode): {e}") from e
