@@ -2,6 +2,23 @@
 
 <!-- version list -->
 
+## v1.7.0 (2026-04-19)
+
+### Bug Fixes
+
+- Build
+  ([`849a3bf`](https://github.com/totonga/odsbox-jaquel-mcp/commit/849a3bfc23dcd4923c1591a98a4866e8c79fd372))
+
+- Fix build
+  ([`8fbe159`](https://github.com/totonga/odsbox-jaquel-mcp/commit/8fbe15991c0346b1d07d94bdffdd454cfae601c6))
+
+### Features
+
+- Modernize environment and improve return values of entity and connection
+  ([#52](https://github.com/totonga/odsbox-jaquel-mcp/pull/52),
+  [`e7c8fa5`](https://github.com/totonga/odsbox-jaquel-mcp/commit/e7c8fa5fd64128a3a6ada7b589b6ca5d0b52d57b))
+
+
 ## v1.6.1 (2026-04-11)
 
 ### Bug Fixes
