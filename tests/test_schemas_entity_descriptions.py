@@ -1,7 +1,5 @@
 """Tests for EntityDescriptions class."""
 
-import pytest
-
 from odsbox_jaquel_mcp.schemas_entity_descriptions import EntityDescriptions
 
 

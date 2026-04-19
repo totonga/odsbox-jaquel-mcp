@@ -13,8 +13,9 @@ Usage:
 import asyncio
 import json
 import sys
+from contextlib import AbstractAsyncContextManager
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from mcp.client.session import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -30,8 +31,8 @@ class MCPServerTestClient:
             timeout: Timeout for server communication
         """
         self.timeout = timeout
-        self.session = None
-        self._context_managers = []
+        self.session: ClientSession | None = None
+        self._context_managers: list[AbstractAsyncContextManager[Any]] = []
 
     async def start(self) -> None:
         """Start MCP server and establish connection."""
@@ -56,6 +57,8 @@ class MCPServerTestClient:
             self._context_managers.append(session_context)
 
             # Initialize protocol
+            if self.session is None:
+                raise RuntimeError("Failed to initialize MCP client session")
             await self.session.initialize()
 
             print("✓ Connected to MCP server")
@@ -180,7 +183,7 @@ class MCPServerTestClient:
 
         try:
             result = await asyncio.wait_for(
-                self.session.read_resource(uri),
+                self.session.read_resource(cast(Any, uri)),
                 timeout=self.timeout,
             )
 

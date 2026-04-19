@@ -17,7 +17,7 @@ class TestConnectWithFactory:
         ODSConnectionManager._con_i = None
         ODSConnectionManager._model_cache = None
         ODSConnectionManager._model = None
-        ODSConnectionManager._connection_info = {}
+        ODSConnectionManager._connection_info = None
 
     def _mock_con_i(self):
         """Create a standard mock ConI instance."""
@@ -51,8 +51,8 @@ class TestConnectWithFactory:
             password="secret",
             verify_certificate=False,
         )
-        assert result["connection"]["username"] == "admin"
-        assert result["connection"]["status"] == "connected"
+        assert result.connection.username == "admin"
+        assert result.connection.status == "connected"
         assert ODSConnectionManager.is_connected()
 
     @patch("odsbox_jaquel_mcp.connection.ConIFactory")
@@ -81,8 +81,8 @@ class TestConnectWithFactory:
             scope=["api", "admin"],
             verify_certificate=True,
         )
-        assert result["connection"]["username"] == "my-client"
-        assert result["connection"]["status"] == "connected"
+        assert result.connection.username == "my-client"
+        assert result.connection.status == "connected"
 
     @patch("odsbox_jaquel_mcp.connection.ConIFactory")
     def test_oidc_mode(self, mock_factory):
@@ -120,7 +120,7 @@ class TestConnectWithFactory:
             verify_certificate=True,
             webfinger_path_prefix="/ods",
         )
-        assert result["connection"]["username"] == "oidc-client"
+        assert result.connection.username == "oidc-client"
 
     @patch("odsbox_jaquel_mcp.connection.ConIFactory")
     def test_oidc_minimal_defaults(self, mock_factory):
@@ -171,7 +171,7 @@ class TestConnectWithFactory:
     @patch("odsbox_jaquel_mcp.connection.ConIFactory")
     def test_unknown_mode_raises_tool_error(self, mock_factory):
         """Unknown mode raises ToolError via ValueError."""
-        auth_args = {"mode": "unknown_mode"}
+        auth_args = {"mode": "unknown_mode", "url": "http://test:8087/api"}
 
         with pytest.raises(ToolError, match="Unknown authentication mode"):
             ODSConnectionManager.connect_with_factory(auth_args)
@@ -197,5 +197,5 @@ class TestConnectWithFactory:
         auth_args["username"] = "user2"
         result = ODSConnectionManager.connect_with_factory(auth_args)
 
-        assert result["connection"]["username"] == "user2"
+        assert result.connection.username == "user2"
         mock_con_i_1.close.assert_called_once()

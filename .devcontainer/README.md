@@ -6,10 +6,9 @@ This devcontainer provides a fully configured Python 3.13 development environmen
 
 - **Python 3.13**: Latest stable Python version specified in `pyproject.toml`
 - **Git Integration**: Pre-installed for version control
-- **VS Code Extensions**: Python development tools including Pylance, debugger, Black formatter, and Ruff linter
-- **Pre-configured Environment**: 
-  - Project installed in editable mode (`pip install -e .`)
-  - Development dependencies installed (`pip install -e '.[dev]'`)
+- **VS Code Extensions**: Python development tools including Pylance, debugger, and Ruff formatter/linter
+- **Pre-configured Environment**:
+   - Project dependencies installed with uv (`uv sync --all-extras --dev`)
   - Python formatting and linting configured
   - Pytest testing configured
 
@@ -21,26 +20,26 @@ This devcontainer provides a fully configured Python 3.13 development environmen
 
 2. **Verify Installation**:
    ```bash
-   python --version
-   python -m pytest tests/ -v
+   uv --version
+   uv run pytest tests/ -v
    ```
 
 3. **Run the Server**:
    ```bash
-   python -m odsbox_jaquel_mcp
+   uv run python -m odsbox_jaquel_mcp
    ```
 
 4. **Build Package**:
    ```bash
-   python -m build
+   uv build
    ```
 
 ## Development Workflow
 
-- **Format Code**: `black .` or use VS Code's Format Document
-- **Lint**: `flake8 .` 
+- **Format Code**: `uv run ruff format .` or use VS Code's Format Document
+- **Lint**: `uv run ruff check .`
 - **Type Check**: `mypy odsbox_jaquel_mcp/`
-- **Run Tests**: Press Ctrl+Shift+D to open Test Explorer or run `pytest tests/ -v`
+- **Run Tests**: Press Ctrl+Shift+D to open Test Explorer or run `uv run pytest tests/ -v`
 - **Debug**: Set breakpoints and use VS Code Debugger (F5)
 
 ## SSH Access

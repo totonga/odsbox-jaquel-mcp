@@ -10,26 +10,21 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-python.debugpy",
-        "ms-python.black-formatter",
         "charliermarsh.ruff",
         "ms-vscode.makefile-tools",
         "github.copilot",
         "github.copilot-chat",
-        "ms-python.isort",
         "ms-python.mypy-type-checker",
         "streetsidesoftware.code-spell-checker"
       ],
       "settings": {
         "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.linting.enabled": true,
-        "python.linting.pylintEnabled": false,
-        "python.linting.flake8Enabled": true,
-        "python.formatting.provider": "black",
         "[python]": {
-          "editor.defaultFormatter": "ms-python.python",
+          "editor.defaultFormatter": "charliermarsh.ruff",
           "editor.formatOnSave": true,
           "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
+            "source.organizeImports": "explicit",
+            "source.fixAll.ruff": "explicit"
           }
         },
         "python.testing.pytestEnabled": true,
@@ -39,6 +34,6 @@
       }
     }
   },
-  "postCreateCommand": "pip install -e . && pip install -e '.[dev]' && pre-commit install --install-hooks && pre-commit install --hook-type commit-msg",
+  "postCreateCommand": "command -v uv >/dev/null || (curl -LsSf https://astral.sh/uv/install.sh | sh); export PATH=\"$HOME/.local/bin:$PATH\"; uv sync --all-extras --group dev && uv run pre-commit install --install-hooks && uv run pre-commit install --hook-type commit-msg",
   "remoteUser": "vscode"
 }

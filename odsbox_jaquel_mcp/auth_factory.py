@@ -55,9 +55,7 @@ def _require_url(env: os._Environ, prefix: str) -> str:  # type: ignore[type-arg
     """Resolve and validate the ODS server URL from environment."""
     url = _env_get(env, prefix, "URL") or _env_get(env, prefix, "API_URL")
     if not url or not isinstance(url, str) or not url.strip():
-        raise ValueError(
-            f"Environment variable {prefix}_URL (or {prefix}_API_URL) " "must be set to a non-empty string"
-        )
+        raise ValueError(f"Environment variable {prefix}_URL (or {prefix}_API_URL) must be set to a non-empty string")
     return url.strip()
 
 
@@ -71,7 +69,7 @@ def _resolve_basic_auth(env: os._Environ, prefix: str) -> dict[str, Any]:  # typ
     username = _env_get(env, prefix, "USERNAME") or _env_get(env, prefix, "USER")
     if not username or not isinstance(username, str) or not username.strip():
         raise ValueError(
-            f"Environment variable {prefix}_USERNAME (or {prefix}_USER) " "must be set to a non-empty string"
+            f"Environment variable {prefix}_USERNAME (or {prefix}_USER) must be set to a non-empty string"
         )
     username = username.strip()
 
@@ -163,8 +161,7 @@ def _resolve_oidc_auth(env: os._Environ, prefix: str) -> dict[str, Any]:  # type
     redirect_uri = _env_get(env, prefix, "OIDC_REDIRECT_URI")
     if not redirect_uri or not isinstance(redirect_uri, str) or not redirect_uri.strip():
         raise ValueError(
-            f"Environment variable {prefix}_OIDC_REDIRECT_URI must be set for OIDC mode "
-            "(e.g., http://127.0.0.1:1234)"
+            f"Environment variable {prefix}_OIDC_REDIRECT_URI must be set for OIDC mode (e.g., http://127.0.0.1:1234)"
         )
     redirect_uri = redirect_uri.strip()
 
@@ -247,7 +244,7 @@ def resolve_auth_args_from_env(prefix: str) -> dict[str, Any]:
 
     if mode not in VALID_MODES:
         raise ValueError(
-            f"Invalid authentication mode: {mode!r}. " f"Set {prefix}_MODE to one of: {', '.join(VALID_MODES)}"
+            f"Invalid authentication mode: {mode!r}. Set {prefix}_MODE to one of: {', '.join(VALID_MODES)}"
         )
 
     if mode == "basic":
@@ -258,5 +255,5 @@ def resolve_auth_args_from_env(prefix: str) -> dict[str, Any]:
         return _resolve_oidc_auth(env, prefix)
     else:
         raise ValueError(
-            f"Unhandled authentication mode: {mode!r}. " f"Set {prefix}_MODE to one of: {', '.join(VALID_MODES)}"
+            f"Unhandled authentication mode: {mode!r}. Set {prefix}_MODE to one of: {', '.join(VALID_MODES)}"
         )

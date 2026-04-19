@@ -130,7 +130,7 @@ class JaquelValidator:
             msg = f"Entity '{entity_name}' query value cannot be None"
             errors.append(msg)
         elif not isinstance(entity_query, (dict, int, str)):
-            msg = f"Entity '{entity_name}' query value must be " "dict, int, or string"
+            msg = f"Entity '{entity_name}' query value must be dict, int, or string"
             errors.append(msg)
 
         if isinstance(entity_query, dict):
@@ -149,13 +149,13 @@ class JaquelValidator:
                 errors.append("$attributes must be a dictionary")
             else:
                 if len(attrs) == 0:
-                    msg = "$attributes is empty - consider " "removing it or adding attributes"
+                    msg = "$attributes is empty - consider removing it or adding attributes"
                     suggestions.append(msg)
 
         if "$orderby" in query:
             orderby = query["$orderby"]
             if not isinstance(orderby, dict):
-                msg = "$orderby must be a dictionary with " "attribute names as keys and 0/1 as values"
+                msg = "$orderby must be a dictionary with attribute names as keys and 0/1 as values"
                 errors.append(msg)
 
         if "$groupby" in query:
@@ -228,7 +228,7 @@ class JaquelValidator:
             "$between": {
                 "category": "comparison",
                 "description": "Value between two values",
-                "example": '{"date": {"$between": ' '["2023-01-01", "2023-12-31"]}}',
+                "example": '{"date": {"$between": ["2023-01-01", "2023-12-31"]}}',
             },
             "$null": {
                 "category": "comparison",
@@ -243,12 +243,12 @@ class JaquelValidator:
             "$and": {
                 "category": "logical",
                 "description": "Logical AND - all must be true",
-                "example": '{"$and": [{"status": "active"},' ' {"value": {"$gt": 0}}]}',
+                "example": '{"$and": [{"status": "active"}, {"value": {"$gt": 0}}]}',
             },
             "$or": {
                 "category": "logical",
                 "description": "Logical OR - at least one true",
-                "example": '{"$or": [{"status": "active"},' ' {"status": "pending"}]}',
+                "example": '{"$or": [{"status": "active"}, {"status": "pending"}]}',
             },
             "$not": {
                 "category": "logical",
@@ -258,17 +258,17 @@ class JaquelValidator:
             "$distinct": {
                 "category": "aggregate",
                 "description": "Get distinct values",
-                "example": '{"$attributes": ' '{"name": {"$distinct": 1}}}',
+                "example": '{"$attributes": {"name": {"$distinct": 1}}}',
             },
             "$min": {
                 "category": "aggregate",
                 "description": "Get minimum value",
-                "example": '{"$attributes": ' '{"value": {"$min": 1}}}',
+                "example": '{"$attributes": {"value": {"$min": 1}}}',
             },
             "$max": {
                 "category": "aggregate",
                 "description": "Get maximum value",
-                "example": '{"$attributes": ' '{"value": {"$max": 1}}}',
+                "example": '{"$attributes": {"value": {"$max": 1}}}',
             },
         }
 

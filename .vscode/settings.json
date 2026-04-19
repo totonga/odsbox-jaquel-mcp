@@ -19,7 +19,6 @@
         "dataframe",
         "dcount",
         "groupby",
-        "isort",
         "Jaquel",
         "Matplotlib",
         "notnull",
@@ -38,15 +37,20 @@
     ],
     "[python]": {
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.defaultFormatter": "charliermarsh.ruff",
         "editor.rulers": [
             119
         ]
     },
+    "[markdown]": {
+        "editor.formatOnSave": false
+    },
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-        "source.organizeImports": "explicit"
+        "source.organizeImports": "explicit",
+        "source.fixAll.ruff": "explicit"
     },
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
     "python.testing.pytestArgs": [
         "tests"
     ],

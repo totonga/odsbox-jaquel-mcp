@@ -27,6 +27,7 @@ from .prompts import PromptLibrary
 from .queries import JaquelExamples, JaquelExplain
 from .resources import ResourceLibrary
 from .schemas import SchemaInspector
+from .schemas_types import ConnectionInfo, ConnectResult, EntitySchema
 from .submatrix import SubmatrixDataReader
 from .submatrix.scripts import (
     generate_advanced_fetcher_script,
@@ -46,9 +47,7 @@ _instructions_path = Path(__file__).parent / "server_instructions.md"
 try:
     _instructions = _instructions_path.read_text(encoding="utf-8")
 except FileNotFoundError:
-    _instructions = (
-        "# ASAM ODS Jaquel MCP Server\n\n" "See documentation at https://github.com/totonga/odsbox-jaquel-mcp"
-    )
+    _instructions = "# ASAM ODS Jaquel MCP Server\n\nSee documentation at https://github.com/totonga/odsbox-jaquel-mcp"
 
 mcp = FastMCP(
     name="odsbox-jaquel-mcp",
@@ -187,7 +186,7 @@ def query_describe(
 )
 def schema_get_entity(
     entity_name: Annotated[str, Field(description="Entity name (e.g., 'StructureLevel')")],
-) -> dict:
+) -> EntitySchema:
     """Get available fields for an entity from ODS model."""
     if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
         raise ValueError("entity_name must be a non-empty string")
@@ -248,7 +247,7 @@ async def ods_connect(
     ],
     verify: Annotated[bool, Field(description="Verify SSL certificates (default: true)")] = True,
     ctx: Context | None = None,
-) -> dict:
+) -> ConnectResult:
     """Establish connection to ASAM ODS server for live model inspection."""
     if not url or not isinstance(url, str) or not url.strip():
         raise ValueError("url must be a non-empty string")
@@ -277,7 +276,7 @@ async def ods_connect_using_env(
         ),
     ] = None,
     ctx: Context | None = None,
-) -> dict:
+) -> ConnectResult:
     """Establish connection to ASAM ODS server using environment variables.
 
     Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix.
@@ -324,7 +323,7 @@ def ods_disconnect() -> dict:
     annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"connection"},
 )
-def ods_get_connection_info() -> dict:
+def ods_get_connection_info() -> ConnectionInfo | None:
     """Get current ODS connection information."""
     return ODSConnectionManager.get_connection_info()
 
@@ -345,10 +344,48 @@ async def query_execute(
             )
         ),
     ],
+    result_format: Annotated[
+        Literal["split", "records"],
+        Field(
+            default="split",
+            description=(
+                'Result serialisation format: "split" (default) encodes column names once '
+                '— {"columns": [...], "index": [...], "data": [...]}; '
+                '"records" repeats all keys per row — [{"col": val, ...}, ...]. '
+                '"split" is more token-efficient for wide results.'
+            ),
+        ),
+    ] = "split",
+    max_rows: Annotated[
+        int,
+        Field(
+            default=100,
+            ge=1,
+            le=10000,
+            description=(
+                "Maximum number of rows to return (default: 100). "
+                "Also capped adaptively by max_cells to protect LLM context size. "
+                "Use a small value like 10-20 for wide results (many columns)."
+            ),
+        ),
+    ] = 100,
+    max_cells: Annotated[
+        int,
+        Field(
+            default=10000,
+            ge=100,
+            le=100000,
+            description=(
+                "Adaptive cell budget: effective_rows = min(max_rows, max_cells // col_count). "
+                "Default 10 000 ≈ 6 000 LLM tokens for double data. "
+                "Increase only if you need more data and understand the context cost."
+            ),
+        ),
+    ] = 10000,
     ctx: Context | None = None,
 ) -> dict:
     """Execute a Jaquel query directly on connected ODS server."""
-    return ODSConnectionManager.query(query)
+    return ODSConnectionManager.query(query, result_format=result_format, max_rows=max_rows, max_cells=max_cells)
 
 
 # ============================================================================
@@ -533,10 +570,10 @@ def plot_comparison_notebook(
     at runtime so no credentials are embedded in the notebook file.
     """
     connection_info = ODSConnectionManager.get_connection_info()
-    if not connection_info.get("url"):
+    if connection_info is None or not connection_info.url:
         raise ValueError("No active ODS connection. Use ods_connect or ods_connect_using_env first.")
-    ods_url = connection_info["url"]
-    ods_username = connection_info.get("username", "")
+    ods_url = connection_info.url
+    ods_username = connection_info.username
 
     notebook = NotebookGenerator.plot_comparison_notebook(
         measurement_query_conditions=measurement_query_conditions,

@@ -757,7 +757,7 @@ query = {
     "output_format": "csv",
     "measurement_quantities": ["Time", "Temperature"],
     "script": "#!/usr/bin/env python3\\n... (complete Python script)",
-    "instructions": "Copy the script above into a Python file and run it. Make sure to install required packages: pip install odsbox pandas matplotlib seaborn"
+    "instructions": "Copy the script above into a Python file and run it. Make sure to install required packages: uv pip install odsbox pandas matplotlib seaborn"
 }
 ```
 

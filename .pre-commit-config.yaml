@@ -6,26 +6,13 @@ repos:
       - id: conventional-pre-commit
         stages: [commit-msg]
 
-  # Code formatting
-  - repo: https://github.com/psf/black
-    rev: 24.10.0
+  # Linting and formatting
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.11.6
     hooks:
-      - id: black
-        language_version: python3.13
-
-  # Import sorting
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
-    hooks:
-      - id: isort
-        args: ["--profile", "black"]
-
-  # Linting
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
-    hooks:
-      - id: flake8
-        args: ["--max-line-length=119", "--extend-ignore=E203,W503,W293"]
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
 
   # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -35,6 +22,7 @@ repos:
         additional_dependencies: ["pandas-stubs"]
         args: [--python-version=3.13, --no-error-summary]
         exclude: ^tests/
+        pass_filenames: false
 
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks

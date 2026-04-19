@@ -7,8 +7,12 @@ echo "🔧 Setting up pre-commit hooks..."
 
 # Check if pre-commit is installed
 if ! command -v pre-commit &> /dev/null; then
-    echo "📦 Installing pre-commit..."
-    pip install pre-commit
+    if ! command -v uv &> /dev/null; then
+        echo "❌ uv is required to install pre-commit. Install uv first: https://docs.astral.sh/uv/"
+        exit 1
+    fi
+    echo "📦 Installing pre-commit with uv..."
+    uv tool install pre-commit
 fi
 
 # Install the git hooks
@@ -20,9 +24,7 @@ echo "✅ Pre-commit hooks installed successfully!"
 echo ""
 echo "📋 Installed hooks:"
 echo "  • Commit message validation (conventional commits)"
-echo "  • Code formatting (black)"
-echo "  • Import sorting (isort)"
-echo "  • Linting (flake8)"
+echo "  • Linting + formatting (ruff)"
 echo "  • Type checking (mypy)"
 echo "  • General file checks (trailing whitespace, merge conflicts, etc.)"
 echo ""
