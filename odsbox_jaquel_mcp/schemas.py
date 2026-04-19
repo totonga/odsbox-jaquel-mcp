@@ -103,7 +103,7 @@ class SchemaInspector:
                 attributes=attributes,
                 relationships=relationships,
                 description=EntityDescriptions.get_entity_description(entity),
-                example_query=SchemasEntityQueries.default_queries(model_cache, entity),
+                example_queries=SchemasEntityQueries.default_queries(model_cache, entity),
             )
 
         except Exception as e:

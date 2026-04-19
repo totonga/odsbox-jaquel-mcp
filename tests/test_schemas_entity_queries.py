@@ -141,12 +141,12 @@ class TestSchemaInspector:
         assert result.description is not None
         assert "measurement" in result.description.lower()
 
-    def test_get_entity_schema_has_example_query(self, mc: ModelCache):
+    def test_get_entity_schema_has_example_queries(self, mc: ModelCache):
         with patch.object(SchemaInspector, "_get_model_cache", return_value=mc):
             result = SchemaInspector.get_entity_schema("MeaResult")
 
-        assert "Base Query" in result.example_query
-        assert "Distinct Names" in result.example_query
+        assert "Base Query" in result.example_queries
+        assert "Distinct Names" in result.example_queries
 
     def test_get_entity_schema_unknown_entity_raises(self, mc: ModelCache):
         with patch.object(SchemaInspector, "_get_model_cache", return_value=mc):

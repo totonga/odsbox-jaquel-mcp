@@ -38,7 +38,7 @@ class EntitySchema:
     attributes: dict[str, AttributeSchema]
     relationships: dict[str, RelationshipSchema]
     description: str | None
-    example_query: dict[str, dict[str, Any]] = field(default_factory=dict)
+    example_queries: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass
