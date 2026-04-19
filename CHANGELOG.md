@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.7.3 (2026-04-19)
+
+### Bug Fixes
+
+- Add verify_certificates to avoid missspelling
+  ([`eddaba8`](https://github.com/totonga/odsbox-jaquel-mcp/commit/eddaba8c9e7d68f28cc67179725b75e2adf76d5c))
+
+
 ## v1.7.2 (2026-04-19)
 
 ### Bug Fixes
