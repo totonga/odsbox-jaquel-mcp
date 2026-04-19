@@ -1233,7 +1233,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "beartype", specifier = "<0.22" },
+    { name = "beartype", specifier = "<=3.0" },
     { name = "fastmcp", specifier = ">=3.0.0" },
     { name = "jinja2", specifier = ">=3.0" },
     { name = "keyring", specifier = ">=25.7.0" },

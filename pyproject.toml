@@ -38,7 +38,7 @@ classifiers = [
 ]
 dependencies = [
     "fastmcp>=3.0.0",
-    "beartype<0.22",
+    "beartype<=3.0",
     "odsbox[oidc]>=1.2.0",
     "pip-system-certs",
     "matplotlib",
