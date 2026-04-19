@@ -28,7 +28,8 @@ def _build_code_example(
             f"import keyring\nfrom odsbox import ConIFactory\n\n"
             f"url = {url!r}\nusername = {username!r}\n"
             f"password = keyring.get_password(url, username)\n"
-            f"with ConIFactory.basic(url=url, username=username, password=password) as con_i:\n"
+            f"with ConIFactory.basic(url=url, username=username, password=password,\n"
+            f"                       verify_certificate=True) as con_i:\n"
             f"    result = con_i.query({q})\n"
         )
     if mode == "m2m":
@@ -36,8 +37,8 @@ def _build_code_example(
             f"import keyring\nfrom odsbox import ConIFactory\n\n"
             f"url = {url!r}\ntoken_endpoint = {token_endpoint!r}\nclient_id = {client_id!r}\n"
             f"client_secret = keyring.get_password(token_endpoint, client_id)\n"
-            f"with ConIFactory.m2m(url=url, token_endpoint=token_endpoint,\n"
-            f"                     client_id=client_id, client_secret=client_secret) as con_i:\n"
+            f"with ConIFactory.m2m(url=url, token_endpoint=token_endpoint, client_id=client_id,\n"
+            f"                     client_secret=client_secret, verify_certificate=True) as con_i:\n"
             f"    result = con_i.query({q})\n"
         )
     if mode == "oidc":
@@ -45,7 +46,7 @@ def _build_code_example(
             f"from odsbox import ConIFactory\n\n"
             f"url = {url!r}\n"
             f"with ConIFactory.oidc(url=url, client_id={client_id!r},\n"
-            f"                      redirect_uri={redirect_uri!r}) as con_i:\n"
+            f"                      redirect_uri={redirect_uri!r}, verify_certificate=True) as con_i:\n"
             f"    result = con_i.query({q})\n"
         )
     return ""
