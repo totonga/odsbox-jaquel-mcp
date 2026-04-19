@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.7.1 (2026-04-19)
+
+### Bug Fixes
+
+- Adjust instructions to avoid direct script generation
+  ([`a5ad1a6`](https://github.com/totonga/odsbox-jaquel-mcp/commit/a5ad1a6fe89bb3b4a9a8661a8f998641b0410ab4))
+
+
 ## v1.7.0 (2026-04-19)
 
 ### Bug Fixes
