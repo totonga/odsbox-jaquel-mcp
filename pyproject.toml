@@ -112,7 +112,7 @@ packages = ["odsbox_jaquel_mcp"]
 [tool.semantic_release]
 version_variables = ["server.json:version"]
 version_pattern = "v{version}"
-build_command = "uv build"
+build_command = ""
 publish_cmd = "uv pip install twine && uv run twine upload dist/* --skip-existing"
 changelog_file = "CHANGELOG.md"
 branch = "main"
