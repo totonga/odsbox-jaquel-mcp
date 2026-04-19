@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.7.2 (2026-04-19)
+
+### Bug Fixes
+
+- Example_queries must be plural
+  ([`05c62e6`](https://github.com/totonga/odsbox-jaquel-mcp/commit/05c62e671199fdcf93212a36afd25387359e94ec))
+
+
 ## v1.7.1 (2026-04-19)
 
 ### Bug Fixes
