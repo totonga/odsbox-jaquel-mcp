@@ -7,6 +7,7 @@ Usage:
     python run_tests.py -all         # Run all tests (unit + integration)
 """
 
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -19,15 +20,12 @@ def run_tests(integration=False, all_tests=False):
         integration: Run only integration tests
         all_tests: Run all tests including integration
     """
-    try:
-        # Check if pytest is available (just import to check)
-        import pytest  # noqa: F401
-    except ImportError:
-        print("pytest not found. Installing...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "pytest"])
+    if not shutil.which("uv"):
+        print("uv is required to run tests. Install uv: https://docs.astral.sh/uv/")
+        return 1
 
     # Build pytest command
-    cmd = [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=short"]
+    cmd = ["uv", "run", "pytest", "tests/", "-v", "--tb=short"]
 
     if all_tests:
         # Run all tests (no filtering)

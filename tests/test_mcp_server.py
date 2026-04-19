@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
+from odsbox_jaquel_mcp.schemas_types import ConnectionInfo, ConnectResult
 from odsbox_jaquel_mcp.server import (
     data_generate_fetcher_script,
     data_get_quantities,
@@ -94,11 +95,20 @@ class TestMCPServer:
     @patch("odsbox_jaquel_mcp.server.SchemaInspector.get_entity_schema")
     def test_call_tool_schema_get_entity(self, mock_get_schema):
         """Test calling schema_get_entity tool."""
-        mock_get_schema.return_value = {"fields": ["id", "name"]}
+        from odsbox_jaquel_mcp.schemas_types import EntitySchema
+
+        mock_get_schema.return_value = EntitySchema(
+            entity="TestEntity",
+            derived_from="AoTest",
+            attributes={},
+            relationships={},
+            description=None,
+        )
 
         result = schema_get_entity(entity_name="TestEntity")
 
-        assert isinstance(result, dict)
+        assert isinstance(result, EntitySchema)
+        assert result.entity == "TestEntity"
         mock_get_schema.assert_called_once_with("TestEntity")
 
     @patch("odsbox_jaquel_mcp.server.SchemaInspector.schema_field_exists")
@@ -115,11 +125,21 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect(self, mock_connect):
         """Test calling ods_connect tool."""
-        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
+        mock_connect.return_value = ConnectResult(
+            message="Connected to ODS server",
+            connection=ConnectionInfo(
+                url="http://test:8087/api",
+                username="user",
+                con_i_url="",
+                status="connected",
+                available_entities=[],
+                initial_query={},
+            ),
+        )
 
         result = await ods_connect(url="http://test:8087/api", username="user", password="pass")
 
-        assert isinstance(result, dict)
+        assert isinstance(result, ConnectResult)
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=True
         )
@@ -128,11 +148,21 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_verify_false(self, mock_connect):
         """Test calling ods_connect tool."""
-        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
+        mock_connect.return_value = ConnectResult(
+            message="Connected to ODS server",
+            connection=ConnectionInfo(
+                url="http://test:8087/api",
+                username="user",
+                con_i_url="",
+                status="connected",
+                available_entities=[],
+                initial_query={},
+            ),
+        )
 
         result = await ods_connect(url="http://test:8087/api", username="user", password="pass", verify=False)
 
-        assert isinstance(result, dict)
+        assert isinstance(result, ConnectResult)
         mock_connect.assert_called_once_with(
             url="http://test:8087/api", auth=("user", "pass"), verify_certificate=False
         )
@@ -141,7 +171,17 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_default_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with default prefix (ODSBOX_MCP)."""
-        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
+        mock_connect.return_value = ConnectResult(
+            message="Connected to ODS server",
+            connection=ConnectionInfo(
+                url="http://test:8087/api",
+                username="user",
+                con_i_url="",
+                status="connected",
+                available_entities=[],
+                initial_query={},
+            ),
+        )
 
         monkeypatch.setenv("ODSBOX_MCP_URL", "http://test:8087/api")
         monkeypatch.setenv("ODSBOX_MCP_USERNAME", "user")
@@ -150,7 +190,7 @@ class TestMCPServer:
 
         result = await ods_connect_using_env()
 
-        assert isinstance(result, dict)
+        assert isinstance(result, ConnectResult)
         mock_connect.assert_called_once()
         auth_args = mock_connect.call_args[0][0]
         assert auth_args["mode"] == "basic"
@@ -163,7 +203,17 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_override_prefix(self, mock_connect, monkeypatch):
         """Test calling ods_connect_using_env tool with an explicit env_prefix."""
-        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
+        mock_connect.return_value = ConnectResult(
+            message="Connected to ODS server",
+            connection=ConnectionInfo(
+                url="http://test:8087/api",
+                username="user",
+                con_i_url="",
+                status="connected",
+                available_entities=[],
+                initial_query={},
+            ),
+        )
 
         monkeypatch.setenv("ODS_URL", "http://test:8087/api")
         monkeypatch.setenv("ODS_USERNAME", "user")
@@ -172,7 +222,7 @@ class TestMCPServer:
 
         result = await ods_connect_using_env(env_prefix="ODS")
 
-        assert isinstance(result, dict)
+        assert isinstance(result, ConnectResult)
         mock_connect.assert_called_once()
         auth_args = mock_connect.call_args[0][0]
         assert auth_args["mode"] == "basic"
@@ -185,7 +235,17 @@ class TestMCPServer:
     @pytest.mark.asyncio
     async def test_call_tool_ods_connect_using_env_fallback_to_ods_vars(self, mock_connect, monkeypatch):
         """Test that ods_connect_using_env falls back to legacy ODS_ env vars when ODSBOX_MCP_ vars are absent."""
-        mock_connect.return_value = {"message": "Connected to ODS server", "connection": {}}
+        mock_connect.return_value = ConnectResult(
+            message="Connected to ODS server",
+            connection=ConnectionInfo(
+                url="http://test:8087/api",
+                username="user",
+                con_i_url="",
+                status="connected",
+                available_entities=[],
+                initial_query={},
+            ),
+        )
 
         monkeypatch.delenv("ODSBOX_MCP_URL", raising=False)
         monkeypatch.delenv("ODSBOX_MCP_USERNAME", raising=False)
@@ -199,7 +259,7 @@ class TestMCPServer:
 
         result = await ods_connect_using_env()
 
-        assert isinstance(result, dict)
+        assert isinstance(result, ConnectResult)
         mock_connect.assert_called_once()
         auth_args = mock_connect.call_args[0][0]
         assert auth_args["mode"] == "basic"
@@ -234,11 +294,18 @@ class TestMCPServer:
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.get_connection_info")
     def test_call_tool_ods_get_connection_info(self, mock_get_info):
         """Test calling ods_get_connection_info tool."""
-        mock_get_info.return_value = {"status": "connected"}
+        mock_get_info.return_value = ConnectionInfo(
+            url="http://test:8087/api",
+            username="user",
+            con_i_url="",
+            status="connected",
+            available_entities=[],
+            initial_query={},
+        )
 
         result = ods_get_connection_info()
 
-        assert isinstance(result, dict)
+        assert isinstance(result, ConnectionInfo)
         mock_get_info.assert_called_once()
 
     @patch("odsbox_jaquel_mcp.server.ODSConnectionManager.get_model")

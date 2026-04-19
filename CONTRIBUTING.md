@@ -7,7 +7,7 @@ This guide explains how to set up your development environment for contributing 
 ### 1. Install Dependencies
 
 ```bash
-pip install -e '.[dev]'
+uv sync --all-extras --group dev
 ```
 
 ### 2. Setup Git Hooks (Recommended)
@@ -32,9 +32,7 @@ Pre-commit hooks automatically validate your code before each commit. This ensur
 | Hook | Purpose | What It Does |
 |------|---------|--------------|
 | **commitlint** | Commit messages | Enforces conventional commit format (feat:, fix:, etc.) |
-| **black** | Code formatting | Auto-formats Python code to consistent style |
-| **isort** | Import sorting | Sorts imports alphabetically and by type |
-| **flake8** | Code style | Checks for PEP 8 violations and common errors |
+| **ruff** | Linting + formatting | Fast linting, import organization, and code formatting |
 | **mypy** | Type checking | Validates Python type hints |
 | **trailing-whitespace** | File cleanup | Removes trailing spaces |
 | **end-of-file-fixer** | File cleanup | Ensures files end with newline |
@@ -64,7 +62,8 @@ pre-commit install --hook-type commit-msg
 pre-commit run --all-files
 
 # Run specific hook
-pre-commit run black --all-files
+pre-commit run ruff --all-files
+pre-commit run ruff-format --all-files
 pre-commit run mypy --all-files
 
 # Run on changed files only (what happens at commit)
@@ -165,8 +164,8 @@ Releases are triggered automatically when commits are pushed to `main`:
 
 3. **Pre-commit hooks run automatically**
    - Validates commit message
-   - Formats code (black, isort)
-   - Checks code quality (flake8, mypy)
+   - Lints/formats code (ruff)
+   - Checks code quality (mypy)
    - Detects common issues
 
 4. **Push and create PR**
@@ -192,16 +191,18 @@ pre-commit install --install-hooks
 pre-commit install --hook-type commit-msg
 ```
 
-### Black/isort formatting conflicts with editor
+### Ruff formatting conflicts with editor
 ```bash
 # These are configured in pyproject.toml:
-[tool.black]
+[tool.ruff]
 line-length = 119
-target-version = ["py313"]
+target-version = "py313"
 
-[tool.isort]
-profile = "black"
-line_length = 119
+[tool.ruff.lint]
+select = ["E", "W", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
 ```
 
 ### Commit rejected by commitlint
@@ -235,7 +236,7 @@ SKIP=mypy git commit -m "feat: new feature"
 When you push to a branch with a pull request, GitHub Actions automatically:
 
 1. ✅ Runs pytest test suite
-2. ✅ Validates commit messages  
+2. ✅ Validates commit messages
 3. ✅ Checks Python code quality
 4. ✅ Builds the package
 
@@ -246,5 +247,4 @@ See `.github/workflows/` for more details.
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [Pre-commit Framework](https://pre-commit.com/)
 - [Python Semantic Release](https://python-semantic-release.readthedocs.io/)
-- [Black Code Formatter](https://black.readthedocs.io/)
-- [isort Import Sorter](https://pycqa.github.io/isort/)
+- [Ruff](https://docs.astral.sh/ruff/)

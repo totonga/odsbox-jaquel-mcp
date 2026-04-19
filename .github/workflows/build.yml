@@ -18,39 +18,39 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         python-version: ["3.13"]
-    
+
     steps:
     - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         fetch-tags: true
-    
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
-    
-    - name: Install build dependencies
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install build wheel setuptools setuptools-scm
-    
-    - name: Install package with dev dependencies
-      run: |
-        pip install -e '.[dev]'
-    
+        uv sync --all-extras --dev
+
     - name: Run tests
       run: |
-        pytest tests/ -v
-    
+        uv run pytest tests/ -v
+
     - name: Build distributions
       run: |
-        python -m build
-    
+        uv build
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v7
       with:
@@ -62,14 +62,14 @@ jobs:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v6
       with:
         fetch-depth: 0
         fetch-tags: true
         token: ${{ secrets.GITHUB_TOKEN }}
-    
+
     - name: Release
       id: release
       uses: python-semantic-release/python-semantic-release@v10.5.3
@@ -77,19 +77,30 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         git_committer_name: "github-actions"
         git_committer_email: "actions@users.noreply.github.com"
-    
-    - name: Install build dependencies
+
+    - name: Set up Python 3.13
+      if: steps.release.outputs.released == 'true'
+      uses: actions/setup-python@v6
+      with:
+        python-version: "3.13"
+
+    - name: Install uv
+      if: steps.release.outputs.released == 'true'
+      uses: astral-sh/setup-uv@v6
+      with:
+        enable-cache: true
+
+    - name: Install dependencies
       if: steps.release.outputs.released == 'true'
       run: |
-        python -m pip install --upgrade pip
-        pip install build wheel setuptools setuptools-scm
-    
+        uv sync --dev
+
     - name: Rebuild distributions (if released)
       if: steps.release.outputs.released == 'true'
       run: |
         rm -rf dist/
-        python -m build
-    
+        uv build
+
     - name: Create Release with artifacts
       if: steps.release.outputs.released == 'true'
       uses: softprops/action-gh-release@v2
@@ -103,7 +114,7 @@ jobs:
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
         packages-dir: dist/
-    
+
     - name: Update server.json version (if released)
       if: steps.release.outputs.released == 'true'
       run: |
@@ -114,14 +125,13 @@ jobs:
           git commit -m "chore: update server.json version to $VERSION" || true
           git push || true
         fi
-    
+
     - name: Install and authenticate mcp-publisher
       if: steps.release.outputs.released == 'true'
       run: |
         curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
         ./mcp-publisher login github-oidc
-    
+
     - name: Publish to MCP Registry
       if: steps.release.outputs.released == 'true'
       run: ./mcp-publisher publish
-

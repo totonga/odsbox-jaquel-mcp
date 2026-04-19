@@ -113,7 +113,7 @@ class NotebookGenerator:
 
         cells.append(
             NotebookGenerator.create_code_cell(
-                f"mea_result_conditions = {query_conditions_str}\n\n" f"mq_names = [{quantities_str}]"
+                f"mea_result_conditions = {query_conditions_str}\n\nmq_names = [{quantities_str}]"
             )
         )
 

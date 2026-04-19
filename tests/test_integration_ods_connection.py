@@ -21,7 +21,7 @@ class TestODSIntegration:
         ODSConnectionManager._con_i = None
         ODSConnectionManager._model_cache = None
         ODSConnectionManager._model = None
-        ODSConnectionManager._connection_info = {}
+        ODSConnectionManager._connection_info = None
 
     def teardown_method(self):
         """Clean up connection after each test."""
@@ -42,9 +42,9 @@ class TestODSIntegration:
         )
 
         assert ODSConnectionManager.is_connected()
-        assert result["connection"]["status"] == "connected"
-        assert result["connection"]["url"].startswith(integration_credentials["url"])
-        assert result["connection"]["username"] == integration_credentials["username"]
+        assert result.connection.status == "connected"
+        assert result.connection.url.startswith(integration_credentials["url"])
+        assert result.connection.username == integration_credentials["username"]
 
     def test_list_entities(self, integration_credentials):
         """Test retrieving available entities from ODS server.
