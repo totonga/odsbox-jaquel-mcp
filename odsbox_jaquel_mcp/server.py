@@ -27,6 +27,7 @@ from .prompts import PromptLibrary
 from .queries import JaquelExamples, JaquelExplain
 from .resources import ResourceLibrary
 from .schemas import SchemaInspector
+from .schemas_types import EntitySchema
 from .submatrix import SubmatrixDataReader
 from .submatrix.scripts import (
     generate_advanced_fetcher_script,
@@ -185,7 +186,7 @@ def query_describe(
 )
 def schema_get_entity(
     entity_name: Annotated[str, Field(description="Entity name (e.g., 'StructureLevel')")],
-) -> dict:
+) -> EntitySchema:
     """Get available fields for an entity from ODS model."""
     if not entity_name or not isinstance(entity_name, str) or not entity_name.strip():
         raise ValueError("entity_name must be a non-empty string")

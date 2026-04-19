@@ -11,9 +11,11 @@ from odsbox.proto import ods
 
 from .connection import ODSConnectionManager
 from .schemas_entity_descriptions import EntityDescriptions
+from .schemas_entity_queries import SchemasEntityQueries
+from .schemas_types import AttributeSchema, EntitySchema, RelationshipSchema
 
 
-def __get_suggestion(available: list, str_val: str) -> list[str]:
+def _get_suggestion(available: list, str_val: str) -> list[str]:
     suggestions = get_close_matches(
         str_val.lower(),
         {f.lower(): f for f in available},
@@ -57,7 +59,7 @@ class SchemaInspector:
         return result
 
     @classmethod
-    def get_entity_schema(cls, entity_name: str) -> dict[str, Any]:
+    def get_entity_schema(cls, entity_name: str) -> EntitySchema:
         """Get schema for an entity from model."""
         model_cache = cls._get_model_cache()
         if not model_cache:
@@ -67,42 +69,42 @@ class SchemaInspector:
             entity: ods.Model.Entity = model_cache.entity(entity_name)
 
             # Get attributes
-            attributes = {}
+            attributes: dict[str, AttributeSchema] = {}
             for attr_name, attr in entity.attributes.items():
                 attr_datatype = ods.DataTypeEnum.Name(attr.data_type)
-                attr_is_array = True if attr_datatype.startswith("DS_") or attr_datatype == "DT_UNKNOWN" else False
-                attributes[attr_name] = {
-                    "base_name": attr.base_name,
-                    "data_type": ods.DataTypeEnum.Name(attr.data_type)[3:],
-                    "is_array": attr_is_array,
-                    "nullable": attr.obligatory is False,
-                }
+                attr_is_array = attr_datatype.startswith("DS_") or attr_datatype == "DT_UNKNOWN"
+                attributes[attr_name] = AttributeSchema(
+                    base_name=attr.base_name,
+                    data_type=ods.DataTypeEnum.Name(attr.data_type)[3:],
+                    is_array=attr_is_array,
+                    nullable=attr.obligatory is False,
+                )
 
             # Get relationships
-            relationships = {}
+            relationships: dict[str, RelationshipSchema] = {}
             for rel_name, rel in entity.relations.items():
                 rel_type = {
                     (-1, -1): "n:m",
                     (1, -1): "1:n",
                 }.get((rel.range_max, rel.inverse_range_max), "n:1")
-                rel_nullable = rel.range_min == 0
-                relationships[rel_name] = {
-                    "base_name": rel.base_name,
-                    "target_entity": rel.entity_name,
-                    "inverse_name": rel.inverse_name,
-                    "inverse_base_name": rel.inverse_base_name,
-                    "relationship_type": rel_type,
-                    "nullable": rel_nullable,
-                    "relationship": ods.Model.RelationshipEnum.Name(rel.relationship)[3:],
-                }
+                relationships[rel_name] = RelationshipSchema(
+                    base_name=rel.base_name,
+                    target_entity=rel.entity_name,
+                    inverse_name=rel.inverse_name,
+                    inverse_base_name=rel.inverse_base_name,
+                    relationship_type=rel_type,
+                    nullable=rel.range_min == 0,
+                    relationship=ods.Model.RelationshipEnum.Name(rel.relationship)[3:],
+                )
 
-            return {
-                "entity": entity.name,
-                "derived_from": entity.base_name,
-                "attributes": attributes,
-                "relationships": relationships,
-                "description": EntityDescriptions.get_entity_description(entity),
-            }
+            return EntitySchema(
+                entity=entity.name,
+                derived_from=entity.base_name,
+                attributes=attributes,
+                relationships=relationships,
+                description=EntityDescriptions.get_entity_description(entity),
+                example_query=SchemasEntityQueries.default_queries(model_cache, entity),
+            )
 
         except Exception as e:
             raise ValueError(f"Schema lookup failed for entity '{entity_name}': {e}") from e
@@ -119,15 +121,13 @@ class SchemaInspector:
         """
         schema = cls.get_entity_schema(entity_name)
 
-        entity = schema.get("entity", entity_name)
-        description = schema.get("description", "No description available")
-        derived_from = schema.get("derived_from", "Unknown")
+        description = schema.description or "No description available"
 
-        md = f"""# Entity Schema: {entity}
+        md = f"""# Entity Schema: {schema.entity}
 
-**Base Name**: `{derived_from}`
+**Base Name**: `{schema.derived_from}`
 
-{f"**Description**: {description}" if description else ""}
+{f"**Description**: {description}" if schema.description else ""}
 
 ## Attributes
 
@@ -135,24 +135,21 @@ class SchemaInspector:
 |------|-----------|-----------|-------|----------|
 """
 
-        for attr_name, attr_info in sorted(schema.get("attributes", {}).items()):
-            is_array = "✓" if attr_info.get("is_array") else "✗"
-            nullable = "✓" if attr_info.get("nullable") else "✗"
-            md += (
-                f"| `{attr_name}` | `{attr_info['base_name']}` | "
-                f"{attr_info['data_type']} | {is_array} | {nullable} |\n"
-            )
+        for attr_name, attr_info in sorted(schema.attributes.items()):
+            is_array = "✓" if attr_info.is_array else "✗"
+            nullable = "✓" if attr_info.nullable else "✗"
+            md += f"| `{attr_name}` | `{attr_info.base_name}` | {attr_info.data_type} | {is_array} | {nullable} |\n"
 
         md += "\n## Relationships\n\n"
         md += "| Name | Target Entity | Type | Nullable | Inverse | Inverse Type |\n"
         md += "|------|---------------|------|----------|---------|---------------|\n"
 
-        for rel_name, rel_info in sorted(schema.get("relationships", {}).items()):
-            nullable = "✓" if rel_info.get("nullable") else "✗"
+        for rel_name, rel_info in sorted(schema.relationships.items()):
+            nullable = "✓" if rel_info.nullable else "✗"
             md += (
-                f"| `{rel_name}` | `{rel_info['target_entity']}` | "
-                f"{rel_info['relationship_type']} | {nullable} | "
-                f"`{rel_info['inverse_name']}` | {rel_info['relationship']} |\n"
+                f"| `{rel_name}` | `{rel_info.target_entity}` | "
+                f"{rel_info.relationship_type} | {nullable} | "
+                f"`{rel_info.inverse_name}` | {rel_info.relationship} |\n"
             )
 
         return md
@@ -170,21 +167,21 @@ class SchemaInspector:
 
             attribute = model_cache.attribute_no_throw(entity, field_name)
             # Check attributes
-            if attribute is not None and attribute.name in schema["attributes"]:
-                return {"exists": True, "type": "attribute", "field_info": schema["attributes"][attribute.name]}
+            if attribute is not None and attribute.name in schema.attributes:
+                return {"exists": True, "type": "attribute", "field_info": schema.attributes[attribute.name]}
 
             relation = model_cache.relation_no_throw(entity, field_name)
-            if relation is not None and relation.name in schema["relationships"]:
-                return {"exists": True, "type": "relationship", "field_info": schema["relationships"][relation.name]}
+            if relation is not None and relation.name in schema.relationships:
+                return {"exists": True, "type": "relationship", "field_info": schema.relationships[relation.name]}
             # Field doesn't exist
-            available = list(schema["attributes"].keys()) + list(schema["relationships"].keys())
+            available = list(schema.attributes.keys()) + list(schema.relationships.keys())
 
             return {
                 "exists": False,
                 "entity": entity.name,
                 "field": field_name,
                 "available_fields": available,
-                "suggestions": __get_suggestion(available, field_name)[:5],
+                "suggestions": _get_suggestion(available, field_name)[:5],
             }
         except Exception as e:
             raise ValueError(f"Field lookup failed for entity '{entity_name}': {e}") from e

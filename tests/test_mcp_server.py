@@ -94,11 +94,20 @@ class TestMCPServer:
     @patch("odsbox_jaquel_mcp.server.SchemaInspector.get_entity_schema")
     def test_call_tool_schema_get_entity(self, mock_get_schema):
         """Test calling schema_get_entity tool."""
-        mock_get_schema.return_value = {"fields": ["id", "name"]}
+        from odsbox_jaquel_mcp.schemas_types import EntitySchema
+
+        mock_get_schema.return_value = EntitySchema(
+            entity="TestEntity",
+            derived_from="AoTest",
+            attributes={},
+            relationships={},
+            description=None,
+        )
 
         result = schema_get_entity(entity_name="TestEntity")
 
-        assert isinstance(result, dict)
+        assert isinstance(result, EntitySchema)
+        assert result.entity == "TestEntity"
         mock_get_schema.assert_called_once_with("TestEntity")
 
     @patch("odsbox_jaquel_mcp.server.SchemaInspector.schema_field_exists")
