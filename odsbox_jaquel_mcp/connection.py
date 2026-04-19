@@ -10,6 +10,46 @@ from odsbox.con_i_factory import ConIFactory
 from odsbox.model_cache import ModelCache
 from odsbox.proto import ods
 
+from .schemas_types import ConnectionInfo, ConnectResult
+
+
+def _build_code_example(
+    mode: str,
+    url: str,
+    username: str = "",
+    token_endpoint: str = "",
+    client_id: str = "",
+    redirect_uri: str = "",
+) -> str:
+    """Generate a compact Python script example for connecting to the ODS server."""
+    q = '{"AoTest": {}, "$attributes": {"id": 1, "name": 1}}'
+    if mode == "basic":
+        return (
+            f"import keyring\nfrom odsbox import ConIFactory\n\n"
+            f"url = {url!r}\nusername = {username!r}\n"
+            f"password = keyring.get_password(url, username)\n"
+            f"with ConIFactory.basic(url=url, username=username, password=password) as con_i:\n"
+            f"    result = con_i.query({q})\n"
+        )
+    if mode == "m2m":
+        return (
+            f"import keyring\nfrom odsbox import ConIFactory\n\n"
+            f"url = {url!r}\ntoken_endpoint = {token_endpoint!r}\nclient_id = {client_id!r}\n"
+            f"client_secret = keyring.get_password(token_endpoint, client_id)\n"
+            f"with ConIFactory.m2m(url=url, token_endpoint=token_endpoint,\n"
+            f"                     client_id=client_id, client_secret=client_secret) as con_i:\n"
+            f"    result = con_i.query({q})\n"
+        )
+    if mode == "oidc":
+        return (
+            f"from odsbox import ConIFactory\n\n"
+            f"url = {url!r}\n"
+            f"with ConIFactory.oidc(url=url, client_id={client_id!r},\n"
+            f"                      redirect_uri={redirect_uri!r}) as con_i:\n"
+            f"    result = con_i.query({q})\n"
+        )
+    return ""
+
 
 class ODSConnectionManager:
     """Manages connection to ASAM ODS server and provides model access."""
@@ -18,7 +58,7 @@ class ODSConnectionManager:
     _con_i: ConI | None = None
     _model_cache: ModelCache | None = None
     _model: ods.Model | None = None
-    _connection_info: dict[str, Any] = {}
+    _connection_info: ConnectionInfo | None = None
 
     def __init__(self):
         """Initialize connection manager (singleton)."""
@@ -40,11 +80,13 @@ class ODSConnectionManager:
         return cls._instance
 
     @classmethod
-    def _init_from_con_i(cls, con_i: ConI, base_url: str, display_username: str) -> dict[str, Any]:
+    def _init_from_con_i(
+        cls, con_i: ConI, base_url: str, display_username: str, code_example: str = ""
+    ) -> ConnectResult:
         """Initialize connection state from an already-created ConI instance.
 
         Shared helper used by both ``connect()`` and ``connect_with_factory()``.
-        Loads the model, populates ``_connection_info``, and returns the status dict.
+        Loads the model, populates ``_connection_info``, and returns a ConnectResult.
         """
         instance = cls.get_instance()
 
@@ -72,19 +114,20 @@ class ODSConnectionManager:
             "$options": {"$rowlimit": 100},
         }
 
-        instance._connection_info = {
-            "url": base_url,
-            "username": display_username,
-            "con_i_url": con_i.con_i_url(),
-            "status": "connected",
-            "available_entities": list(instance._model.entities.keys()) if instance._model else [],
-            "initial_query": initial_query,
-        }
+        instance._connection_info = ConnectionInfo(
+            url=base_url,
+            username=display_username,
+            con_i_url=con_i.con_i_url(),
+            status="connected",
+            available_entities=list(instance._model.entities.keys()) if instance._model else [],
+            initial_query=initial_query,
+            code_example=code_example,
+        )
 
-        return {"message": "Connected to ODS server", "connection": instance._connection_info}
+        return ConnectResult(message="Connected to ODS server", connection=instance._connection_info)
 
     @classmethod
-    def connect(cls, url: str, auth: tuple, **kwargs) -> dict[str, Any]:
+    def connect(cls, url: str, auth: tuple, **kwargs) -> ConnectResult:
         """Establish connection to ODS server.
 
         Args:
@@ -93,17 +136,20 @@ class ODSConnectionManager:
             **kwargs: Additional ConI parameters
 
         Returns:
-            Connection status dict
+            ConnectResult with message and ConnectionInfo
         """
         try:
             con_i = ConI(url=url, auth=auth, load_model=True, **kwargs)
             display_username = auth[0] if isinstance(auth, tuple) else "unknown"
-            return cls._init_from_con_i(con_i=con_i, base_url=url, display_username=display_username)
+            code_example = _build_code_example("basic", url, username=display_username)
+            return cls._init_from_con_i(
+                con_i=con_i, base_url=url, display_username=display_username, code_example=code_example
+            )
         except Exception as e:
             raise ToolError(f"Connection failed: {e}") from e
 
     @classmethod
-    def connect_with_factory(cls, auth_args: dict[str, Any]) -> dict[str, Any]:
+    def connect_with_factory(cls, auth_args: dict[str, Any]) -> ConnectResult:
         """Establish connection using ConIFactory based on authentication mode.
 
         Args:
@@ -111,7 +157,7 @@ class ODSConnectionManager:
                        ``mode`` plus all mode-specific parameters.
 
         Returns:
-            Connection status dict
+            ConnectResult with message and ConnectionInfo
         """
         mode = auth_args["mode"]
         url = auth_args["url"]
@@ -157,7 +203,17 @@ class ODSConnectionManager:
             else:
                 raise ValueError(f"Unknown authentication mode: {mode!r}")
 
-            return cls._init_from_con_i(con_i=con_i, base_url=url, display_username=display_username)
+            code_example = _build_code_example(
+                mode=mode,
+                url=url,
+                username=auth_args.get("username", ""),
+                token_endpoint=auth_args.get("token_endpoint", ""),
+                client_id=auth_args.get("client_id", ""),
+                redirect_uri=auth_args.get("redirect_uri", ""),
+            )
+            return cls._init_from_con_i(
+                con_i=con_i, base_url=url, display_username=display_username, code_example=code_example
+            )
 
         except Exception as e:
             raise ToolError(f"Connection failed ({mode} mode): {e}") from e
@@ -179,7 +235,7 @@ class ODSConnectionManager:
             instance._con_i = None
             instance._model_cache = None
             instance._model = None
-            instance._connection_info = {}
+            instance._connection_info = None
 
             return {"message": "Disconnected from ODS server"}
         except Exception as e:
@@ -204,10 +260,10 @@ class ODSConnectionManager:
         return instance._model
 
     @classmethod
-    def get_connection_info(cls) -> dict[str, Any]:
-        """Get current connection information."""
+    def get_connection_info(cls) -> ConnectionInfo | None:
+        """Get current connection information, or None if not connected."""
         instance = cls.get_instance()
-        return instance._connection_info.copy()
+        return instance._connection_info
 
     @classmethod
     def query(

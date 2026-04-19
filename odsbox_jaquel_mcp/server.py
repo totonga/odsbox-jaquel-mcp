@@ -27,7 +27,7 @@ from .prompts import PromptLibrary
 from .queries import JaquelExamples, JaquelExplain
 from .resources import ResourceLibrary
 from .schemas import SchemaInspector
-from .schemas_types import EntitySchema
+from .schemas_types import ConnectionInfo, ConnectResult, EntitySchema
 from .submatrix import SubmatrixDataReader
 from .submatrix.scripts import (
     generate_advanced_fetcher_script,
@@ -247,7 +247,7 @@ async def ods_connect(
     ],
     verify: Annotated[bool, Field(description="Verify SSL certificates (default: true)")] = True,
     ctx: Context | None = None,
-) -> dict:
+) -> ConnectResult:
     """Establish connection to ASAM ODS server for live model inspection."""
     if not url or not isinstance(url, str) or not url.strip():
         raise ValueError("url must be a non-empty string")
@@ -276,7 +276,7 @@ async def ods_connect_using_env(
         ),
     ] = None,
     ctx: Context | None = None,
-) -> dict:
+) -> ConnectResult:
     """Establish connection to ASAM ODS server using environment variables.
 
     Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix.
@@ -323,7 +323,7 @@ def ods_disconnect() -> dict:
     annotations={"readOnlyHint": True, "openWorldHint": False},
     tags={"connection"},
 )
-def ods_get_connection_info() -> dict:
+def ods_get_connection_info() -> ConnectionInfo | None:
     """Get current ODS connection information."""
     return ODSConnectionManager.get_connection_info()
 
@@ -570,10 +570,10 @@ def plot_comparison_notebook(
     at runtime so no credentials are embedded in the notebook file.
     """
     connection_info = ODSConnectionManager.get_connection_info()
-    if not connection_info.get("url"):
+    if connection_info is None or not connection_info.url:
         raise ValueError("No active ODS connection. Use ods_connect or ods_connect_using_env first.")
-    ods_url = connection_info["url"]
-    ods_username = connection_info.get("username", "")
+    ods_url = connection_info.url
+    ods_username = connection_info.username
 
     notebook = NotebookGenerator.plot_comparison_notebook(
         measurement_query_conditions=measurement_query_conditions,

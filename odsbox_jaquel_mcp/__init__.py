@@ -13,7 +13,7 @@ from .connection import ODSConnectionManager
 from .notebook_generator import NotebookGenerator
 from .queries import JaquelExamples
 from .schemas import EntityDescriptions, SchemaInspector
-from .schemas_types import AttributeSchema, EntitySchema, RelationshipSchema
+from .schemas_types import AttributeSchema, ConnectionInfo, ConnectResult, EntitySchema, RelationshipSchema
 from .submatrix import SubmatrixDataReader
 from .validators import JaquelValidator
 from .visualization_templates import VisualizationTemplateGenerator
@@ -27,6 +27,8 @@ __all__ = [
     "AttributeSchema",
     "RelationshipSchema",
     "EntitySchema",
+    "ConnectionInfo",
+    "ConnectResult",
     "SubmatrixDataReader",
     "VisualizationTemplateGenerator",
     "NotebookGenerator",

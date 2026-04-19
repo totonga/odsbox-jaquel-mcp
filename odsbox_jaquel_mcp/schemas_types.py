@@ -39,3 +39,24 @@ class EntitySchema:
     relationships: dict[str, RelationshipSchema]
     description: str | None
     example_query: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+
+@dataclass
+class ConnectionInfo:
+    """Connection information for an active ODS server connection."""
+
+    url: str
+    username: str
+    con_i_url: str
+    status: str
+    available_entities: list[str]
+    initial_query: dict[str, Any]
+    code_example: str = ""
+
+
+@dataclass
+class ConnectResult:
+    """Result returned after connecting to an ODS server."""
+
+    message: str
+    connection: ConnectionInfo

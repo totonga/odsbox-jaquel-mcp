@@ -21,7 +21,7 @@ class TestODSIntegration:
         ODSConnectionManager._con_i = None
         ODSConnectionManager._model_cache = None
         ODSConnectionManager._model = None
-        ODSConnectionManager._connection_info = {}
+        ODSConnectionManager._connection_info = None
 
     def teardown_method(self):
         """Clean up connection after each test."""

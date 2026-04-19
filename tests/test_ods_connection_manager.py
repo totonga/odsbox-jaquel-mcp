@@ -17,7 +17,7 @@ class TestODSConnectionManager:
         ODSConnectionManager._con_i = None
         ODSConnectionManager._model_cache = None
         ODSConnectionManager._model = None
-        ODSConnectionManager._connection_info = {}
+        ODSConnectionManager._connection_info = None
 
     def test_get_instance_creates_singleton(self):
         """Test that get_instance creates a singleton."""
@@ -34,7 +34,7 @@ class TestODSConnectionManager:
         assert instance._con_i is None
         assert instance._model_cache is None
         assert instance._model is None
-        assert instance._connection_info == {}
+        assert instance._connection_info is None
         assert not ODSConnectionManager.is_connected()
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
@@ -51,11 +51,11 @@ class TestODSConnectionManager:
 
         result = ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
 
-        assert "Connected to ODS server" in result["message"]
-        assert result["connection"]["url"] == "http://test:8087/api"
-        assert result["connection"]["username"] == "user"
-        assert result["connection"]["status"] == "connected"
-        assert result["connection"]["available_entities"] == ["Measurement", "Unit", "Test"]
+        assert "Connected to ODS server" in result.message
+        assert result.connection.url == "http://test:8087/api"
+        assert result.connection.username == "user"
+        assert result.connection.status == "connected"
+        assert result.connection.available_entities == ["Measurement", "Unit", "Test"]
         assert ODSConnectionManager.is_connected()
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
@@ -119,15 +119,26 @@ class TestODSConnectionManager:
 
     def test_get_connection_info(self):
         """Test getting connection info."""
-        info = ODSConnectionManager.get_connection_info()
-        assert info == {}
+        from odsbox_jaquel_mcp.schemas_types import ConnectionInfo
 
-        # Set some connection info
+        info = ODSConnectionManager.get_connection_info()
+        assert info is None
+
         instance = ODSConnectionManager.get_instance()
-        instance._connection_info = {"test": "data"}
+        mock_info = ConnectionInfo(
+            url="http://test:8087/api",
+            username="user",
+            con_i_url="http://test:8087",
+            status="connected",
+            available_entities=[],
+            initial_query={},
+        )
+        instance._connection_info = mock_info
 
         info = ODSConnectionManager.get_connection_info()
-        assert info == {"test": "data"}
+        assert info is mock_info
+        assert info.url == "http://test:8087/api"
+        assert info.username == "user"
 
     def test_get_model_cache_and_model(self):
         """Test getting model cache and model."""

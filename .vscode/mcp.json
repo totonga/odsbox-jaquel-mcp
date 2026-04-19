@@ -8,6 +8,11 @@
 				"-m",
 				"odsbox_jaquel_mcp"
 			],
+			"env": {
+				"ODSBOX_MCP_URL": "https://docker.peak-solution.de:10032/api",
+				"ODSBOX_MCP_USER": "Demo",
+				"ODSBOX_MCP_PASSWORD": "mdm"
+			},
 			"cwd": "."
 		}
 	},
