@@ -103,7 +103,7 @@ jobs:
 
     - name: Create Release with artifacts
       if: steps.release.outputs.released == 'true'
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         tag_name: v${{ steps.release.outputs.version }}
         files: dist/*
