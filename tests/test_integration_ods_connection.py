@@ -42,9 +42,9 @@ class TestODSIntegration:
         )
 
         assert ODSConnectionManager.is_connected()
-        assert result["connection"]["status"] == "connected"
-        assert result["connection"]["url"].startswith(integration_credentials["url"])
-        assert result["connection"]["username"] == integration_credentials["username"]
+        assert result.connection.status == "connected"
+        assert result.connection.url.startswith(integration_credentials["url"])
+        assert result.connection.username == integration_credentials["username"]
 
     def test_list_entities(self, integration_credentials):
         """Test retrieving available entities from ODS server.
