@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.7.4 (2026-04-27)
+
+### Bug Fixes
+
+- Serialization issue with numpy float ([#54](https://github.com/totonga/odsbox-jaquel-mcp/pull/54),
+  [`10c5f6f`](https://github.com/totonga/odsbox-jaquel-mcp/commit/10c5f6f91bd2b3250aca2ca5f709e0cf22e65bfa))
+
+
 ## v1.7.3 (2026-04-19)
 
 ### Bug Fixes
