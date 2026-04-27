@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import Any, Literal
 
 from fastmcp.exceptions import ToolError
@@ -321,7 +322,7 @@ class ODSConnectionManager:
             df = result.head(effective_rows)
 
             return {
-                "result": df.to_dict(orient=result_format),
+                "result": json.loads(df.to_json(orient=result_format)),
                 "total_rows": total_rows,
                 "returned_rows": len(df),
                 "truncated": total_rows > len(df),

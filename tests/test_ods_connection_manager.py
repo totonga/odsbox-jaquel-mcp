@@ -1,7 +1,10 @@
 """Tests for ODSConnectionManager."""
 
+import json
 from unittest.mock import Mock, patch
 
+import numpy as np
+import pandas as pd
 import pytest
 from fastmcp.exceptions import ToolError
 
@@ -164,11 +167,12 @@ class TestODSConnectionManager:
         mock_result.__len__ = Mock(return_value=3)
         mock_result.columns = ["id", "name"]
         mock_result.head.return_value = mock_result
-        mock_result.to_dict.return_value = {
+        _expected_result = {
             "columns": ["id", "name"],
             "index": [0, 1, 2],
             "data": [[1, "a"], [2, "b"], [3, "c"]],
         }
+        mock_result.to_json.return_value = json.dumps(_expected_result)
         mock_coni.query.return_value = mock_result
         mock_coni.con_i_url.return_value = "http://test:8087/api"
         mock_coni.mc = Mock()
@@ -183,7 +187,7 @@ class TestODSConnectionManager:
         query = {"TestEntity": {}}
         result = ODSConnectionManager.query(query)
 
-        assert result["result"] == mock_result.to_dict.return_value
+        assert result["result"] == _expected_result
         assert result["total_rows"] == 3
         assert result["returned_rows"] == 3
         assert result["truncated"] is False
@@ -195,6 +199,47 @@ class TestODSConnectionManager:
 
         with pytest.raises(ToolError, match="Not connected to ODS server"):
             ODSConnectionManager.query(query)
+
+    @patch("odsbox_jaquel_mcp.connection.ConI")
+    def test_query_result_numpy_floats_are_json_serializable(self, mock_coni_class):
+        """Regression: query results containing numpy float64 values must be JSON-serializable.
+
+        odsbox returns pandas DataFrames whose cells are numpy scalars.  Before the
+        fix, df.to_dict() preserved those numpy types and Pydantic's default_serializer
+        raised ``TypeError: 'float' object cannot be interpreted as an integer``.
+        """
+        mock_coni = Mock()
+        # Return a *real* DataFrame with numpy float64 columns, exactly as odsbox does.
+        df = pd.DataFrame(
+            {
+                "id": pd.array([1, 2, 3], dtype=np.int64),
+                "value": pd.array([1.1, 2.2, 3.3], dtype=np.float64),
+                "name": ["a", "b", "c"],
+            }
+        )
+        mock_coni.query.return_value = df
+        mock_coni.con_i_url.return_value = "http://test:8087/api"
+        mock_coni.mc = Mock()
+        mock_model = Mock()
+        mock_model.entities = {}
+        mock_coni.model.return_value = mock_model
+        mock_coni_class.return_value = mock_coni
+
+        ODSConnectionManager.connect(url="http://test:8087/api", auth=("user", "pass"))
+
+        result = ODSConnectionManager.query({"TestEntity": {}})
+
+        # The result dict must round-trip through json.dumps without raising.
+        serialized = json.dumps(result)
+        assert serialized  # non-empty
+
+        # Values must be native Python types, not numpy scalars.
+        data_values = result["result"]["data"]
+        for row in data_values:
+            for cell in row:
+                assert type(cell) in (int, float, str, bool, type(None)), (
+                    f"Expected native Python type, got {type(cell)}: {cell!r}"
+                )
 
     @patch("odsbox_jaquel_mcp.connection.ConI")
     def test_query_failure(self, mock_coni_class):
