@@ -82,7 +82,7 @@ jobs:
 
     - name: Release
       id: release
-      uses: python-semantic-release/python-semantic-release@v10.5.3
+      uses: python-semantic-release/python-semantic-release@v10.6.1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         git_committer_name: "github-actions"
