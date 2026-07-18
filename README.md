@@ -123,15 +123,17 @@ Or with uv tool:
 | `ODSBOX_MCP_MODE` | `basic` | Authentication mode for `ods_connect_using_env`: `basic`, `m2m`, or `oidc` |
 | `ODSBOX_MCP_URL` | not set | ODS server URL for `ods_connect_using_env` |
 | `ODSBOX_MCP_USER` | not set | ODS username (basic mode) |
-| `ODSBOX_MCP_PASSWORD` | not set | ODS password (basic mode; falls back to keyring) |
+| `ODSBOX_MCP_PASSWORD` | not set | ODS password (basic mode; falls back to keyring, checking `ods-pilot` first) |
 | `ODSBOX_MCP_M2M_TOKEN_ENDPOINT` | not set | OAuth2 token endpoint (m2m mode) |
 | `ODSBOX_MCP_M2M_CLIENT_ID` | not set | Client ID (m2m mode) |
-| `ODSBOX_MCP_M2M_CLIENT_SECRET` | not set | Client secret (m2m mode; falls back to keyring) |
+| `ODSBOX_MCP_M2M_CLIENT_SECRET` | not set | Client secret (m2m mode; falls back to keyring, checking `ods-pilot` first) |
 | `ODSBOX_MCP_OIDC_CLIENT_ID` | not set | Client ID (oidc mode) |
 | `ODSBOX_MCP_OIDC_REDIRECT_URI` | not set | Redirect URI (oidc mode, e.g. `http://127.0.0.1:1234`) |
 | `ODSBOX_MCP_VERIFY` | `true` | TLS certificate verification (`true`/`false`) |
 
 See [TOOLS_GUIDE.md](TOOLS_GUIDE.md#ods_connect_using_env) for the full list of authentication variables and keyring fallback details.
+
+Secrets are looked up in the `ods-pilot` keyring service first using `<service>::<username>` records, then in the legacy direct service lookup if no entry is found.
 
 ### Usage Monitoring
 

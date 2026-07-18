@@ -359,6 +359,31 @@ class TestOIDCMode:
 class TestKeyringFallback:
     """Test keyring integration edge cases."""
 
+    def test_ods_pilot_secret_uses_expected_keyring_entry(self):
+        """The dedicated `ods-pilot` service uses `<service>::<username>` as the key."""
+        from odsbox_jaquel_mcp.auth_factory import _get_ods_pilot_secret
+
+        with patch("keyring.get_password", return_value="ods-pilot-secret") as mock_get_password:
+            result = _get_ods_pilot_secret("https://ods.example/api", "admin")
+
+        assert result == "ods-pilot-secret"
+        mock_get_password.assert_called_once_with("ods-pilot", "https://ods.example/api::admin")
+
+    def test_get_secret_from_keyring_prefers_ods_pilot_entry(self):
+        """The `ods-pilot` entry wins over the legacy direct-service lookup."""
+        from odsbox_jaquel_mcp.auth_factory import _get_secret_from_keyring
+
+        with patch(
+            "odsbox_jaquel_mcp.auth_factory._get_ods_pilot_secret",
+            return_value="ods-pilot-secret",
+        ) as mock_ods_pilot:
+            with patch("keyring.get_password", return_value="legacy-secret") as mock_get_password:
+                result = _get_secret_from_keyring("https://ods.example/api", "admin")
+
+        assert result == "ods-pilot-secret"
+        mock_ods_pilot.assert_called_once_with("https://ods.example/api", "admin")
+        mock_get_password.assert_not_called()
+
     def test_keyring_import_failure_returns_none(self):
         """If keyring is not installed, _get_secret_from_keyring returns None."""
         from odsbox_jaquel_mcp.auth_factory import _get_secret_from_keyring
