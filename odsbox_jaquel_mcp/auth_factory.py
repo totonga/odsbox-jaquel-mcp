@@ -13,11 +13,21 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, cast
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 VALID_MODES = ("basic", "m2m", "oidc")
+
+
+def _get_ods_pilot_secret(service: str, username: str) -> str | None:
+    try:
+        import keyring
+
+        secret: str | None = keyring.get_password("ods-pilot", f"{service}::{username}")
+        return secret
+    except Exception:
+        return None
 
 
 def _get_secret_from_keyring(service: str, username: str) -> str | None:
@@ -30,10 +40,15 @@ def _get_secret_from_keyring(service: str, username: str) -> str | None:
     Returns:
         The secret string, or None if keyring is not installed or the secret is not found.
     """
+    secret: str | None = _get_ods_pilot_secret(service, username)
+    if secret is not None:
+        return secret
+
     try:
         import keyring
 
-        return cast(str | None, keyring.get_password(service, username))
+        secret = keyring.get_password(service, username)
+        return secret
     except Exception:
         return None
 

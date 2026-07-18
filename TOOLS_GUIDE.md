@@ -463,10 +463,12 @@ Set `{PREFIX}_MODE=oidc`.
 | `{PREFIX}_VERIFY` | No | TLS verification |
 
 > **Keyring fallback**: Secrets marked with \* fall back to the system keyring when the env var is absent.
-> Store secrets with `keyring set '<service>' '<username>'`:
-> - Basic: `keyring set '<URL>' '<username>'`
-> - M2M: `keyring set '<token_endpoint>' '<client_id>'`
-> - OIDC: `keyring set '<URL>' '<client_id>'` (optional for public clients)
+> The resolver checks the dedicated `ods-pilot` keyring service first using the record name `<service>::<username>`,
+> then falls back to the legacy direct lookup with `keyring set '<service>' '<username>'`.
+> Examples:
+> - Basic: `keyring set 'ods-pilot' '<URL>::<username>'` (or `keyring set '<URL>' '<username>'`)
+> - M2M: `keyring set 'ods-pilot' '<token_endpoint>::<client_id>'` (or `keyring set '<token_endpoint>' '<client_id>'`)
+> - OIDC: `keyring set 'ods-pilot' '<URL>::<client_id>'` (or `keyring set '<URL>' '<client_id>'`, optional for public clients)
 
 **Input**:
 ```json
