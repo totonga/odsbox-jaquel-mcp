@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.1 (2026-07-20)
+
+### Bug Fixes
+
+- ODSBOX_MCP_URL did not result in an entry in server list
+  ([`d43b2c8`](https://github.com/totonga/odsbox-jaquel-mcp/commit/d43b2c85cc8b283ed4d9ab81dd257abb4531f9d8))
+
+
 ## v1.8.0 (2026-07-20)
 
 ### Features
