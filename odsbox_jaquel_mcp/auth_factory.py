@@ -20,6 +20,53 @@ logger = logging.getLogger(__name__)
 VALID_MODES = ("basic", "m2m", "oidc")
 
 
+def get_available_servers(env: os._Environ) -> list[str]:
+    """Return a list of available ODS server prefixes from environment variables.
+
+    Looks for environment variables starting with ``ODS_`` or ``ODSBOX_MCP_``
+    and extracts the unique prefixes (e.g., ``ODSBOX_MCP_MYODSSERVER_URL`` -> ``MYODSSERVER``).
+
+    Returns:
+        A list of unique server prefixes (case-insensitive).
+    """
+    prefixes = set()
+
+    for key in env.keys():
+        if key.startswith("ODS_") and key.endswith("_URL"):
+            prefix = key[len("ODS_") : -len("_URL")]
+            prefixes.add(prefix)
+        elif key.startswith("ODSBOX_MCP_") and key.endswith("_URL"):
+            prefix = key[len("ODSBOX_MCP_") : -len("_URL")]
+            prefixes.add(prefix)
+
+    return sorted(prefixes)
+
+
+def get_available_server_infos(env: os._Environ) -> list[dict[str, str]]:  # type: ignore[type-arg]
+    """Return available ODS server prefixes and their URLs from environment variables.
+
+    Resolves the URL for each prefix found by :func:`get_available_servers`.
+    Entries with an empty prefix (e.g. from a bare ``ODS_URL``) are skipped.
+
+    Returns:
+        A list of dicts with ``"prefix"`` and ``"url"`` keys, sorted by prefix.
+        ``"url"`` is an empty string when the URL cannot be resolved.
+    """
+    prefixes = get_available_servers(env)
+    result = []
+    for prefix in prefixes:
+        if not prefix:
+            continue  # bare ODS_URL produces an empty prefix — skip it
+        url = (
+            _env_get(env, prefix, "URL")
+            or _env_get(env, prefix, "API_URL")
+            or env.get(f"ODS_{prefix}_URL")  # direct fallback for ODS_<prefix>_URL pattern
+            or ""
+        )
+        result.append({"prefix": prefix, "url": url})
+    return result
+
+
 def _get_ods_pilot_secret(service: str, username: str) -> str | None:
     try:
         import keyring
@@ -55,7 +102,7 @@ def _get_secret_from_keyring(service: str, username: str) -> str | None:
 
 def _env_get(env: os._Environ, prefix: str, key: str) -> str | None:  # type: ignore[type-arg]
     """Look up an environment variable with prefix fallback to ODS_ legacy prefix."""
-    return env.get(f"{prefix}_{key}") or env.get(f"ODS_{key}")
+    return env.get(f"{prefix}_{key}") or env.get(f"ODSBOX_MCP_{prefix}_{key}") or env.get(f"ODS_{key}")
 
 
 def _parse_verify(env: os._Environ, prefix: str) -> bool:  # type: ignore[type-arg]
