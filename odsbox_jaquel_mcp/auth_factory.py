@@ -55,8 +55,8 @@ def get_available_server_infos(env: os._Environ) -> list[dict[str, str]]:  # typ
     prefixes = get_available_servers(env)
     result = []
     for prefix in prefixes:
-        if not prefix:
-            continue  # bare ODS_URL produces an empty prefix — skip it
+        if not prefix:  # Skip empty prefix (bare ODS_URL or ODSBOX_MCP_URL)
+            continue
         url = (
             _env_get(env, prefix, "URL")
             or _env_get(env, prefix, "API_URL")
@@ -102,7 +102,11 @@ def _get_secret_from_keyring(service: str, username: str) -> str | None:
 
 def _env_get(env: os._Environ, prefix: str, key: str) -> str | None:  # type: ignore[type-arg]
     """Look up an environment variable with prefix fallback to ODS_ legacy prefix."""
-    return env.get(f"{prefix}_{key}") or env.get(f"ODSBOX_MCP_{prefix}_{key}") or env.get(f"ODS_{key}")
+    return (
+        env.get(f"{prefix}_{key}")
+        or (env.get(f"ODSBOX_MCP_{prefix}_{key}") if prefix else env.get(f"ODSBOX_MCP_{key}"))
+        or env.get(f"ODS_{key}")
+    )
 
 
 def _parse_verify(env: os._Environ, prefix: str) -> bool:  # type: ignore[type-arg]
