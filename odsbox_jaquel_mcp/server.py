@@ -15,10 +15,11 @@ from pathlib import Path
 from typing import Annotated, Literal
 
 from fastmcp import Context, FastMCP
+from jinja2 import Environment, FileSystemLoader
 from pydantic import Field
 
 from . import __version__
-from .auth_factory import resolve_auth_args_from_env
+from .auth_factory import get_available_server_infos, resolve_auth_args_from_env
 from .bulk_api_guide import BulkAPIGuide
 from .connection import ODSConnectionManager
 from .monitoring import ToolStatsMiddleware
@@ -42,16 +43,28 @@ from .visualization_templates import VisualizationTemplateGenerator
 # MCP SERVER SETUP
 # ============================================================================
 
-# Load instructions from markdown file
-_instructions_path = Path(__file__).parent / "server_instructions.md"
-try:
-    _instructions = _instructions_path.read_text(encoding="utf-8")
-except FileNotFoundError:
-    _instructions = "# ASAM ODS Jaquel MCP Server\n\nSee documentation at https://github.com/totonga/odsbox-jaquel-mcp"
+
+def _render_server_instructions() -> str:
+    """Render server instructions from Jinja2 template with available ODS servers."""
+    template_dir = Path(__file__).parent / "templates"
+    try:
+        env = Environment(
+            loader=FileSystemLoader(str(template_dir)),
+            trim_blocks=True,
+            lstrip_blocks=True,
+            keep_trailing_newline=True,
+        )
+        template = env.get_template("server_instructions.j2")
+        configured_servers = get_available_server_infos(os.environ)
+        rv: str = template.render(configured_servers=configured_servers)
+        return rv
+    except Exception:
+        return "# ASAM ODS Jaquel MCP Server\n\nSee documentation at https://github.com/totonga/odsbox-jaquel-mcp"
+
 
 mcp = FastMCP(
     name="odsbox-jaquel-mcp",
-    instructions=_instructions,
+    instructions=_render_server_instructions(),
     version=__version__,
 )
 
@@ -282,7 +295,7 @@ async def ods_connect_using_env(
     Default prefix is ODSBOX_MCP; set ODSBOX_MCP_ENV_PREFIX or pass env_prefix.
     Falls back to legacy ODS_ prefix variables.
 
-    Supports three authentication modes via {prefix}_MODE:
+    Supports three authentication modes via {prefix}_MODE or ODSBOX_MCP_{prefix}_MODE:
     - basic (default): Username/password. Vars: URL, USERNAME, PASSWORD, VERIFY.
     - m2m: OAuth2 client credentials. Vars: URL, M2M_TOKEN_ENDPOINT, M2M_CLIENT_ID,
       M2M_CLIENT_SECRET, M2M_SCOPE (optional, comma-separated), VERIFY.
@@ -326,6 +339,24 @@ def ods_disconnect() -> dict:
 def ods_get_connection_info() -> ConnectionInfo | None:
     """Get current ODS connection information."""
     return ODSConnectionManager.get_connection_info()
+
+
+@mcp.tool(
+    annotations={"readOnlyHint": True, "openWorldHint": False},
+    tags={"connection"},
+)
+def ods_connect_env_list() -> dict:
+    """List all ODS servers configured via environment variables.
+
+    Returns each server's prefix and URL so you can identify the right server
+    and connect with ``ods_connect_using_env(env_prefix='PREFIX')``.
+    """
+    configured_servers = get_available_server_infos(os.environ)
+    return {
+        "configured_servers": configured_servers,
+        "count": len(configured_servers),
+        "usage": "Call ods_connect_using_env(env_prefix='PREFIX') to connect to a server",
+    }
 
 
 @mcp.tool(
