@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.0 (2026-07-20)
+
+### Features
+
+- Add server configuration retrieval and instructions rendering
+  ([`161a198`](https://github.com/totonga/odsbox-jaquel-mcp/commit/161a198236a842138daa5f6d0b11bf92d09914f8))
+
+
 ## v1.7.5 (2026-07-18)
 
 ### Bug Fixes
