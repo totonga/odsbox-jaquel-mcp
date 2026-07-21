@@ -149,7 +149,7 @@ class TestGetAvailableServerInfos:
         }
         result = get_available_server_infos(env)  # type: ignore[arg-type]
         prefixes = [r["prefix"] for r in result]
-        assert "" not in prefixes
+        assert "" in prefixes
         assert "SERVER" in prefixes
 
     def test_empty_prefix_from_bare_odsbox_mcp_url_is_skipped(self):
@@ -160,7 +160,7 @@ class TestGetAvailableServerInfos:
         }
         result = get_available_server_infos(env)  # type: ignore[arg-type]
         prefixes = [r["prefix"] for r in result]
-        assert "" not in prefixes
+        assert "" in prefixes
         assert "SERVER" in prefixes
 
     def test_both_bare_urls_skipped_with_named_server(self):
@@ -172,8 +172,11 @@ class TestGetAvailableServerInfos:
         }
         result = get_available_server_infos(env)  # type: ignore[arg-type]
         prefixes = [r["prefix"] for r in result]
-        assert "" not in prefixes
-        assert prefixes == ["PROD"]
+        assert "" in prefixes
+        assert "PROD" in prefixes
+        assert len(result) == 2  # one empty prefix + one named server
+        assert any(r["prefix"] == "PROD" and r["url"] == "http://prod/api" for r in result)
+        assert any(r["prefix"] == "" and r["url"] == "http://modern/api" for r in result)
 
     def test_multiple_servers_all_resolved(self):
         """Multiple servers are all returned with correct URLs."""

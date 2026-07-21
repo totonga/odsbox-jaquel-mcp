@@ -592,7 +592,8 @@ class TestGetAvailableServerInfos:
 
         env = {"ODS_URL": "http://default/api"}
         result = get_available_server_infos(env)
-        assert len(result) == 0  # Empty prefix is skipped
+        assert len(result) == 1  # Empty prefix is included
+        assert result[0]["prefix"] == ""
 
     def test_get_available_server_infos_with_odsbox_mcp_default(self):
         """Should skip default from ODSBOX_MCP_URL."""
@@ -600,7 +601,8 @@ class TestGetAvailableServerInfos:
 
         env = {"ODSBOX_MCP_URL": "http://odsbox/api"}
         result = get_available_server_infos(env)
-        assert len(result) == 0  # Empty prefix is skipped
+        assert len(result) == 1  # Empty prefix is included
+        assert result[0]["prefix"] == ""
 
     def test_get_available_server_infos_resolves_url_with_env_get(self):
         """Should use _env_get fallback chain to resolve URL."""
@@ -678,11 +680,11 @@ class TestGetAvailableServerInfos:
             "ODSBOX_MCP_BETA_URL": "http://beta/api",
         }
         result = get_available_server_infos(env)
-        assert len(result) == 2  # Only named servers, not default
+        assert len(result) == 3  # Only named servers, not default
 
         # Check that we have entries for "ALPHA", "BETA" (not "")
         prefixes = [entry["prefix"] for entry in result]
-        assert "" not in prefixes
+        assert "" in prefixes
         assert "ALPHA" in prefixes
         assert "BETA" in prefixes
 
@@ -697,12 +699,12 @@ class TestGetAvailableServerInfos:
         env = {
             "ODS_ZULU_URL": "http://zulu/api",
             "ODS_ALPHA_URL": "http://alpha/api",
-            "ODS_URL": "http://default/api",  # Will be skipped
+            "ODS_URL": "http://default/api",
             "ODS_BRAVO_URL": "http://bravo/api",
         }
         result = get_available_server_infos(env)
         prefixes = [entry["prefix"] for entry in result]
-        assert prefixes == ["ALPHA", "BRAVO", "ZULU"]  # Empty prefix excluded
+        assert prefixes == ["", "ALPHA", "BRAVO", "ZULU"]  # Empty prefix included
 
     def test_get_available_server_infos_legacy_ods_fallback_for_named_server(self):
         """Should resolve named server URLs using legacy ODS_ fallback."""
