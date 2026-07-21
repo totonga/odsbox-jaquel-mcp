@@ -50,13 +50,11 @@ def get_available_server_infos(env: os._Environ) -> list[dict[str, str]]:  # typ
 
     Returns:
         A list of dicts with ``"prefix"`` and ``"url"`` keys, sorted by prefix.
-        ``"url"`` is an empty string when the URL cannot be resolved.
+        ``"prefix"`` is an empty string for default configuration.
     """
     prefixes = get_available_servers(env)
     result = []
     for prefix in prefixes:
-        if not prefix:  # Skip empty prefix (bare ODS_URL or ODSBOX_MCP_URL)
-            continue
         url = (
             _env_get(env, prefix, "URL")
             or _env_get(env, prefix, "API_URL")
