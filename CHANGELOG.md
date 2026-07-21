@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v1.8.2 (2026-07-21)
+
+### Bug Fixes
+
+- Default server entry must be included
+  ([`5369995`](https://github.com/totonga/odsbox-jaquel-mcp/commit/53699957ec151aaa02a4d86740cc8136856bde19))
+
+
 ## v1.8.1 (2026-07-20)
 
 ### Bug Fixes
