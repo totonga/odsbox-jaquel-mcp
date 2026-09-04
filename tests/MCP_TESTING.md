@@ -32,19 +32,19 @@ async def test_example():
     # Start server
     client = MCPServerTestClient()
     await client.start()
-    
+
     try:
         # List tools
         tools = await client.list_tools()
         print(f"Available tools: {len(tools)}")
-        
+
         # Call a tool
         result = await client.call_tool(
             "query_validate",
             {"query": {"TestEntity": {}}}
         )
         print(f"Result: {result}")
-        
+
         # List resources
         resources = await client.list_resources()
         print(f"Resources: {len(resources)}")
@@ -298,7 +298,7 @@ else:
    ```bash
    # Quick CI tests (no ODS required)
    pytest tests/test_mcp_server.py tests/test_integration_mcp_server_e2e.py
-   
+
    # Full tests (with ODS server available)
    pytest tests/ -v
    ```
@@ -311,29 +311,29 @@ else:
 class MCPServerTestClient:
     def __init__(self, timeout: float = 30.0) -> None:
         """Initialize client with optional timeout."""
-    
+
     async def start(self) -> None:
         """Start server and connect."""
-    
+
     async def stop(self) -> None:
         """Disconnect and stop server."""
-    
+
     async def call_tool(
         self,
         tool_name: str,
         arguments: dict[str, Any]
     ) -> dict[str, Any]:
         """Call a tool and get result."""
-    
+
     async def list_tools(self) -> list[dict[str, Any]]:
         """List all available tools."""
-    
+
     async def list_resources(self) -> list[dict[str, Any]]:
         """List all available resources."""
-    
+
     async def __aenter__(self):
         """Context manager entry."""
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Context manager exit."""
 ```
