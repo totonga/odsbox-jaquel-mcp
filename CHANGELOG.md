@@ -2,6 +2,15 @@
 
 <!-- version list -->
 
+## v1.8.3 (2026-09-04)
+
+### Bug Fixes
+
+- Adjust dependency versions to resolve runtime issues
+  ([#64](https://github.com/totonga/odsbox-jaquel-mcp/pull/64),
+  [`5c9d577`](https://github.com/totonga/odsbox-jaquel-mcp/commit/5c9d57785306b29d00bc8c524ad615725becb87d))
+
+
 ## v1.8.2 (2026-07-21)
 
 ### Bug Fixes
