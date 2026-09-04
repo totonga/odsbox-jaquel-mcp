@@ -37,13 +37,12 @@ classifiers = [
     "Topic :: Database :: Front-Ends",
 ]
 dependencies = [
-    "fastmcp>=3.0.0",
-    "beartype<=3.0",
-    "odsbox[oidc]>=1.2.0",
+    "fastmcp>=3.2.4,<4.0.0",
+    "odsbox[oidc]>=1.2.0,<2.0.0",
     "pip-system-certs",
-    "matplotlib",
-    "Jinja2>=3.0",
-    "keyring>=25.7.0",
+    "matplotlib<4.0.0",
+    "Jinja2>=3.0,<4.0.0",
+    "keyring>=25.0.0,<26.0.0",
 ]
 
 [dependency-groups]
