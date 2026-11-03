@@ -12,7 +12,6 @@ include tests/MCP_TESTING.md
 # Resource files and templates
 recursive-include odsbox_jaquel_mcp/resource_files *
 recursive-include odsbox_jaquel_mcp/templates *.j2
-include odsbox_jaquel_mcp/server_instructions.md
 include odsbox_jaquel_mcp/py.typed
 
 # Scripts

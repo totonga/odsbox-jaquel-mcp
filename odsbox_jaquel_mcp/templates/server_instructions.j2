@@ -1,6 +1,28 @@
 # ASAM ODS Jaquel MCP Server
 
 Query and analyze ASAM ODS measurement data via Jaquel queries.
+{% if configured_servers %}
+
+## Configured ODS Servers
+
+The following ODS servers are pre-configured via environment variables:
+
+| Prefix | URL |
+|---|---|
+{% for server in configured_servers %}
+| `{{ server.prefix }}` | {{ server.url }} |
+{% endfor %}
+
+Connect to a specific server: `ods_connect_using_env(env_prefix="PREFIX")`.
+Call `ods_connect_env_list` at any time to refresh this list.
+{% else %}
+
+## Connecting
+
+No ODS servers are pre-configured in the environment.
+Use `ods_connect` with explicit credentials, or set `ODSBOX_MCP_URL`, `ODSBOX_MCP_USERNAME`,
+and `ODSBOX_MCP_PASSWORD` environment variables and call `ods_connect_using_env`.
+{% endif %}
 
 ## Core rules
 
