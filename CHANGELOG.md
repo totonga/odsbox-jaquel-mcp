@@ -2,6 +2,37 @@
 
 <!-- version list -->
 
+## v1.8.1 (2026-07-20)
+
+### Bug Fixes
+
+- ODSBOX_MCP_URL did not result in an entry in server list
+  ([`d43b2c8`](https://github.com/totonga/odsbox-jaquel-mcp/commit/d43b2c85cc8b283ed4d9ab81dd257abb4531f9d8))
+
+
+## v1.8.0 (2026-07-20)
+
+### Features
+
+- Add server configuration retrieval and instructions rendering
+  ([`161a198`](https://github.com/totonga/odsbox-jaquel-mcp/commit/161a198236a842138daa5f6d0b11bf92d09914f8))
+
+
+## v1.7.5 (2026-07-18)
+
+### Bug Fixes
+
+- Bump actions/checkout from 6 to 7 ([#55](https://github.com/totonga/odsbox-jaquel-mcp/pull/55),
+  [`f0bcacb`](https://github.com/totonga/odsbox-jaquel-mcp/commit/f0bcacbaa763b38f15dfa6ccec4c5a9bf684d523))
+
+- Bump python-semantic-release/python-semantic-release from 10.5.3 to 10.6.1
+  ([#56](https://github.com/totonga/odsbox-jaquel-mcp/pull/56),
+  [`89e19c9`](https://github.com/totonga/odsbox-jaquel-mcp/commit/89e19c974726eaaf1dc165698cfaf6926962ae1a))
+
+- Enhance keyring integration for ODS secrets retrieval
+  ([`ad2ac8a`](https://github.com/totonga/odsbox-jaquel-mcp/commit/ad2ac8a8b7fca17ed0e6ad93594fd6b9478ac97f))
+
+
 ## v1.7.4 (2026-04-27)
 
 ### Bug Fixes
