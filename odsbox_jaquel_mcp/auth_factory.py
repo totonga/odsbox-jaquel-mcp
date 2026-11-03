@@ -20,8 +20,6 @@ logger = logging.getLogger(__name__)
 VALID_MODES = ("basic", "m2m", "oidc")
 
 
-<<<<<<< HEAD
-=======
 def get_available_servers(env: os._Environ) -> list[str]:
     """Return a list of available ODS server prefixes from environment variables.
 
@@ -65,9 +63,6 @@ def get_available_server_infos(env: os._Environ) -> list[dict[str, str]]:  # typ
         )
         result.append({"prefix": prefix, "url": url})
     return result
-
-
->>>>>>> origin/develop
 def _get_ods_pilot_secret(service: str, username: str) -> str | None:
     try:
         import keyring
