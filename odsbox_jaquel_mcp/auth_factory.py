@@ -64,6 +64,7 @@ def get_available_server_infos(env: os._Environ) -> list[dict[str, str]]:  # typ
         result.append({"prefix": prefix, "url": url})
     return result
 
+
 def _get_ods_pilot_secret(service: str, username: str) -> str | None:
     try:
         import keyring
